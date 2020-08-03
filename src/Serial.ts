@@ -83,24 +83,28 @@ export class Serial {
   }
   async onData(callback: (data: number[]) => unknown) {
     callback(dataMock)
-    const reader = async () => {
-      let data =
+    const reader = async (): Promise<any> => {
+      const data =
         this.reader && (await Promise.race([sleep(500), this.reader.read()]))
       if (data && data.value !== undefined) {
         this.readbuffer.push(...data.value)
-        const [firstIdx, lastIdx] = findSequence(
-          [255, 255, 255, 255],
-          this.readbuffer
-        )
-        if (firstIdx > -1) {
-          const response = this.readbuffer.slice(0, firstIdx)
-          this.readbuffer = this.readbuffer.slice(lastIdx + 1)
-          callback(response)
+        let first = true
+        while (true) {
+          const [firstIdx, lastIdx] = findSequence(
+            [255, 255, 255, 255],
+            this.readbuffer
+          )
+          if (firstIdx > -1) {
+            if (first) {
+              const response = this.readbuffer.slice(0, firstIdx)
+              callback(response)
+            }
+            this.readbuffer = this.readbuffer.slice(lastIdx + 1)
+            first = false
+          } else break
         }
-        reader()
-      } else {
-        setTimeout(reader, 5)
       }
+      requestAnimationFrame(reader)
     }
     reader()
   }

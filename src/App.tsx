@@ -34,7 +34,7 @@ function App() {
         hz.current = newhz
         lastT.current = now
       },
-      fps(10)
+      fps(200)
       // { leading: true, trailing: false }
     )
     serial.onData(throttled)
