@@ -25,14 +25,14 @@ function App() {
         if (!stoppedRef.current) {
           setData(parseSerial(newData))
         }
-        ;(window as any).mockdata = newData
+        // ;(window as any).mockdata = newData
         const now = performance.now()
         const newhz = 1000 / (now - lastT.current)
         hz.current = newhz
         lastT.current = now
       },
-      fps(20),
-      { leading: true, trailing: false }
+      fps(20)
+      // { leading: true, trailing: false }
     )
     serial.onData(throttled)
   }, [])

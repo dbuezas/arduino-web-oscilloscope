@@ -4,66 +4,16 @@ import throttle from 'lodash/throttle'
 import { atom, useRecoilState } from 'recoil'
 import serial from './Serial'
 
-const triggerVoltageState = atom({
-  key: 'TV',
-  default: 1
-})
-
 const fps = (fps: number) => 1000 / fps
 
-const sendTriggerVoltage = throttle(
-  (newValue: number) => {
-    const round = Math.ceil((newValue / 5) * 255)
-    const toSend = 'V' + round + '>'
-    serial.write(toSend)
-  },
-  fps(10),
-  { trailing: true, leading: true }
-)
-
-export function useTriggerVoltage(): [number, (n: number) => unknown] {
-  const [triggerVoltage, setTriggerVoltage] = useRecoilState(
-    triggerVoltageState
-  )
-
-  useEffect(() => sendTriggerVoltage(triggerVoltage), [triggerVoltage])
-
-  return [triggerVoltage, setTriggerVoltage]
-}
-
-const triggerPosState = atom({
-  key: 'TP',
-  default: 1
-})
-
-const sendTriggerPos = throttle(
-  (newValue: number) => {
-    const round = Math.ceil(newValue)
-    const toSend = 'P' + round + '>'
-    serial.write(toSend)
-  },
-  fps(10),
-  { trailing: true, leading: true }
-)
-
-export function useTriggerPos(): [number, (n: number) => unknown] {
-  const [triggerPos, setTriggerPos] = useRecoilState(triggerPosState)
-
-  useEffect(() => sendTriggerPos(triggerPos), [triggerPos])
-
-  return [triggerPos, setTriggerPos]
-}
-
-function createHook(key: string, defaultValue = 0) {
+function createHook(key: string, web2ardu = Math.ceil) {
   const state = atom({
     key,
-    default: defaultValue
+    default: 0
   })
   const sendValue = throttle(
     (newValue: number) => {
-      const round = Math.ceil(newValue)
-      const toSend = key + round + '>'
-      serial.write(toSend)
+      serial.write(key + web2ardu(newValue) + '>')
     },
     fps(10),
     { trailing: true, leading: true }
@@ -75,3 +25,8 @@ function createHook(key: string, defaultValue = 0) {
     return [value, setValue]
   }
 }
+
+export const useTriggerVoltage = createHook('V', (v: number) =>
+  Math.ceil((v / 5) * 255)
+)
+export const useTriggerPos = createHook('P', Math.ceil)
