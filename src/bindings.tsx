@@ -6,27 +6,34 @@ import serial from './Serial'
 
 const fps = (fps: number) => 1000 / fps
 
-function createHook(key: string, web2ardu = Math.ceil) {
+function createHook<T>(key: string, defaultV: T, web2ardu: (v: T) => number) {
   const state = atom({
     key,
-    default: 0
+    default: defaultV
   })
   const sendValue = throttle(
-    (newValue: number) => {
+    (newValue: T) => {
       serial.write(key + web2ardu(newValue) + '>')
     },
     fps(10),
-    { trailing: true, leading: true }
+    { leading: true, trailing: false }
   )
 
-  return function useState(): [number, (n: number) => unknown] {
-    const [value, setValue] = useRecoilState(state)
+  return function useState(): [T, (n: T) => unknown] {
+    const [value, setValue] = useRecoilState<T>(state)
     useEffect(() => sendValue(value), [value])
     return [value, setValue]
   }
 }
 
-export const useTriggerVoltage = createHook('V', (v: number) =>
+export const useTriggerVoltage = createHook<number>('V', 0, (v) =>
   Math.ceil((v / 5) * 255)
 )
-export const useTriggerPos = createHook('P', Math.ceil)
+export const useTriggerPos = createHook<number>('P', 0, (v) => Math.ceil(v))
+export const useAdcClocks = createHook<number>('C', 0, (v) => Math.ceil(v))
+export const useTriggerDirection = createHook<boolean>('D', false, (v) =>
+  v ? 1 : 0
+)
+export const useBlockInterrupts = createHook<boolean>('B', false, (v) =>
+  v ? 1 : 0
+)
