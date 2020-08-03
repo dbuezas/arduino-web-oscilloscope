@@ -14,7 +14,8 @@ import {
   Whisper,
   Tooltip,
   RadioGroup,
-  Radio
+  Radio,
+  Slider
 } from 'rsuite'
 
 function Controls() {
@@ -35,12 +36,19 @@ function Controls() {
 
   return (
     <div>
+      <Slider
+        progress
+        min={0}
+        max={1000}
+        value={adcClockTicks}
+        onChange={setAdcClockTicks}
+      />
       <InputGroup style={styles.input}>
         <InputNumber
           size="lg"
           min={0}
           value={adcClockTicks}
-          onChange={(v) => setAdcClockTicks(v as number)}
+          onChange={(v) => setAdcClockTicks(parseFloat(`${v}`))}
         />
         <InputGroup.Addon>
           <Icon icon="clock-o" />
