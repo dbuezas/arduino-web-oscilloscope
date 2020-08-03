@@ -1,0 +1,22 @@
+[
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "/Users/davidbuezas/Library/Arduino15/packages/LGT8fx Boards/hardware/avr/1.0.6/cores/lgt8f"
+  },
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "/Users/davidbuezas/Library/Arduino15/packages/LGT8fx Boards/hardware/avr/1.0.6/variants/lgt8fx8p"
+  },
+  {
+    "Sourcefile": "/Users/davidbuezas/code/arduino-web-oscilloscope/arduino/build/sketch/MemoryFree.cpp.cpp",
+    "Include": "mystream.h",
+    "Includepath": "/Users/davidbuezas/code/arduino/libraries/mystream"
+  },
+  {
+    "Sourcefile": "/Users/davidbuezas/code/arduino-web-oscilloscope/arduino/build/sketch/MemoryFree.cpp.cpp",
+    "Include": "",
+    "Includepath": null
+  }
+]

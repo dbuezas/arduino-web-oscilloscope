@@ -1,0 +1,12 @@
+{
+  "additionalFiles": "..,..,..,..,..",
+  "builtInLibrariesFolders": "/Applications/Arduino.app/Contents/Java/libraries",
+  "builtInToolsFolders": "/Applications/Arduino.app/Contents/Java/tools-builder,/Applications/Arduino.app/Contents/Java/hardware/tools/avr,/Users/davidbuezas/Library/Arduino15/packages",
+  "compiler.optimization_flags": "",
+  "customBuildProperties": "build.path=/Users/davidbuezas/code/arduino-web-oscilloscope/arduino/build,build.warn_data_percentage=75",
+  "fqbn": "LGT8fx Boards:avr:328:arduino_isp=disable,clock_source=internal,clock=32MHz,variant=modelP",
+  "hardwareFolders": "/Applications/Arduino.app/Contents/Java/hardware,/Users/davidbuezas/Library/Arduino15/packages",
+  "otherLibrariesFolders": "/Users/davidbuezas/code/arduino/libraries",
+  "runtime.ide.version": "10813",
+  "sketchLocation": "/Users/davidbuezas/code/arduino-web-oscilloscope/arduino/src/MemoryFree.cpp"
+}

@@ -1,0 +1,71 @@
+path {
+  stroke-width: 1;
+  fill: none;
+}
+path.plot-area-d2 {
+  stroke: burlywood;
+}
+path.plot-area-d3 {
+  stroke: lightcoral;
+}
+path.plot-area-d4 {
+  stroke: chartreuse;
+}
+path.plot-area-d5 {
+  stroke: cornsilk;
+}
+path.plot-area-d6 {
+  stroke: darkmagenta;
+}
+path.plot-area-d7 {
+  stroke: deeppink;
+}
+path.plot-area {
+  stroke: steelblue;
+  stroke-width: 3;
+}
+
+.axis .domain {
+  fill: rgba(0, 0, 0, 0.2);
+  stroke: grey;
+  stroke-width: 2;
+}
+.axis.y text {
+  font-size: 14px;
+}
+.axis line {
+  fill: none;
+  stroke: grey;
+  stroke-width: 1;
+  opacity: 0.3;
+  stroke-dasharray: 5;
+}
+line.triggerPosHandle {
+  cursor: col-resize;
+}
+line.triggerVoltageHandle {
+  cursor: row-resize;
+}
+line.triggerPosHandle,
+line.triggerVoltageHandle {
+  stroke-width: 40;
+  stroke: white;
+  opacity: 0.03;
+}
+line.triggerPos,
+line.triggerVoltage {
+  fill: none;
+  stroke-dasharray: 10;
+  stroke-width: 1;
+  opacity: 0.7;
+}
+line.triggerPos {
+  stroke: lightblue;
+}
+line.triggerVoltage {
+  stroke: yellow;
+}
+line.triggerPos.active,
+line.triggerVoltage.active {
+  stroke-width: 1;
+}
