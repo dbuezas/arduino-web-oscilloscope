@@ -8,11 +8,12 @@ export function renderData(
   svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
   data: Datum[][],
   xScale: d3.ScaleLinear<number, number>,
-  yScale: d3.ScaleLinear<number, number>
+  yScale: d3.ScaleLinear<number, number>,
+  xDomain: [number, number]
 ) {
   const line = d3
     .line<Datum>()
-    .x((d, i) => xScale(i))
+    .x((d, i) => xScale((i / data[0].length) * (xDomain[1] - xDomain[0])))
     .y((d) => yScale(d))
 
   svg.select<SVGGElement>('path.plot-area').datum(data[0]).attr('d', line)
@@ -25,8 +26,7 @@ export function renderData(
 export function renderXAxis(
   svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
   xScale: d3.ScaleLinear<number, number>,
-  size: Size,
-  xDomain: [number, number]
+  size: Size
 ) {
   svg.select<SVGGElement>('g.x.axis').call((g) =>
     g
@@ -37,11 +37,7 @@ export function renderXAxis(
           .ticks(size.width / 80)
           .tickPadding(10)
           .tickSize(-size.height + margin.top + margin.bottom)
-          .tickFormat(
-            (t) =>
-              (((t as number) / (xDomain[1] - xDomain[0])) * 2.75).toFixed(3) +
-              'ms'
-          )
+          .tickFormat((t) => ((t as number) * 1000).toFixed(3) + 'ms')
           .tickSizeOuter(0)
       )
       .call((g) => g.select('.domain').remove())

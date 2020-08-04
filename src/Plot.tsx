@@ -10,25 +10,35 @@ import {
   renderTriggerVoltage,
   renderTriggerPos
 } from './plot.d3'
-import { useTriggerVoltage, useTriggerPos } from './bindings'
+import { useTriggerVoltage, useTriggerPos, useAdcClocks } from './bindings'
 import { ScaleLinear } from 'd3'
 const margin = { top: 20, right: 50, bottom: 30, left: 50 }
+const constrain = (n: number, min: number, max: number) =>
+  n > max ? max : n < min ? min : n
 
 type Props = {
   data: Datum[][]
 }
 export default function Plot(props: Props) {
-  const [xDomain] = useState<[number, number]>([0, 500])
+  const [xDomain, setXDomain] = useState<[number, number]>([0, 500])
   const [yDomain] = useState<[number, number]>([0, 5])
   const nodeRef = useRef<SVGSVGElement>(null)
   const [xScale, setXScale] = useState<ScaleLinear<number, number>>()
   const [yScale, setYScale] = useState<ScaleLinear<number, number>>()
+  const [adcClocks] = useAdcClocks()
   const [triggerVoltage, setTriggerVoltage] = useTriggerVoltage()
-  const [triggerPos, setTriggerPos] = useTriggerPos()
+  const [triggerPosInt, setTriggerPosInt] = useTriggerPos()
+
   const size = {
     width: window.innerWidth,
     height: window.innerHeight - 200
   }
+  const samples = props.data[0].length
+  const triggerPos = (triggerPosInt / samples) * xDomain[1]
+
+  useEffect(() => {
+    setXDomain([0, (adcClocks / 32000000) * samples])
+  }, [adcClocks, samples])
   useEffect(() => {
     setXScale(() =>
       d3
@@ -57,21 +67,26 @@ export default function Plot(props: Props) {
     if (!xScale) return
 
     const svg = d3.select(nodeRef.current!)
-    renderXAxis(svg, xScale, size, xDomain)
-  }, [xScale, size, xDomain])
+    renderXAxis(svg, xScale, size)
+  }, [xScale, size])
   useLayoutEffect(() => {
     if (!xScale) return
     if (!yScale) return
 
     const svg = d3.select(nodeRef.current!)
-    renderData(svg, props.data, xScale, yScale)
-  }, [props.data, xScale, yScale])
+    renderData(svg, props.data, xScale, yScale, xDomain)
+  }, [props.data, xScale, yScale, xDomain])
   useLayoutEffect(() => {
     if (!xScale) return
     if (!yScale) return
     const svg = d3.select(nodeRef.current!)
+    const setTriggerPos = (sec: number) => {
+      let scaled = (sec / xDomain[1]) * samples
+      scaled = constrain(scaled, 0, samples)
+      setTriggerPosInt(scaled)
+    }
     renderTriggerPos(svg, triggerPos, yScale, xScale, yDomain, setTriggerPos)
-  }, [triggerPos, yScale, xScale, yDomain, setTriggerPos])
+  }, [triggerPos, yScale, xScale, yDomain, samples, setTriggerPosInt, xDomain])
   useLayoutEffect(() => {
     if (!xScale) return
     if (!yScale) return
