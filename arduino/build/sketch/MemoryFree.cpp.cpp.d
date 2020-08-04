@@ -16,5 +16,4 @@
  /Users/davidbuezas/Library/Arduino15/packages/LGT8fx\ Boards/hardware/avr/1.0.6/cores/lgt8f/fastio_digital.h \
  /Users/davidbuezas/code/arduino-web-oscilloscope/arduino/build/sketch/MemoryFree.h \
  /Users/davidbuezas/code/arduino-web-oscilloscope/arduino/build/sketch/v2.h \
- /Users/davidbuezas/code/arduino-web-oscilloscope/arduino/build/sketch/dac_constants.h \
- /Users/davidbuezas/code/arduino/libraries/mystream/mystream.h
+ /Users/davidbuezas/code/arduino-web-oscilloscope/arduino/build/sketch/dac_constants.h

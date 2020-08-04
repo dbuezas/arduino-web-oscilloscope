@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import {
   useTriggerVoltage,
   useTriggerPos,
@@ -10,7 +10,6 @@ import {
   InputGroup,
   Icon,
   InputNumber,
-  Toggle,
   Whisper,
   Tooltip,
   RadioGroup,

@@ -11,11 +11,6 @@
   },
   {
     "Sourcefile": "/Users/davidbuezas/code/arduino-web-oscilloscope/arduino/build/sketch/MemoryFree.cpp.cpp",
-    "Include": "mystream.h",
-    "Includepath": "/Users/davidbuezas/code/arduino/libraries/mystream"
-  },
-  {
-    "Sourcefile": "/Users/davidbuezas/code/arduino-web-oscilloscope/arduino/build/sketch/MemoryFree.cpp.cpp",
     "Include": "",
     "Includepath": null
   }

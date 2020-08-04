@@ -1,25 +1,19 @@
 import * as d3 from 'd3'
 
 const margin = { top: 20, right: 50, bottom: 30, left: 50 }
-export type Datum = { v: number; t: number }
-
+export type Datum = number
+type Size = { height: number; width: number }
 export default (
   node: SVGSVGElement,
   triggerVoltage: number,
-  setTriggerVoltage: (v: number) => any,
+  setTriggerVoltage: (v: number) => void,
   triggerPos: number,
-  setTriggerPos: (v: number) => any,
-  data: Datum[],
-  dataD2: Datum[],
-  dataD3: Datum[],
-  dataD4: Datum[],
-  dataD5: Datum[],
-  dataD6: Datum[],
-  dataD7: Datum[],
-  size: { height: number; width: number }
+  setTriggerPos: (v: number) => void,
+  xDomain: [number, number],
+  data: Datum[][],
+  size: Size
 ) => {
   // console.log(i++)
-  const xDomain = d3.extent(data, (d) => d.t) as [number, number]
   const yDomain = [0, 5] as [number, number]
   const xScale = d3
     .scaleLinear()
@@ -29,12 +23,73 @@ export default (
     .scaleLinear()
     .domain(yDomain)
     .rangeRound([size.height - margin.bottom, margin.top])
+  const svg = d3.select(node)
+  renderYAxis(svg, yScale, size)
+  renderXAxis(svg, xScale, size, xDomain)
+
+  renderData(svg, data, xScale, yScale)
+
+  /* trigger voltage */
+  renderTriggerPos(svg, triggerPos, yScale, xScale, yDomain, setTriggerPos)
+  renderTriggerVoltage(
+    svg,
+    triggerVoltage,
+    yScale,
+    xScale,
+    xDomain,
+    setTriggerVoltage
+  )
+}
+
+function renderData(
+  svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
+  data: Datum[][],
+  xScale: d3.ScaleLinear<number, number>,
+  yScale: d3.ScaleLinear<number, number>
+) {
   const line = d3
     .line<Datum>()
     // .curve(d3.curveCatmullRom) // REMOVE
-    .x((d) => xScale(d.t))
-    .y((d) => yScale(d.v))
-  const svg = d3.select(node)
+    .x((d, i) => xScale(i))
+    .y((d) => yScale(d))
+
+  svg.select<SVGGElement>('path.plot-area').datum(data[0]).attr('d', line)
+  for (let i = 1; i < data.length; i++)
+    svg
+      .select<SVGGElement>('path.plot-area-d' + (i + 1))
+      .datum(data[i])
+      .attr('d', line)
+}
+function renderXAxis(
+  svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
+  xScale: d3.ScaleLinear<number, number>,
+  size: Size,
+  xDomain: [number, number]
+) {
+  svg.select<SVGGElement>('g.x.axis').call((g) =>
+    g
+      .attr('transform', `translate(0,${size.height - margin.bottom})`)
+      .call(
+        d3
+          .axisBottom(xScale)
+          .ticks(size.width / 80)
+          .tickPadding(10)
+          .tickSize(-size.height + margin.top + margin.bottom)
+          .tickFormat(
+            (t) =>
+              (((t as number) / (xDomain[1] - xDomain[0])) * 2.75).toFixed(3) +
+              'ms'
+          )
+          .tickSizeOuter(0)
+      )
+      .call((g) => g.select('.domain').remove())
+  )
+}
+function renderYAxis(
+  svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
+  yScale: d3.ScaleLinear<number, number>,
+  size: Size
+) {
   const yTicks = d3.ticks(yScale.domain()[0], yScale.domain()[1], 10)
   svg
     .select<SVGGElement>('g.y.axis')
@@ -56,64 +111,14 @@ export default (
           d3.select(path[0]).attr('d') + 'z'
       )
     )
-
-  svg.select<SVGGElement>('g.x.axis').call((g) =>
-    g
-      .attr('transform', `translate(0,${size.height - margin.bottom})`)
-      .call(
-        d3
-          .axisBottom(xScale)
-          .ticks(size.width / 80)
-          .tickPadding(10)
-          .tickSize(-size.height + margin.top + margin.bottom)
-          .tickFormat((t) => (((t as number) / 500) * 2.75).toFixed(3) + 'ms')
-          .tickSizeOuter(0)
-      )
-      .call((g) => g.select('.domain').remove())
-  )
-
-  svg.select<SVGGElement>('path.plot-area').datum(data).attr('d', line)
-  svg.select<SVGGElement>('path.plot-area-d2').datum(dataD2).attr('d', line)
-  svg.select<SVGGElement>('path.plot-area-d3').datum(dataD3).attr('d', line)
-  svg.select<SVGGElement>('path.plot-area-d4').datum(dataD4).attr('d', line)
-  svg.select<SVGGElement>('path.plot-area-d5').datum(dataD5).attr('d', line)
-  svg.select<SVGGElement>('path.plot-area-d6').datum(dataD6).attr('d', line)
-  svg.select<SVGGElement>('path.plot-area-d7').datum(dataD7).attr('d', line)
-
-  /* trigger voltage */
-  renderTriggerPos(svg, triggerPos, yScale, xScale, yDomain, setTriggerPos)
-  renderTriggerVoltage(
-    svg,
-    triggerVoltage,
-    yScale,
-    xScale,
-    xDomain,
-    setTriggerVoltage
-  )
-  // if (triggerVoltage != last.triggerVoltage) {
-  //   last.triggerVoltage = triggerVoltage
-  //   renderTriggerVoltage(
-  //     svg,
-  //     triggerVoltage,
-  //     yScale,
-  //     xScale,
-  //     xDomain,
-  //     setTriggerVoltage
-  //   )
-  // }
-  // if (triggerPos != last.triggerPos) {
-  //   last.triggerPos = triggerPos
-  //   renderTriggerPos(svg, triggerPos, yScale, xScale, yDomain, setTriggerPos)
-  // }
 }
-
 function renderTriggerVoltage(
   svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
   triggerVoltage: number,
   yScale: d3.ScaleLinear<number, number>,
   xScale: d3.ScaleLinear<number, number>,
   xDomain: [number, number],
-  setTriggerVoltage: (v: number) => any
+  setTriggerVoltage: (v: number) => void
 ) {
   const line = svg
     .selectAll<SVGLineElement, number>('line.triggerVoltage')
@@ -141,13 +146,13 @@ function renderTriggerVoltage(
   handle.call(
     d3
       .drag<SVGLineElement, number>()
-      .on('start', function (d) {
+      .on('start', function () {
         d3.select(this).classed('active', true)
       })
-      .on('drag', function dragged(d) {
+      .on('drag', function dragged() {
         setTriggerVoltage(yScale.invert(d3.event.y))
       })
-      .on('end', function (d) {
+      .on('end', function () {
         d3.select(this).classed('active', false)
       })
   )
@@ -159,7 +164,7 @@ function renderTriggerPos(
   yScale: d3.ScaleLinear<number, number>,
   xScale: d3.ScaleLinear<number, number>,
   yDomain: [number, number],
-  setTriggerVoltage: (v: number) => any
+  setTriggerVoltage: (v: number) => void
 ) {
   const line = svg
     .selectAll<SVGLineElement, number>('line.triggerPos')
@@ -188,13 +193,13 @@ function renderTriggerPos(
   handle.call(
     d3
       .drag<SVGLineElement, number>()
-      .on('start', function (d) {
+      .on('start', function () {
         d3.select(this).classed('active', true)
       })
-      .on('drag', function dragged(d) {
+      .on('drag', function dragged() {
         setTriggerVoltage(xScale.invert(d3.event.x))
       })
-      .on('end', function (d) {
+      .on('end', function () {
         d3.select(this).classed('active', false)
       })
   )

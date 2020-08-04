@@ -1,15 +1,38 @@
 // based in wonky  https://github.com/yaakov-h/uniden-web-controller/blob/master/serial.js
 import dataMock from './dataMock'
 
-const findSequence = (needle: number[], haystack: number[]) => {
-  let needleIdx = 0
-  let i
-  for (i = 0; i < haystack.length && needleIdx < needle.length; i++) {
-    if (needle[needleIdx] === haystack[i]) needleIdx++
-    else needleIdx = 0
+type Port = {
+  readable: ReadableStream
+  writable: WritableStream
+  open: (options: SerialOptions) => Promise<void>
+  close: () => Promise<void>
+}
+type NavigatorSerial = {
+  requestPort: (optn: unknown) => Port
+  getPorts: () => Promise<Port[]>
+}
+
+declare global {
+  interface Window {
+    serial: Serial
   }
-  if (needleIdx === needle.length) return [i - needleIdx - 1, i - 1]
-  return [-1, -1]
+  interface Navigator {
+    serial: NavigatorSerial
+  }
+}
+const END_SEQUENCE = [255, 255, 255, 255]
+const indexesOfSequence = (needle: number[], haystack: number[]) => {
+  const result = []
+  for (let i = 0, j = 0; i < haystack.length; i++) {
+    if (haystack[i] === needle[j]) {
+      j++
+      if (j == needle.length) {
+        result.push(i - j + 1)
+        j = 0
+      }
+    } else j = 0
+  }
+  return result
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -25,12 +48,11 @@ type SerialOptions = {
   xany?: boolean
 }
 export class Serial {
-  reader: any
-  writer: any
-  port: any
+  reader?: ReadableStreamDefaultReader
+  writer?: WritableStreamDefaultWriter
+  port?: Port
   readbuffer: number[] = []
-  data: any
-  outputDone: any
+  outputDone?: Promise<void>
   async close() {
     console.log('closing')
     if (this.reader) {
@@ -51,7 +73,16 @@ export class Serial {
     }
     console.log('closed')
   }
+  async connectWithPaired(options: SerialOptions) {
+    const [port] = await navigator.serial.getPorts()
+    if (!port) throw new Error('no paired')
+    this._connect(options, port)
+  }
   async connect(options: SerialOptions) {
+    const port = await navigator.serial.requestPort({})
+    this._connect(options, port)
+  }
+  async _connect(options: SerialOptions, port: Port) {
     options = {
       baudrate: 9600,
       databits: 8,
@@ -64,11 +95,10 @@ export class Serial {
       ...options
     }
     if (this.port) await this.close()
-    this.port = await (navigator as any).serial.requestPort({})
+    this.port = port
     await this.port.open(options)
-    window['myport' as any] = this.port
     this.reader = this.port.readable.getReader()
-    // this.writer = this.port.writable.getWriter()
+    // this.writer = this.port.writable.getWriter() // binary
     const encoder = new TextEncoderStream()
     this.outputDone = encoder.readable.pipeTo(this.port.writable)
     const textOutputStream = encoder.writable
@@ -83,25 +113,18 @@ export class Serial {
   }
   async onData(callback: (data: number[]) => unknown) {
     callback(dataMock)
-    const reader = async (): Promise<any> => {
+    const reader = async () => {
       const data = this.reader && (await this.reader.read())
       if (data && data.value !== undefined) {
         this.readbuffer.push(...data.value)
-        let first = true
-        const forever = true
-        while (forever) {
-          const [firstIdx, lastIdx] = findSequence(
-            [255, 255, 255, 255],
-            this.readbuffer
-          )
-          if (firstIdx > -1) {
-            if (first) {
-              const response = this.readbuffer.slice(0, firstIdx)
-              callback(response)
-            }
-            this.readbuffer = this.readbuffer.slice(lastIdx + 1)
-            first = false
-          } else break
+        const idxs = indexesOfSequence(END_SEQUENCE, this.readbuffer)
+        if (idxs.length > 1) {
+          const head = idxs.pop()!
+          const neck = idxs.pop()! + END_SEQUENCE.length
+          const length = head - neck
+          callback(this.readbuffer.slice(neck, length))
+          // old frames are discarded
+          this.readbuffer = this.readbuffer.slice(head)
         }
       }
       requestAnimationFrame(reader)
@@ -110,12 +133,8 @@ export class Serial {
   }
 }
 const serial = new Serial()
+
 export default serial
 
-declare global {
-  interface Window {
-    serial: any
-  }
-}
 window.serial = serial
 window.addEventListener('beforeunload', () => serial.close())

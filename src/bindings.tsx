@@ -15,11 +15,11 @@ function createHook<T>(key: string, defaultV: T, web2ardu: (v: T) => number) {
     (newValue: T) => {
       serial.write(key + web2ardu(newValue) + '>')
     },
-    fps(60),
+    fps(30),
     { leading: true, trailing: false }
   )
 
-  return function useState(): [T, (n: T) => unknown] {
+  return function useState(): [T, (n: T) => void] {
     const [value, setValue] = useRecoilState<T>(state)
     useEffect(() => sendValue(value), [value])
     return [value, setValue]

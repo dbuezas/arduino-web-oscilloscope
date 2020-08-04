@@ -1,6 +1,5 @@
 #include "MemoryFree.h"
 #include "dac_constants.h"
-#include "mystream.h"
 
 #define SERIAL_SAMPLES 500
 #define SAMPLES SERIAL_SAMPLES  // 800
@@ -20,6 +19,7 @@ uint16_t ADC_MAIN_CLOCK_TICKS =
     ADC_PRESCALER * (15 + 1.5 + 5.5) -
     9;  // A normal conversion takes 15 ADC clock cycles
         // + 1.5 sample and hold + (5.5 unaccounted for) -9 for timing overhead
+// prescaler = 1 --> 13
 // prescaler = 2 --> 79
 // prescaler = 3 --> 167
 // prescaler = 4 --> 343
@@ -93,7 +93,7 @@ void setup() {
                             // 10: voltage source is internal reference voltage
                             // (IVSEL0) 11: shut down DAC reference source and
                             // DAC at the sametime
-  Serial.begin(115200 * 2);
+  Serial.begin(115200);
   Serial.setTimeout(100);
   pinMode(D2, INPUT);
   pinMode(D3, INPUT);

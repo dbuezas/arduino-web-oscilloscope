@@ -1,17 +1,11 @@
-import React, { useRef, useLayoutEffect, useEffect } from 'react'
+import React, { useRef, useEffect } from 'react'
 
 import './Plot.css'
 import updatePlot, { Datum } from './plot.d3'
 import { useTriggerVoltage, useTriggerPos } from './bindings'
 
 type Props = {
-  data: Datum[]
-  dataD2: Datum[]
-  dataD3: Datum[]
-  dataD4: Datum[]
-  dataD5: Datum[]
-  dataD6: Datum[]
-  dataD7: Datum[]
+  data: Datum[][]
 }
 export default function Plot(props: Props) {
   const nodeRef = useRef<SVGSVGElement>(null)
@@ -26,31 +20,14 @@ export default function Plot(props: Props) {
       setTriggerVoltage,
       triggerPos,
       setTriggerPos,
+      [0, 500],
       props.data,
-      props.dataD2,
-      props.dataD3,
-      props.dataD4,
-      props.dataD5,
-      props.dataD6,
-      props.dataD7,
       {
         width: window.innerWidth,
         height: window.innerHeight - 200
       }
     )
-  }, [
-    props.data,
-    triggerVoltage,
-    triggerPos,
-    setTriggerVoltage,
-    setTriggerPos,
-    props.dataD2,
-    props.dataD3,
-    props.dataD4,
-    props.dataD5,
-    props.dataD6,
-    props.dataD7
-  ])
+  }, [props.data, triggerVoltage, triggerPos, setTriggerVoltage, setTriggerPos])
 
   return (
     <svg
