@@ -23,21 +23,16 @@ function App() {
   const hz = useRef<number>(0)
   const lastT = useRef<number>(0)
   useEffect(() => {
-    const throttled = throttle(
-      (newData: number[]) => {
-        if (!stoppedRef.current) {
-          setData(parseSerial(newData))
-        }
-        // ;(window as any).mockdata = newData
-        const now = performance.now()
-        const newhz = 1000 / (now - lastT.current)
-        hz.current = newhz
-        lastT.current = now
-      },
-      fps(200)
-      // { leading: true, trailing: false }
-    )
-    serial.onData(throttled)
+    serial.onData((newData: number[]) => {
+      if (!stoppedRef.current) {
+        setData(parseSerial(newData))
+      }
+      // ;(window as any).mockdata = newData
+      const now = performance.now()
+      const newhz = 1000 / (now - lastT.current)
+      hz.current = newhz
+      lastT.current = now
+    })
   }, [])
 
   return (
@@ -47,7 +42,10 @@ function App() {
         size="lg"
         onClick={async () => {
           // await serial.connect(170000)
-          await serial.connect({ baudrate: 115200 * 2, buffersize: 500 * 100 })
+          await serial.connect({
+            baudrate: 115200 * 2,
+            buffersize: 1000000 //500 * 100
+          })
           console.log('connected')
         }}
         icon={<Icon icon="arrow-right" />}

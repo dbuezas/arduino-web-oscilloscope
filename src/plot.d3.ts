@@ -3,8 +3,6 @@ import * as d3 from 'd3'
 const margin = { top: 20, right: 50, bottom: 30, left: 50 }
 export type Datum = { v: number; t: number }
 
-const last: any = {} // TODO: remove this hack and do good memoization
-
 export default (
   node: SVGSVGElement,
   triggerVoltage: number,
@@ -38,80 +36,49 @@ export default (
     .y((d) => yScale(d.v))
   const svg = d3.select(node)
   const yTicks = d3.ticks(yScale.domain()[0], yScale.domain()[1], 10)
-  if (last.domainx != xDomain[1]) {
-    last.domainx = xDomain[1]
-    svg
-      .select<SVGGElement>('g.y.axis')
-      .call((g) =>
-        g.attr('transform', `translate(${margin.left},0)`).call(
-          d3
-            .axisLeft(yScale)
-            .tickValues(yTicks)
-            .tickPadding(10)
-            .tickSize(-size.width + margin.right + margin.left - 1)
-            .tickFormat((v) => v + 'v')
-        )
+  svg
+    .select<SVGGElement>('g.y.axis')
+    .call((g) =>
+      g.attr('transform', `translate(${margin.left},0)`).call(
+        d3
+          .axisLeft(yScale)
+          .tickValues(yTicks)
+          .tickPadding(10)
+          .tickSize(-size.width + margin.right + margin.left - 1)
+          .tickFormat((v) => v + 'v')
       )
-      .call((g) =>
-        g.select('.domain').attr(
-          'd',
-          (d, _, path) =>
-            // close path so the domain has a right border
-            d3.select(path[0]).attr('d') + 'z'
-        )
-      )
-
-    svg.select<SVGGElement>('g.x.axis').call((g) =>
-      g
-        .attr('transform', `translate(0,${size.height - margin.bottom})`)
-        .call(
-          d3
-            .axisBottom(xScale)
-            .ticks(size.width / 80)
-            .tickPadding(10)
-            .tickSize(-size.height + margin.top + margin.bottom)
-            .tickFormat((t) => (((t as number) / 500) * 2.75).toFixed(3) + 'ms')
-            .tickSizeOuter(0)
-        )
-        .call((g) => g.select('.domain').remove())
     )
-  }
+    .call((g) =>
+      g.select('.domain').attr(
+        'd',
+        (d, _, path) =>
+          // close path so the domain has a right border
+          d3.select(path[0]).attr('d') + 'z'
+      )
+    )
 
-  // svg.select<SVGGElement>('path.plot-area').datum(data).attr('d', line)
-  // svg.select<SVGGElement>('path.plot-area-d2').datum(dataD2).attr('d', line)
-  // svg.select<SVGGElement>('path.plot-area-d3').datum(dataD3).attr('d', line)
-  // svg.select<SVGGElement>('path.plot-area-d4').datum(dataD4).attr('d', line)
-  // svg.select<SVGGElement>('path.plot-area-d5').datum(dataD5).attr('d', line)
-  // svg.select<SVGGElement>('path.plot-area-d6').datum(dataD6).attr('d', line)
-  // svg.select<SVGGElement>('path.plot-area-d7').datum(dataD7).attr('d', line)
-  if (data != last.data) {
-    svg.select<SVGGElement>('path.plot-area').datum(data).attr('d', line)
-    last.data = data
-  }
-  if (dataD2 != last.dataD2) {
-    svg.select<SVGGElement>('path.plot-area-d2').datum(dataD2).attr('d', line)
-    last.dataD2 = dataD2
-  }
-  if (dataD3 != last.dataD3) {
-    svg.select<SVGGElement>('path.plot-area-d3').datum(dataD3).attr('d', line)
-    last.dataD3 = dataD3
-  }
-  if (dataD4 != last.dataD4) {
-    svg.select<SVGGElement>('path.plot-area-d4').datum(dataD4).attr('d', line)
-    last.dataD4 = dataD4
-  }
-  if (dataD5 != last.dataD5) {
-    svg.select<SVGGElement>('path.plot-area-d5').datum(dataD5).attr('d', line)
-    last.dataD5 = dataD5
-  }
-  if (dataD6 != last.dataD6) {
-    svg.select<SVGGElement>('path.plot-area-d6').datum(dataD6).attr('d', line)
-    last.dataD6 = dataD6
-  }
-  if (dataD7 != last.dataD7) {
-    svg.select<SVGGElement>('path.plot-area-d7').datum(dataD7).attr('d', line)
-    last.dataD7 = dataD7
-  }
+  svg.select<SVGGElement>('g.x.axis').call((g) =>
+    g
+      .attr('transform', `translate(0,${size.height - margin.bottom})`)
+      .call(
+        d3
+          .axisBottom(xScale)
+          .ticks(size.width / 80)
+          .tickPadding(10)
+          .tickSize(-size.height + margin.top + margin.bottom)
+          .tickFormat((t) => (((t as number) / 500) * 2.75).toFixed(3) + 'ms')
+          .tickSizeOuter(0)
+      )
+      .call((g) => g.select('.domain').remove())
+  )
+
+  svg.select<SVGGElement>('path.plot-area').datum(data).attr('d', line)
+  svg.select<SVGGElement>('path.plot-area-d2').datum(dataD2).attr('d', line)
+  svg.select<SVGGElement>('path.plot-area-d3').datum(dataD3).attr('d', line)
+  svg.select<SVGGElement>('path.plot-area-d4').datum(dataD4).attr('d', line)
+  svg.select<SVGGElement>('path.plot-area-d5').datum(dataD5).attr('d', line)
+  svg.select<SVGGElement>('path.plot-area-d6').datum(dataD6).attr('d', line)
+  svg.select<SVGGElement>('path.plot-area-d7').datum(dataD7).attr('d', line)
 
   /* trigger voltage */
   renderTriggerPos(svg, triggerPos, yScale, xScale, yDomain, setTriggerPos)

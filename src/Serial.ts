@@ -84,12 +84,12 @@ export class Serial {
   async onData(callback: (data: number[]) => unknown) {
     callback(dataMock)
     const reader = async (): Promise<any> => {
-      const data =
-        this.reader && (await Promise.race([sleep(500), this.reader.read()]))
+      const data = this.reader && (await this.reader.read())
       if (data && data.value !== undefined) {
         this.readbuffer.push(...data.value)
         let first = true
-        while (true) {
+        const forever = true
+        while (forever) {
           const [firstIdx, lastIdx] = findSequence(
             [255, 255, 255, 255],
             this.readbuffer

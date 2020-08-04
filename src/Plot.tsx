@@ -1,4 +1,4 @@
-import React, { useRef, useLayoutEffect } from 'react'
+import React, { useRef, useLayoutEffect, useEffect } from 'react'
 
 import './Plot.css'
 import updatePlot, { Datum } from './plot.d3'
@@ -18,7 +18,7 @@ export default function Plot(props: Props) {
   const [triggerVoltage, setTriggerVoltage] = useTriggerVoltage()
   const [triggerPos, setTriggerPos] = useTriggerPos()
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const node = nodeRef.current!
     updatePlot(
       node,
@@ -40,19 +40,18 @@ export default function Plot(props: Props) {
     )
   }, [
     props.data,
-    nodeRef.current,
     triggerVoltage,
     triggerPos,
-    window.innerWidth,
-    window.innerHeight
+    setTriggerVoltage,
+    setTriggerPos,
+    props.dataD2,
+    props.dataD3,
+    props.dataD4,
+    props.dataD5,
+    props.dataD6,
+    props.dataD7
   ])
-  // useLayoutEffect(() => {
-  //   const node = nodeRef.current!
-  //   updatePlot(node, props.data, {
-  //     width: window.innerWidth,
-  //     height: window.innerHeight - 200
-  //   })
-  // }, [props.data])
+
   return (
     <svg
       ref={nodeRef}

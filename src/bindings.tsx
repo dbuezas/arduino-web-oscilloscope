@@ -15,7 +15,7 @@ function createHook<T>(key: string, defaultV: T, web2ardu: (v: T) => number) {
     (newValue: T) => {
       serial.write(key + web2ardu(newValue) + '>')
     },
-    fps(10),
+    fps(60),
     { leading: true, trailing: false }
   )
 
