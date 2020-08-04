@@ -3,45 +3,8 @@ import * as d3 from 'd3'
 const margin = { top: 20, right: 50, bottom: 30, left: 50 }
 export type Datum = number
 type Size = { height: number; width: number }
-export default (
-  node: SVGSVGElement,
-  triggerVoltage: number,
-  setTriggerVoltage: (v: number) => void,
-  triggerPos: number,
-  setTriggerPos: (v: number) => void,
-  xDomain: [number, number],
-  data: Datum[][],
-  size: Size
-) => {
-  // console.log(i++)
-  const yDomain = [0, 5] as [number, number]
-  const xScale = d3
-    .scaleLinear()
-    .domain(xDomain)
-    .range([margin.left, size.width - margin.right])
-  const yScale = d3
-    .scaleLinear()
-    .domain(yDomain)
-    .rangeRound([size.height - margin.bottom, margin.top])
-  const svg = d3.select(node)
-  renderYAxis(svg, yScale, size)
-  renderXAxis(svg, xScale, size, xDomain)
 
-  renderData(svg, data, xScale, yScale)
-
-  /* trigger voltage */
-  renderTriggerPos(svg, triggerPos, yScale, xScale, yDomain, setTriggerPos)
-  renderTriggerVoltage(
-    svg,
-    triggerVoltage,
-    yScale,
-    xScale,
-    xDomain,
-    setTriggerVoltage
-  )
-}
-
-function renderData(
+export function renderData(
   svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
   data: Datum[][],
   xScale: d3.ScaleLinear<number, number>,
@@ -49,7 +12,6 @@ function renderData(
 ) {
   const line = d3
     .line<Datum>()
-    // .curve(d3.curveCatmullRom) // REMOVE
     .x((d, i) => xScale(i))
     .y((d) => yScale(d))
 
@@ -60,7 +22,7 @@ function renderData(
       .datum(data[i])
       .attr('d', line)
 }
-function renderXAxis(
+export function renderXAxis(
   svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
   xScale: d3.ScaleLinear<number, number>,
   size: Size,
@@ -85,7 +47,7 @@ function renderXAxis(
       .call((g) => g.select('.domain').remove())
   )
 }
-function renderYAxis(
+export function renderYAxis(
   svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
   yScale: d3.ScaleLinear<number, number>,
   size: Size
@@ -112,7 +74,7 @@ function renderYAxis(
       )
     )
 }
-function renderTriggerVoltage(
+export function renderTriggerVoltage(
   svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
   triggerVoltage: number,
   yScale: d3.ScaleLinear<number, number>,
@@ -143,22 +105,22 @@ function renderTriggerVoltage(
     .attr('x2', xScale(xDomain[1]))
     .attr('y1', yScale(triggerVoltage))
     .attr('y2', yScale(triggerVoltage))
-  handle.call(
-    d3
-      .drag<SVGLineElement, number>()
-      .on('start', function () {
-        d3.select(this).classed('active', true)
-      })
-      .on('drag', function dragged() {
-        setTriggerVoltage(yScale.invert(d3.event.y))
-      })
-      .on('end', function () {
-        d3.select(this).classed('active', false)
-      })
-  )
+    .call(
+      d3
+        .drag<SVGLineElement, number>()
+        .on('start', function () {
+          d3.select(this).classed('active', true)
+        })
+        .on('drag', function dragged() {
+          setTriggerVoltage(yScale.invert(d3.event.y))
+        })
+        .on('end', function () {
+          d3.select(this).classed('active', false)
+        })
+    )
 }
 
-function renderTriggerPos(
+export function renderTriggerPos(
   svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
   triggerPos: number,
   yScale: d3.ScaleLinear<number, number>,
@@ -190,17 +152,17 @@ function renderTriggerPos(
     .attr('x2', xScale(triggerPos))
     .attr('y1', yScale(yDomain[0]))
     .attr('y2', yScale(yDomain[1]))
-  handle.call(
-    d3
-      .drag<SVGLineElement, number>()
-      .on('start', function () {
-        d3.select(this).classed('active', true)
-      })
-      .on('drag', function dragged() {
-        setTriggerVoltage(xScale.invert(d3.event.x))
-      })
-      .on('end', function () {
-        d3.select(this).classed('active', false)
-      })
-  )
+    .call(
+      d3
+        .drag<SVGLineElement, number>()
+        .on('start', function () {
+          d3.select(this).classed('active', true)
+        })
+        .on('drag', function dragged() {
+          setTriggerVoltage(xScale.invert(d3.event.x))
+        })
+        .on('end', function () {
+          d3.select(this).classed('active', false)
+        })
+    )
 }

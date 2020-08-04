@@ -77,7 +77,7 @@ function Controls() {
           size="lg"
           min={0}
           max={2700}
-          step={10}
+          step={1}
           value={triggerPos}
           onChange={(v) => setTriggerPos(v as number)}
         />

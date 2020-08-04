@@ -106,18 +106,19 @@ export class Serial {
   }
 
   async write(text: string) {
-    console.log(text)
+    // console.log(text)
     if (!this.writer) return
     await this.writer.write(text)
     await sleep(1)
   }
   async onData(callback: (data: number[]) => unknown) {
     callback(dataMock)
-    const reader = async () => {
+    const thread = async () => {
       const data = this.reader && (await this.reader.read())
       if (data && data.value !== undefined) {
         this.readbuffer.push(...data.value)
         const idxs = indexesOfSequence(END_SEQUENCE, this.readbuffer)
+        // console.log(idxs.length)
         if (idxs.length > 1) {
           const head = idxs.pop()!
           const neck = idxs.pop()! + END_SEQUENCE.length
@@ -127,9 +128,9 @@ export class Serial {
           this.readbuffer = this.readbuffer.slice(head)
         }
       }
-      requestAnimationFrame(reader)
+      requestAnimationFrame(thread)
     }
-    reader()
+    thread()
   }
 }
 const serial = new Serial()
