@@ -13,7 +13,7 @@ export function renderData(
 ) {
   const line = d3
     .line<Datum>()
-    .x((d, i) => xScale((i / data[0].length) * (xDomain[1] - xDomain[0])))
+    .x((d, i) => xScale(((i + 0.5) / data[0].length) * xDomain[1]))
     .y((d) => yScale(d))
 
   svg.select<SVGGElement>('path.plot-area').datum(data[0]).attr('d', line)
