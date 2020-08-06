@@ -8,10 +8,12 @@ import {
   renderXAxis,
   renderYAxis,
   renderTriggerVoltage,
-  renderTriggerPos
+  renderTriggerPos,
+  Size
 } from './plot.d3'
 import { useTriggerVoltage, useTriggerPos, useAdcClocks } from './bindings'
 import { ScaleLinear } from 'd3'
+import { throttle } from 'lodash'
 const margin = { top: 20, right: 50, bottom: 30, left: 50 }
 const constrain = (n: number, min: number, max: number) =>
   n > max ? max : n < min ? min : n
@@ -20,6 +22,10 @@ type Props = {
   data: Datum[][]
 }
 export default function Plot(props: Props) {
+  const [size, setSize] = useState({
+    width: 0,
+    height: 0
+  })
   const [xDomain, setXDomain] = useState<[number, number]>([0, 500])
   const [yDomain] = useState<[number, number]>([0, 5])
   const nodeRef = useRef<SVGSVGElement>(null)
@@ -27,19 +33,28 @@ export default function Plot(props: Props) {
   const [yScale, setYScale] = useState<ScaleLinear<number, number>>()
   const [adcClocks] = useAdcClocks()
   const [triggerVoltage, setTriggerVoltage] = useTriggerVoltage()
-  const [triggerPosInt, setTriggerPosInt] = useTriggerPos()
+  const [triggerPosInt, , sendTriggerPosInt] = useTriggerPos()
 
-  const size = {
-    width: window.innerWidth,
-    height: window.innerHeight - 200
-  }
   const samples = props.data[0].length
   const triggerPos = (triggerPosInt / samples) * xDomain[1]
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    console.log('size')
+
+    setSize({
+      width: window.innerWidth,
+      height: window.innerHeight - 200
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [window.innerWidth, window.innerHeight])
+  useLayoutEffect(() => {
+    console.log('xDomain')
+
     setXDomain([0, (adcClocks / 32000000) * samples])
   }, [adcClocks, samples])
-  useEffect(() => {
+  useLayoutEffect(() => {
+    console.log('xScale')
+
     setXScale(() =>
       d3
         .scaleLinear()
@@ -47,7 +62,9 @@ export default function Plot(props: Props) {
         .range([margin.left, size.width - margin.right])
     )
   }, [xDomain, size.width])
-  useEffect(() => {
+  useLayoutEffect(() => {
+    console.log('yScale')
+
     setYScale(() =>
       d3
         .scaleLinear()
@@ -57,49 +74,90 @@ export default function Plot(props: Props) {
   }, [size.height, yDomain])
 
   useLayoutEffect(() => {
-    console.log('yScale', yScale)
-
+    console.log('yAxis')
     if (!yScale) return
     const svg = d3.select(nodeRef.current!)
     renderYAxis(svg, yScale, size)
   }, [yScale, size])
   useLayoutEffect(() => {
+    console.log('xAxis')
     if (!xScale) return
-
     const svg = d3.select(nodeRef.current!)
     renderXAxis(svg, xScale, size)
   }, [xScale, size])
   useLayoutEffect(() => {
     if (!xScale) return
     if (!yScale) return
-
     const svg = d3.select(nodeRef.current!)
     renderData(svg, props.data, xScale, yScale, xDomain)
   }, [props.data, xScale, yScale, xDomain])
-  useLayoutEffect(() => {
-    if (!xScale) return
-    if (!yScale) return
-    const svg = d3.select(nodeRef.current!)
-    const setTriggerPos = (sec: number) => {
-      let scaled = (sec / xDomain[1]) * samples
-      scaled = constrain(scaled, 0, samples)
-      setTriggerPosInt(scaled)
-    }
-    renderTriggerPos(svg, triggerPos, yScale, xScale, yDomain, setTriggerPos)
-  }, [triggerPos, yScale, xScale, yDomain, samples, setTriggerPosInt, xDomain])
-  useLayoutEffect(() => {
-    if (!xScale) return
-    if (!yScale) return
-    const svg = d3.select(nodeRef.current!)
-    renderTriggerVoltage(
-      svg,
-      triggerVoltage,
-      yScale,
-      xScale,
-      xDomain,
-      setTriggerVoltage
+
+  // useEffect(() => {
+  //   console.log('triggerPos')
+  //   if (!xScale) return
+
+  //   const svg = d3.select(nodeRef.current!)
+  //   const setTriggerPos = (sec: number) => {
+  //     let scaled = (sec / xDomain[1]) * samples
+  //     scaled = constrain(scaled, 0, samples)
+  //     sendTriggerPosInt(scaled)
+  //   }
+  //   renderTriggerPos(svg, triggerPos, xScale, size, setTriggerPos)
+  // }, [triggerPos, xScale, samples, xDomain, sendTriggerPosInt, size])
+  const throttled = useRef(
+    throttle(
+      (
+        triggerPos: number,
+        xScale: d3.ScaleLinear<number, number> | undefined,
+        samples: number,
+        xDomain: number[],
+        sendTriggerPosInt: (arg0: number) => void,
+        size: Size
+      ) => {
+        console.log('triggerPos')
+        if (!xScale) return
+
+        const svg = d3.select(nodeRef.current!)
+        const setTriggerPos = (sec: number) => {
+          let scaled = (sec / xDomain[1]) * samples
+          scaled = constrain(scaled, 0, samples)
+          sendTriggerPosInt(scaled)
+        }
+        renderTriggerPos(svg, triggerPos, xScale, size, setTriggerPos)
+      },
+      0,
+      { leading: false, trailing: true }
     )
-  }, [triggerVoltage, yScale, xScale, xDomain, setTriggerVoltage])
+  )
+
+  useEffect(
+    () =>
+      throttled.current(
+        triggerPos,
+        xScale,
+        samples,
+        xDomain,
+        sendTriggerPosInt,
+        size
+      ),
+    [triggerPos, xScale, samples, xDomain, sendTriggerPosInt, size]
+  )
+
+  useLayoutEffect(() => {}, [
+    triggerPos,
+    xScale,
+    samples,
+    xDomain,
+    sendTriggerPosInt,
+    size
+  ])
+  useLayoutEffect(() => {
+    console.log('triggerVolt')
+    if (!yScale) return
+    const svg = d3.select(nodeRef.current!)
+
+    renderTriggerVoltage(svg, triggerVoltage, yScale, size, setTriggerVoltage)
+  }, [triggerVoltage, yScale, size, setTriggerVoltage])
 
   return (
     <svg

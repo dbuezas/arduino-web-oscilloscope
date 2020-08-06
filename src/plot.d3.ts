@@ -2,7 +2,7 @@ import * as d3 from 'd3'
 
 const margin = { top: 20, right: 50, bottom: 30, left: 50 }
 export type Datum = number
-type Size = { height: number; width: number }
+export type Size = { height: number; width: number }
 
 export function renderData(
   svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
@@ -74,8 +74,7 @@ export function renderTriggerVoltage(
   svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
   triggerVoltage: number,
   yScale: d3.ScaleLinear<number, number>,
-  xScale: d3.ScaleLinear<number, number>,
-  xDomain: [number, number],
+  size: Size,
   setTriggerVoltage: (v: number) => void
 ) {
   const line = svg
@@ -84,8 +83,8 @@ export function renderTriggerVoltage(
   const newLine = line.enter().append('line').classed('triggerVoltage', true)
   line
     .merge(newLine)
-    .attr('x1', xScale(xDomain[0]))
-    .attr('x2', xScale(xDomain[1]))
+    .attr('x1', margin.left)
+    .attr('x2', size.width - margin.right)
     .attr('y1', yScale(triggerVoltage))
     .attr('y2', yScale(triggerVoltage))
   const handle = svg
@@ -97,8 +96,8 @@ export function renderTriggerVoltage(
     .classed('triggerVoltageHandle', true)
   handle
     .merge(newHandle)
-    .attr('x1', xScale(xDomain[0]))
-    .attr('x2', xScale(xDomain[1]))
+    .attr('x1', margin.left)
+    .attr('x2', size.width - margin.right)
     .attr('y1', yScale(triggerVoltage))
     .attr('y2', yScale(triggerVoltage))
     .call(
@@ -115,14 +114,12 @@ export function renderTriggerVoltage(
         })
     )
 }
-
 export function renderTriggerPos(
   svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
   triggerPos: number,
-  yScale: d3.ScaleLinear<number, number>,
   xScale: d3.ScaleLinear<number, number>,
-  yDomain: [number, number],
-  setTriggerVoltage: (v: number) => void
+  size: Size,
+  setTriggerPos: (v: number) => void
 ) {
   const line = svg
     .selectAll<SVGLineElement, number>('line.triggerPos')
@@ -132,8 +129,8 @@ export function renderTriggerPos(
     .merge(newLine)
     .attr('x1', xScale(triggerPos))
     .attr('x2', xScale(triggerPos))
-    .attr('y1', yScale(yDomain[0]))
-    .attr('y2', yScale(yDomain[1]))
+    .attr('y1', size.height - margin.bottom)
+    .attr('y2', margin.top)
 
   const handle = svg
     .selectAll<SVGLineElement, number>('line.triggerPosHandle')
@@ -146,8 +143,8 @@ export function renderTriggerPos(
     .merge(newhandle)
     .attr('x1', xScale(triggerPos))
     .attr('x2', xScale(triggerPos))
-    .attr('y1', yScale(yDomain[0]))
-    .attr('y2', yScale(yDomain[1]))
+    .attr('y1', size.height - margin.bottom)
+    .attr('y2', margin.top)
     .call(
       d3
         .drag<SVGLineElement, number>()
@@ -155,7 +152,7 @@ export function renderTriggerPos(
           d3.select(this).classed('active', true)
         })
         .on('drag', function dragged() {
-          setTriggerVoltage(xScale.invert(d3.event.x))
+          setTriggerPos(xScale.invert(d3.event.x))
         })
         .on('end', function () {
           d3.select(this).classed('active', false)

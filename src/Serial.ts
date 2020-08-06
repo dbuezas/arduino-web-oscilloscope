@@ -115,8 +115,13 @@ export class Serial {
     callback(dataMock)
     const thread = async () => {
       const data = this.reader && (await this.reader.read())
+      // TODO: put requestanimationframe to get the data instead!
       if (data && data.value !== undefined) {
-        this.readbuffer.push(...data.value)
+        try {
+          this.readbuffer.push(...data.value)
+        } catch (e) {
+          console.error(e)
+        }
         const idxs = indexesOfSequence(END_SEQUENCE, this.readbuffer)
         // console.log(idxs.length)
         if (idxs.length > 1) {

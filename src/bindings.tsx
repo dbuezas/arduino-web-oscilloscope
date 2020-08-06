@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { atom, useRecoilState } from 'recoil'
 import serial from './Serial'
@@ -12,10 +12,19 @@ function createHook<T>(key: string, defaultV: T, web2ardu: (v: T) => number) {
     serial.write(key + web2ardu(newValue) + '>')
   }
 
-  return function useState(): [T, (n: T) => void] {
+  return function useState(): [
+    T,
+    (n: T) => void,
+    (n: T) => void,
+    (n: T) => void
+  ] {
     const [value, setValue] = useRecoilState<T>(state)
-    useEffect(() => sendValue(value), [value])
-    return [value, setValue]
+
+    // useEffect(() => sendValue(value), [value])
+    const onlySet = (n: T) => {
+      setValue(n)
+    }
+    return [value, setValue, sendValue, onlySet]
   }
 }
 export const useTriggerVoltage = createHook<number>('V', 0, (v) =>

@@ -19,7 +19,7 @@ import {
 
 function Controls() {
   const [blockInterrupts, setBlockInterrupts] = useBlockInterrupts()
-  const [adcClockTicks, setAdcClockTicks] = useAdcClocks()
+  const [adcClockTicks, , setAdcClockTicks] = useAdcClocks()
   const [triggerVoltage, setTriggerVoltage] = useTriggerVoltage()
   const [triggerPos, setTriggerPos] = useTriggerPos()
   const [triggerDirection, setTriggerDirection] = useTriggerDirection()

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { IconButton, Icon } from 'rsuite'
-
+import { useTriggerPos, useAdcClocks } from './bindings'
 import parseSerial from './parseSerial'
 import Plot from './Plot'
 // import 'rsuite/dist/styles/rsuite-default.css'
@@ -20,17 +20,24 @@ function App() {
   })
   const hz = useRef<number>(0)
   const lastT = useRef<number>(0)
+  const [, , , setTriggerPosLocal] = useTriggerPos()
+  const [, , , setAdcClocks] = useAdcClocks()
 
   useEffect(() => {
-    try {
-      serial.connectWithPaired({
+    serial
+      .connectWithPaired({
         baudrate: 115200,
         buffersize: 1000000 //500 * 100
       })
-    } catch (e) {}
+      .catch(() => {})
     serial.onData((newData: number[]) => {
       if (!stoppedRef.current) {
-        setData(parseSerial(newData))
+        const data = parseSerial(newData)
+        if (data.analog.length > 0) {
+          setTriggerPosLocal(data.triggerPos)
+          setAdcClocks(data.ADC_MAIN_CLOCK_TICKS)
+          setData(data)
+        }
       }
       // ;(window as any).mockdata = newData
       const now = performance.now()
