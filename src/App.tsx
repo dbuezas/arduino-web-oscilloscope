@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react'
+// @ts-ignore
+import FPSStats from 'react-fps-stats'
 import { IconButton, Icon } from 'rsuite'
 import {
   useTriggerPos,
@@ -15,6 +17,11 @@ import './App.css'
 import serial from './Serial'
 import Controls from './Controls'
 
+const serialOptions = {
+  baudrate: 115200,
+  buffersize: 1000000 //500 * 100
+}
+
 function App() {
   const stoppedRef = useRef<boolean>()
   const [data, setData] = useState<{ analog: number[]; digital: number[] }>({
@@ -29,12 +36,7 @@ function App() {
   const [, , receiveAdcClocks] = useAdcClocks()
 
   useEffect(() => {
-    serial
-      .connectWithPaired({
-        baudrate: 115200,
-        buffersize: 1000000 //500 * 100
-      })
-      .catch(() => {})
+    serial.connectWithPaired(serialOptions).catch(() => {})
     serial.onData((newData: number[]) => {
       if (!stoppedRef.current) {
         const data = parseSerial(newData)
@@ -58,15 +60,13 @@ function App() {
   return (
     <div className="App">
       <span>{Math.round(hz.current)}hz</span>
+      <FPSStats />
       {useMemo(
         () => (
           <IconButton
             size="lg"
             onClick={async () => {
-              await serial.connect({
-                baudrate: 115200,
-                buffersize: 1000000 //500 * 100
-              })
+              await serial.connect(serialOptions)
               console.log('connected')
             }}
             icon={<Icon icon="arrow-right" />}
@@ -98,10 +98,7 @@ function App() {
           <IconButton
             size="lg"
             onClick={async () => {
-              serial.connectWithPaired({
-                baudrate: 115200,
-                buffersize: 1000000 //500 * 100
-              })
+              serial.connectWithPaired(serialOptions)
             }}
             icon={<Icon icon="recycle" />}
             placement="right"

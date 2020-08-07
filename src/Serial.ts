@@ -114,7 +114,9 @@ export class Serial {
   async onData(callback: (data: number[]) => unknown) {
     callback(dataMock)
     while (1) {
-      //
+      // React would do this anyway to skip paints, but only after computing the svg
+      await new Promise((r) => requestAnimationFrame(r))
+
       if (!this.reader) await sleep(100)
       const data = this.reader && (await this.reader.read())
       if (data && data.value !== undefined) {
