@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useMemo } from 'react'
 import { IconButton, Icon } from 'rsuite'
 import {
   useTriggerPos,
@@ -58,44 +58,60 @@ function App() {
   return (
     <div className="App">
       <span>{Math.round(hz.current)}hz</span>
-      <IconButton
-        size="lg"
-        onClick={async () => {
-          await serial.connect({
-            baudrate: 115200,
-            buffersize: 1000000 //500 * 100
-          })
-          console.log('connected')
-        }}
-        icon={<Icon icon="arrow-right" />}
-        placement="right"
-      >
-        Connect
-      </IconButton>
-      <IconButton
-        size="lg"
-        onClick={async () => {
-          await serial.close()
-          console.log('closed')
-        }}
-        icon={<Icon icon="stop" />}
-        placement="right"
-      >
-        disConnect
-      </IconButton>
-      <IconButton
-        size="lg"
-        onClick={async () => {
-          serial.connectWithPaired({
-            baudrate: 115200,
-            buffersize: 1000000 //500 * 100
-          })
-        }}
-        icon={<Icon icon="recycle" />}
-        placement="right"
-      >
-        reconnect
-      </IconButton>
+      {useMemo(
+        () => (
+          <IconButton
+            size="lg"
+            onClick={async () => {
+              await serial.connect({
+                baudrate: 115200,
+                buffersize: 1000000 //500 * 100
+              })
+              console.log('connected')
+            }}
+            icon={<Icon icon="arrow-right" />}
+            placement="right"
+          >
+            Connect
+          </IconButton>
+        ),
+        []
+      )}
+      {useMemo(
+        () => (
+          <IconButton
+            size="lg"
+            onClick={async () => {
+              await serial.close()
+              console.log('closed')
+            }}
+            icon={<Icon icon="stop" />}
+            placement="right"
+          >
+            disConnect
+          </IconButton>
+        ),
+        []
+      )}
+      {useMemo(
+        () => (
+          <IconButton
+            size="lg"
+            onClick={async () => {
+              serial.connectWithPaired({
+                baudrate: 115200,
+                buffersize: 1000000 //500 * 100
+              })
+            }}
+            icon={<Icon icon="recycle" />}
+            placement="right"
+          >
+            reconnect
+          </IconButton>
+        ),
+        []
+      )}
+
       <Controls />
       <div
         onMouseDown={() => (stoppedRef.current = true)}

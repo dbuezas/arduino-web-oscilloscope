@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import {
   useTriggerVoltage,
   useTriggerPos,
@@ -10,8 +10,6 @@ import {
   InputGroup,
   Icon,
   InputNumber,
-  Whisper,
-  Tooltip,
   RadioGroup,
   Radio,
   Slider
@@ -33,85 +31,109 @@ function Controls() {
 
   return (
     <div>
-      <Slider
-        style={{ width: 500 }}
-        progress
-        min={0}
-        max={1000}
-        value={adcClockTicks}
-        onChange={setAdcClockTicks}
-      />
-      <InputGroup style={styles.input}>
-        <InputNumber
-          size="lg"
-          min={0}
-          value={adcClockTicks}
-          onChange={setAdcClockTicks as any}
-        />
-        <InputGroup.Addon>
-          <Icon icon="clock-o" />
-        </InputGroup.Addon>
-      </InputGroup>
-      <Whisper
-        placement="top"
-        trigger="hover"
-        speaker={<Tooltip>Trigger Voltage</Tooltip>}
-      >
-        <InputGroup style={styles.input}>
-          <InputNumber
-            size="lg"
+      {useMemo(
+        () => (
+          <Slider
+            style={{ width: 500 }}
+            progress
             min={0}
-            max={5}
-            step={0.05}
-            value={triggerVoltage}
-            onChange={setTriggerVoltage as any}
+            max={1000}
+            value={adcClockTicks}
+            onChange={setAdcClockTicks}
           />
-          <InputGroup.Addon>
-            <Icon icon="arrows-v" />
-          </InputGroup.Addon>
-        </InputGroup>
-      </Whisper>
-      <InputGroup style={styles.input}>
-        <InputNumber
-          size="lg"
-          min={0}
-          max={2700}
-          step={1}
-          value={triggerPos}
-          onChange={setTriggerPos as any}
-        />
-        <InputGroup.Addon>
-          <Icon icon="arrows-h" />
-        </InputGroup.Addon>
-      </InputGroup>{' '}
-      <RadioGroup
-        inline
-        value={triggerDirection}
-        onChange={setTriggerDirection}
-        appearance="picker"
-      >
-        <span style={styles.radioGroupLabel}>Trigger: </span>
-        <Radio value={false}>
-          <Icon icon="level-down" size="2x" />
-        </Radio>
-        <Radio value={true}>
-          <Icon icon="level-up" size="2x" />
-        </Radio>
-      </RadioGroup>
-      <RadioGroup
-        inline
-        value={blockInterrupts}
-        onChange={setBlockInterrupts}
-        appearance="picker"
-      >
-        <span style={styles.radioGroupLabel}>Block Interrupts: </span>
-        <Radio value={false}>
-          <Icon icon="sign-out" size="2x" />
-        </Radio>
-        <Radio value={true}>
-          <Icon icon="hand-stop-o" size="2x" />
-        </Radio>
-      </RadioGroup>
+        ),
+        [adcClockTicks, setAdcClockTicks]
+      )}
+      {useMemo(
+        () => (
+          <InputGroup style={styles.input}>
+            <InputNumber
+              size="lg"
+              min={0}
+              value={adcClockTicks}
+              onChange={setAdcClockTicks as any}
+            />
+            <InputGroup.Addon>
+              <Icon icon="clock-o" />
+            </InputGroup.Addon>
+          </InputGroup>
+        ),
+        [adcClockTicks, setAdcClockTicks]
+      )}
+      {useMemo(
+        () => (
+          <InputGroup style={styles.input}>
+            <InputNumber
+              size="lg"
+              min={0}
+              max={5}
+              step={0.05}
+              value={triggerVoltage}
+              onChange={setTriggerVoltage as any}
+            />
+            <InputGroup.Addon>
+              <Icon icon="arrows-v" />
+            </InputGroup.Addon>
+          </InputGroup>
+        ),
+        [setTriggerVoltage, triggerVoltage]
+      )}
+      {useMemo(
+        () => (
+          <InputGroup style={styles.input}>
+            <InputNumber
+              size="lg"
+              min={0}
+              max={2700}
+              step={1}
+              value={triggerPos}
+              onChange={setTriggerPos as any}
+            />
+            <InputGroup.Addon>
+              <Icon icon="arrows-h" />
+            </InputGroup.Addon>
+          </InputGroup>
+        ),
+        [setTriggerPos, triggerPos]
+      )}
+      {useMemo(
+        () => (
+          <RadioGroup
+            inline
+            value={triggerDirection}
+            onChange={setTriggerDirection}
+            appearance="picker"
+          >
+            <span style={styles.radioGroupLabel}>Trigger: </span>
+            <Radio value={false}>
+              <Icon icon="level-down" size="2x" />
+            </Radio>
+            <Radio value={true}>
+              <Icon icon="level-up" size="2x" />
+            </Radio>
+          </RadioGroup>
+        ),
+        [setTriggerDirection, triggerDirection]
+      )}
+      {useMemo(
+        () => (
+          <RadioGroup
+            inline
+            value={blockInterrupts}
+            onChange={setBlockInterrupts}
+            appearance="picker"
+          >
+            <span style={styles.radioGroupLabel}>Block Interrupts: </span>
+            <Radio value={false}>
+              <Icon icon="sign-out" size="2x" />
+            </Radio>
+            <Radio value={true}>
+              <Icon icon="hand-stop-o" size="2x" />
+            </Radio>
+          </RadioGroup>
+        ),
+        [blockInterrupts, setBlockInterrupts]
+      )}
     </div>
   )
 }
