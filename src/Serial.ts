@@ -114,10 +114,9 @@ export class Serial {
   async onData(callback: (data: number[]) => unknown) {
     callback(dataMock)
     while (1) {
-      // type Data = any
-      await new Promise((r) => requestAnimationFrame(r))
+      //
+      if (!this.reader) await sleep(100)
       const data = this.reader && (await this.reader.read())
-      // TODO: put requestanimationframe to get the data instead!
       if (data && data.value !== undefined) {
         try {
           this.readbuffer.push(...data.value)
