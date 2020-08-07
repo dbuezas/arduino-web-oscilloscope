@@ -1,6 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { IconButton, Icon } from 'rsuite'
-import { useTriggerPos, useAdcClocks } from './bindings'
+import {
+  useTriggerPos,
+  useAdcClocks,
+  useTriggerVoltage,
+  useTriggerDirection
+} from './bindings'
 import parseSerial from './parseSerial'
 import Plot from './Plot'
 // import 'rsuite/dist/styles/rsuite-default.css'
@@ -10,8 +15,6 @@ import './App.css'
 import serial from './Serial'
 import Controls from './Controls'
 
-const fps = (fps: number) => 1000 / fps
-
 function App() {
   const stoppedRef = useRef<boolean>()
   const [data, setData] = useState<{ analog: number[]; digital: number[] }>({
@@ -20,8 +23,10 @@ function App() {
   })
   const hz = useRef<number>(0)
   const lastT = useRef<number>(0)
-  const [, , , setTriggerPosLocal] = useTriggerPos()
-  const [, , , setAdcClocks] = useAdcClocks()
+  const [, , receiveTriggerPos] = useTriggerPos()
+  const [, , receiveTriggerVoltage] = useTriggerVoltage()
+  const [, , receiveTriggerDir] = useTriggerDirection()
+  const [, , receiveAdcClocks] = useAdcClocks()
 
   useEffect(() => {
     serial
@@ -34,8 +39,11 @@ function App() {
       if (!stoppedRef.current) {
         const data = parseSerial(newData)
         if (data.analog.length > 0) {
-          setTriggerPosLocal(data.triggerPos)
-          setAdcClocks(data.ADC_MAIN_CLOCK_TICKS)
+          receiveTriggerPos(data.triggerPos)
+          receiveAdcClocks(data.ADC_MAIN_CLOCK_TICKS)
+          receiveTriggerVoltage((data.triggerVoltageInt / 255) * 5)
+          receiveTriggerDir(data.triggerDir)
+
           setData(data)
         }
       }
@@ -63,6 +71,30 @@ function App() {
         placement="right"
       >
         Connect
+      </IconButton>
+      <IconButton
+        size="lg"
+        onClick={async () => {
+          await serial.close()
+          console.log('closed')
+        }}
+        icon={<Icon icon="stop" />}
+        placement="right"
+      >
+        disConnect
+      </IconButton>
+      <IconButton
+        size="lg"
+        onClick={async () => {
+          serial.connectWithPaired({
+            baudrate: 115200,
+            buffersize: 1000000 //500 * 100
+          })
+        }}
+        icon={<Icon icon="recycle" />}
+        placement="right"
+      >
+        reconnect
       </IconButton>
       <Controls />
       <div

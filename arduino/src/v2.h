@@ -144,36 +144,36 @@ __attribute__((always_inline)) inline void storeOne() {
 }
 void readBuffer() {
   // fill until triggerPos
-  limit = SAMPLES * 10;
   uint8_t triggerVoltageIntMinus = max(0, (int)triggerVoltageInt - 2);
   uint8_t triggerVoltageIntPlus = min(255, (int)triggerVoltageInt + 2);
   if (blockInterrupts) noInterrupts();
 
+  limit = SAMPLES * 10;
   startADC();
   TCNT1 = 0;
-  for (int16_t i = 0; i < triggerPos && limit > 0; i++) {
+  for (uint16_t i = 0; i < triggerPos; i++) {
     storeOne();
   }
   if (triggerDir == FALLING_EDGE) {
-    while (val < triggerVoltageIntPlus && limit > 0) {
+    while (val < triggerVoltageIntPlus && limit != 0) {
       storeOne();
     }
-    while (val > triggerVoltageInt && limit > 0) {
+    while (val > triggerVoltageInt && limit != 0) {
       storeOne();
     }
   }
   if (triggerDir == RISING_EDGE) {
-    while (val > triggerVoltageIntMinus && limit > 0) {
+    while (val > triggerVoltageIntMinus && limit != 0) {
       storeOne();
     }
-    while (val < triggerVoltageInt && limit > 0) {
+    while (val < triggerVoltageInt && limit != 0) {
       storeOne();
     }
   }
-  if (limit == 0)
-    triggerPtr = 0;
-  else
-    triggerPtr = WritePtr;
+  // if (limit == 0)
+  //   triggerPtr = 0;
+  // else
+  triggerPtr = WritePtr;
   // trigger point found
   int16_t stopPtr = triggerPtr - triggerPos - 1;
   if (stopPtr < 0) stopPtr += SAMPLES;

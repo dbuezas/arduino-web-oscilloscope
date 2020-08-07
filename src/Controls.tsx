@@ -16,26 +16,25 @@ import {
   Radio,
   Slider
 } from 'rsuite'
-
+const styles = {
+  input: { width: 200, marginRight: 10, display: 'inline-flex' },
+  radioGroupLabel: {
+    padding: '8px 2px 8px 10px',
+    display: 'inline-block',
+    verticalAlign: 'middle'
+  }
+}
 function Controls() {
   const [blockInterrupts, setBlockInterrupts] = useBlockInterrupts()
-  const [adcClockTicks, , setAdcClockTicks] = useAdcClocks()
+  const [adcClockTicks, setAdcClockTicks] = useAdcClocks()
   const [triggerVoltage, setTriggerVoltage] = useTriggerVoltage()
   const [triggerPos, setTriggerPos] = useTriggerPos()
   const [triggerDirection, setTriggerDirection] = useTriggerDirection()
 
-  const styles = {
-    input: { width: 200, marginRight: 10, display: 'inline-flex' },
-    radioGroupLabel: {
-      padding: '8px 2px 8px 10px',
-      display: 'inline-block',
-      verticalAlign: 'middle'
-    }
-  }
-
   return (
     <div>
       <Slider
+        style={{ width: 500 }}
         progress
         min={0}
         max={1000}
@@ -47,7 +46,7 @@ function Controls() {
           size="lg"
           min={0}
           value={adcClockTicks}
-          onChange={(v) => setAdcClockTicks(parseFloat(`${v}`))}
+          onChange={setAdcClockTicks as any}
         />
         <InputGroup.Addon>
           <Icon icon="clock-o" />
@@ -65,7 +64,7 @@ function Controls() {
             max={5}
             step={0.05}
             value={triggerVoltage}
-            onChange={(v) => setTriggerVoltage(v as number)}
+            onChange={setTriggerVoltage as any}
           />
           <InputGroup.Addon>
             <Icon icon="arrows-v" />
@@ -79,13 +78,12 @@ function Controls() {
           max={2700}
           step={1}
           value={triggerPos}
-          onChange={(v) => setTriggerPos(v as number)}
+          onChange={setTriggerPos as any}
         />
         <InputGroup.Addon>
           <Icon icon="arrows-h" />
         </InputGroup.Addon>
-      </InputGroup>
-
+      </InputGroup>{' '}
       <RadioGroup
         inline
         value={triggerDirection}

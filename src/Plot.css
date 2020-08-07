@@ -2,27 +2,27 @@ path {
   stroke-width: 1;
   fill: none;
 }
-path.plot-area-d2 {
-  stroke: burlywood;
-}
-path.plot-area-d3 {
-  stroke: lightcoral;
-}
-path.plot-area-d4 {
-  stroke: chartreuse;
-}
-path.plot-area-d5 {
-  stroke: cornsilk;
-}
-path.plot-area-d6 {
-  stroke: darkmagenta;
-}
-path.plot-area-d7 {
-  stroke: deeppink;
-}
-path.plot-area {
+path.plot-area-d0 {
   stroke: steelblue;
   stroke-width: 3;
+}
+path.plot-area-d1 {
+  stroke: burlywood;
+}
+path.plot-area-d2 {
+  stroke: lightcoral;
+}
+path.plot-area-d3 {
+  stroke: chartreuse;
+}
+path.plot-area-d4 {
+  stroke: cornsilk;
+}
+path.plot-area-d5 {
+  stroke: darkmagenta;
+}
+path.plot-area-d6 {
+  stroke: deeppink;
 }
 
 .axis .domain {

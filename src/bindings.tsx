@@ -12,19 +12,14 @@ function createHook<T>(key: string, defaultV: T, web2ardu: (v: T) => number) {
     serial.write(key + web2ardu(newValue) + '>')
   }
 
-  return function useState(): [
-    T,
-    (n: T) => void,
-    (n: T) => void,
-    (n: T) => void
-  ] {
+  return function useState(): [T, (n: T) => void, (n: T) => void] {
     const [value, setValue] = useRecoilState<T>(state)
 
     // useEffect(() => sendValue(value), [value])
-    const onlySet = (n: T) => {
+    const receiveValue = (n: T) => {
       setValue(n)
     }
-    return [value, setValue, sendValue, onlySet]
+    return [value, sendValue, receiveValue]
   }
 }
 export const useTriggerVoltage = createHook<number>('V', 0, (v) =>
