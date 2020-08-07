@@ -175,7 +175,7 @@ void readBuffer() {
   // else
   triggerPtr = WritePtr;
   // trigger point found
-  int16_t stopPtr = triggerPtr - triggerPos - 1;
+  int16_t stopPtr = triggerPtr - triggerPos;
   if (stopPtr < 0) stopPtr += SAMPLES;
   // fill buffer
   while (WritePtr != stopPtr) {
