@@ -93,7 +93,7 @@ void setup() {
                             // 10: voltage source is internal reference voltage
                             // (IVSEL0) 11: shut down DAC reference source and
                             // DAC at the sametime
-  Serial.begin(115200);
+  Serial.begin(115200 * 2);
   Serial.setTimeout(100);
   pinMode(D2, INPUT);
   pinMode(D3, INPUT);

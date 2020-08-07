@@ -70,8 +70,10 @@ export default function Plot(props: Props) {
   )
   const offset = useMemo(
     () => nodeRef.current?.getBoundingClientRect() || { top: 0, left: 0 },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [size, nodeRef.current]
   )
+
   return (
     <svg
       ref={nodeRef}
@@ -116,6 +118,15 @@ export default function Plot(props: Props) {
         y1={yScale(triggerVoltage)}
         y2={yScale(triggerVoltage)}
       ></line>
+      <text
+        fill="currentColor"
+        y={yScale(triggerVoltage)}
+        x={size.width - margin.right}
+        dy=".32em"
+        dx="10"
+      >
+        {triggerVoltage.toFixed(2)}v
+      </text>
       <line
         className="triggerPos"
         x1={xScale(triggerPos)}
@@ -136,6 +147,9 @@ export default function Plot(props: Props) {
         y1={size.height - margin.bottom}
         y2={margin.top}
       ></line>
+      <text fill="currentColor" x={xScale(triggerPos)} dx="-1em" dy="1em">
+        {Math.round((triggerPos / xDomain[1]) * 100)}%
+      </text>
     </svg>
   )
 }

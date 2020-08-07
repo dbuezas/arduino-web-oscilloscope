@@ -1,11 +1,5 @@
 import React, { useMemo } from 'react'
-import {
-  useTriggerVoltage,
-  useTriggerPos,
-  useAdcClocks,
-  useTriggerDirection,
-  useBlockInterrupts
-} from './bindings'
+import { useAdcClocks, useTriggerDirection, useSynchMode } from './bindings'
 import {
   InputGroup,
   Icon,
@@ -23,10 +17,8 @@ const styles = {
   }
 }
 function Controls() {
-  const [blockInterrupts, setBlockInterrupts] = useBlockInterrupts()
+  const [synchMode, setSynchMode] = useSynchMode()
   const [adcClockTicks, setAdcClockTicks] = useAdcClocks()
-  const [triggerVoltage, setTriggerVoltage] = useTriggerVoltage()
-  const [triggerPos, setTriggerPos] = useTriggerPos()
   const [triggerDirection, setTriggerDirection] = useTriggerDirection()
 
   return (
@@ -36,15 +28,17 @@ function Controls() {
           <Slider
             style={{ width: 500 }}
             progress
-            min={0}
+            min={79}
             max={1000}
+            // graduated
+            // step={79}
             value={adcClockTicks}
             onChange={setAdcClockTicks}
           />
         ),
         [adcClockTicks, setAdcClockTicks]
       )}
-      {useMemo(
+      {/* {useMemo(
         () => (
           <InputGroup style={styles.input}>
             <InputNumber
@@ -59,43 +53,8 @@ function Controls() {
           </InputGroup>
         ),
         [adcClockTicks, setAdcClockTicks]
-      )}
-      {useMemo(
-        () => (
-          <InputGroup style={styles.input}>
-            <InputNumber
-              size="lg"
-              min={0}
-              max={5}
-              step={0.05}
-              value={triggerVoltage}
-              onChange={setTriggerVoltage as any}
-            />
-            <InputGroup.Addon>
-              <Icon icon="arrows-v" />
-            </InputGroup.Addon>
-          </InputGroup>
-        ),
-        [setTriggerVoltage, triggerVoltage]
-      )}
-      {useMemo(
-        () => (
-          <InputGroup style={styles.input}>
-            <InputNumber
-              size="lg"
-              min={0}
-              max={2700}
-              step={1}
-              value={triggerPos}
-              onChange={setTriggerPos as any}
-            />
-            <InputGroup.Addon>
-              <Icon icon="arrows-h" />
-            </InputGroup.Addon>
-          </InputGroup>
-        ),
-        [setTriggerPos, triggerPos]
-      )}
+      )} */}
+
       {useMemo(
         () => (
           <RadioGroup
@@ -119,20 +78,20 @@ function Controls() {
         () => (
           <RadioGroup
             inline
-            value={blockInterrupts}
-            onChange={setBlockInterrupts}
+            value={synchMode}
+            onChange={setSynchMode as any}
             appearance="picker"
           >
-            <span style={styles.radioGroupLabel}>Block Interrupts: </span>
+            <span style={styles.radioGroupLabel}>SynchMode: </span>
             <Radio value={false}>
-              <Icon icon="sign-out" size="2x" />
+              <Icon icon="blind" size="2x" />
             </Radio>
             <Radio value={true}>
-              <Icon icon="hand-stop-o" size="2x" />
+              <Icon icon="handshake-o" size="2x" />
             </Radio>
           </RadioGroup>
         ),
-        [blockInterrupts, setBlockInterrupts]
+        [synchMode, setSynchMode]
       )}
     </div>
   )

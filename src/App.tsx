@@ -18,7 +18,7 @@ import serial from './Serial'
 import Controls from './Controls'
 
 const serialOptions = {
-  baudrate: 115200,
+  baudrate: 115200 * 2,
   buffersize: 1000000 //500 * 100
 }
 
@@ -28,8 +28,6 @@ function App() {
     analog: [],
     digital: []
   })
-  const hz = useRef<number>(0)
-  const lastT = useRef<number>(0)
   const [, , receiveTriggerPos] = useTriggerPos()
   const [, , receiveTriggerVoltage] = useTriggerVoltage()
   const [, , receiveTriggerDir] = useTriggerDirection()
@@ -37,6 +35,8 @@ function App() {
 
   useEffect(() => {
     serial.connectWithPaired(serialOptions).catch(() => {})
+  }, [])
+  useEffect(() => {
     serial.onData((newData: number[]) => {
       if (!stoppedRef.current) {
         const data = parseSerial(newData)
@@ -45,21 +45,14 @@ function App() {
           receiveAdcClocks(data.ADC_MAIN_CLOCK_TICKS)
           receiveTriggerVoltage((data.triggerVoltageInt / 255) * 5)
           receiveTriggerDir(data.triggerDir)
-
           setData(data)
         }
       }
-      // ;(window as any).mockdata = newData
-      const now = performance.now()
-      const newhz = 1000 / (now - lastT.current)
-      hz.current = newhz
-      lastT.current = now
     })
   }, [])
 
   return (
     <div className="App">
-      <span>{Math.round(hz.current)}hz</span>
       <FPSStats />
       {useMemo(
         () => (
@@ -98,7 +91,11 @@ function App() {
           <IconButton
             size="lg"
             onClick={async () => {
-              serial.connectWithPaired(serialOptions)
+              try {
+                await serial.connectWithPaired(serialOptions)
+              } catch (e) {
+                await serial.connect(serialOptions)
+              }
             }}
             icon={<Icon icon="recycle" />}
             placement="right"

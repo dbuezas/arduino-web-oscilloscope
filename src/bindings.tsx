@@ -1,24 +1,50 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useMemo, useCallback } from 'react'
 
 import { atom, useRecoilState } from 'recoil'
 import serial from './Serial'
 
+const nop = () => {}
+const synchModeState = atom({
+  key: 'synch-mode',
+  default: true
+})
+
+const win = window as any
+win.synchMode = true
+export const useSynchMode = () => {
+  const [value, setValue] = useRecoilState(synchModeState)
+  useEffect(() => {
+    // TODO: too lazy to implement properly now
+    win.synchMode = value
+  }, [value])
+  return [value, setValue]
+}
 function createHook<T>(key: string, defaultV: T, web2ardu: (v: T) => number) {
   const state = atom({
     key,
     default: defaultV
   })
-  const sendValue = (newValue: T) => {
-    serial.write(key + web2ardu(newValue) + '>')
-  }
 
   return function useState(): [T, (n: T) => void, (n: T) => void] {
     const [value, setValue] = useRecoilState<T>(state)
+    const lastVal = useRef(value)
+    useEffect(() => {
+      lastVal.current = value
+    }, [value])
+    const receiveValue = useCallback(
+      (n: T) => {
+        if (win.synchMode && lastVal.current !== n) setValue(n)
+      },
+      [setValue]
+    )
+    const sendValue = useCallback(
+      (newValue: T) => {
+        serial.write(key + web2ardu(newValue) + '>')
+        if (!win.synchMode) setValue(newValue)
+      },
+      [setValue]
+    )
 
-    // useEffect(() => sendValue(value), [value])
-    const receiveValue = (n: T) => {
-      setValue(n)
-    }
     return [value, sendValue, receiveValue]
   }
 }
