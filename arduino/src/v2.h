@@ -111,7 +111,7 @@ void setup() {
 
 uint8_t Buffer[SAMPLES];
 uint8_t BufferBinary[SAMPLES];
-
+boolean didTrigger;
 bool blockInterrupts = false;
 
 float triggerVoltage = 1.5;
@@ -178,10 +178,11 @@ void readBuffer() {
   int16_t stopPtr = triggerPtr - triggerPos;
   if (stopPtr < 0) stopPtr += SAMPLES;
   // fill buffer
-  while (WritePtr != stopPtr) {
+  while (WritePtr != stopPtr && limit != 0) {
     storeOne();
   }
   stopADC();
+  didTrigger = limit > 0;
   if (blockInterrupts) interrupts();
 }
 
@@ -238,6 +239,7 @@ void loop() {
   send_uint8(triggerDir);
   send_uint16(ADC_MAIN_CLOCK_TICKS);
   send_int16(triggerPos);
+  send_uint8(didTrigger);
   send_int16(freeMemory());
   send_uint16(SERIAL_SAMPLES);
   digitalWrite(D13, 0);

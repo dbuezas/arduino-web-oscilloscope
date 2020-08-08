@@ -28,6 +28,7 @@ export default function parse(data: number[]) {
   const triggerDir = get(myData, 'uint8')
   const ADC_MAIN_CLOCK_TICKS = get(myData, 'uint16')
   const triggerPos = get(myData, 'int16')
+  const didTrigger = get(myData, 'uint8')
   const freeMemory = get(myData, 'int16')
   const SERIAL_SAMPLES = get(myData, 'int16')
   return {
@@ -38,6 +39,7 @@ export default function parse(data: number[]) {
     ADC_MAIN_CLOCK_TICKS,
     triggerPos,
     freeMemory,
+    didTrigger,
     SERIAL_SAMPLES
   }
 }
