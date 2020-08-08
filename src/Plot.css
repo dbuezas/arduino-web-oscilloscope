@@ -60,7 +60,7 @@ line.triggerVoltage {
   opacity: 0.7;
 }
 line.triggerPos {
-  stroke: lightblue;
+  stroke: black;
 }
 line.triggerVoltage {
   stroke: yellow;

@@ -25,7 +25,7 @@ function get(buffer: number[], format: Format) {
 export default function parse(data: number[]) {
   const myData = data.slice()
   const triggerVoltageInt = get(myData, 'uint8')
-  const triggerDir = !!get(myData, 'uint8')
+  const triggerDir = get(myData, 'uint8')
   const ADC_MAIN_CLOCK_TICKS = get(myData, 'uint16')
   const triggerPos = get(myData, 'int16')
   const freeMemory = get(myData, 'int16')

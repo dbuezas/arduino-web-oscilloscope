@@ -1,9 +1,10 @@
 import React, { useMemo } from 'react'
-import { useAdcClocks, useTriggerDirection, useSynchMode } from './bindings'
+import { useAdcClocks, useTriggerDirection, synchMode } from './bindings'
 import { formatTime } from './formatters'
 //@ts-ignore
 import { Slider } from 'shards-react'
 import { Icon, RadioGroup, Radio } from 'rsuite'
+import { useRecoilState } from 'recoil'
 
 const samples = 500
 const styles = {
@@ -24,7 +25,7 @@ const millisToADCClocks = (msPerFrame: number) => {
 function Controls() {
   const [adcClockTicks, setAdcClockTicks] = useAdcClocks()
   const [triggerDirection, setTriggerDirection] = useTriggerDirection()
-  const [, setSynchMode] = useSynchMode()
+  const [, setSynchMode] = useRecoilState(synchMode)
 
   return (
     <div style={{ width: 'calc(100% - 50px)' }}>

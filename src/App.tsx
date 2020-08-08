@@ -45,7 +45,7 @@ function App() {
         if (data.analog.length > 0) {
           receiveTriggerPos(data.triggerPos)
           receiveAdcClocks(data.ADC_MAIN_CLOCK_TICKS)
-          receiveTriggerVoltage((data.triggerVoltageInt / 255) * 5)
+          receiveTriggerVoltage(data.triggerVoltageInt)
           receiveTriggerDir(data.triggerDir)
           setData(data)
         }

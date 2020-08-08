@@ -1,65 +1,88 @@
-import { useEffect, useRef, useMemo, useCallback } from 'react'
-import { atom, useRecoilState } from 'recoil'
+import { atom, useRecoilState, selector, DefaultValue } from 'recoil'
 import serial from './Serial'
-import { memoize } from 'lodash'
 
-const synchModeState = atom({
+const synchModeAtom = atom({
   key: 'synch-mode',
   default: true
 })
 
-const win = window as any
-win.synchMode = true
-export const useSynchMode = (): [boolean, (v: boolean) => void] => {
-  const [value, setValue1] = useRecoilState(synchModeState)
-  const setValue = useCallback(
-    (n: boolean) => {
-      if (win.synchMode !== n) {
-        setValue1(n)
-        win.synchMode = n
-      }
-    },
-    [setValue1]
-  )
-  return [value, setValue]
-}
-function createHook<T>(key: string, defaultV: T, web2ardu: (v: T) => number) {
-  const state = atom({
+export const synchMode = selector<boolean>({
+  key: 'synch-mode-selector',
+  get: ({ get }) => get(synchModeAtom),
+  set: ({ set, get }, newValue) => {
+    const isSynch = get(synchModeAtom)
+    if (isSynch !== newValue) {
+      set(synchModeAtom, newValue)
+      console.log('set synch', newValue)
+    }
+  }
+})
+
+function createHook<T>({
+  key,
+  ui2mcu,
+  mcu2ui
+}: {
+  key: string
+  ui2mcu: (v: T) => number
+  mcu2ui: (v: number) => T
+}) {
+  const localState = atom<number>({
     key,
-    default: defaultV
+    default: 0
+  })
+  const select = selector<T>({
+    key: key + '-selector',
+    get: ({ get }) => mcu2ui(get(localState)),
+    set: ({ set, get }, newValue) => {
+      const current = get(localState)
+      const mcuValue =
+        newValue instanceof DefaultValue ? newValue : ui2mcu(newValue)
+      if (current !== mcuValue) {
+        const isSynch = get(synchMode)
+        if (!isSynch) set(localState, mcuValue)
+        serial.write(key + mcuValue + '>')
+      }
+    }
+  })
+  const selectLocally = selector<number>({
+    key: key + '-local-selector',
+    get: ({ get }) => get(localState),
+    set: ({ set, get }, newValue) => {
+      const current = get(localState)
+      if (current !== newValue) {
+        const isSynch = get(synchMode)
+        console.log(key, 'received', newValue)
+
+        if (isSynch) set(localState, newValue)
+      }
+    }
   })
 
-  return function useState(): [T, (n: T) => void, (n: T) => void] {
-    const [value, setValue] = useRecoilState<T>(state)
-    const lastVal = useRef(value)
-    const receiveValue = useCallback(
-      (n: T) => {
-        if (win.synchMode && lastVal.current !== n) {
-          setValue(n)
-          lastVal.current = n
-        }
-      },
-      [setValue]
-    )
-    const sendValue = useCallback(
-      (newValue: T) => {
-        serial.write(key + web2ardu(newValue) + '>')
-        if (!win.synchMode) setValue(newValue)
-      },
-      [setValue]
-    )
+  return function useState(): [T, (n: T) => void, (n: number) => void] {
+    const [value, setValue] = useRecoilState(select)
+    const [, setLocally] = useRecoilState(selectLocally)
 
-    return [value, sendValue, receiveValue]
+    return [value, setValue, setLocally]
   }
 }
-export const useTriggerVoltage = createHook<number>('V', 0, (v) =>
-  Math.ceil((v / 5) * 255)
-)
-export const useTriggerPos = createHook<number>('P', 0, (v) => Math.ceil(v))
-export const useAdcClocks = createHook<number>('C', 79, (v) => Math.ceil(v))
-export const useTriggerDirection = createHook<boolean>('D', false, (v) =>
-  v ? 1 : 0
-)
-export const useBlockInterrupts = createHook<boolean>('B', false, (v) =>
-  v ? 1 : 0
-)
+export const useTriggerVoltage = createHook<number>({
+  key: 'V',
+  ui2mcu: (v) => Math.ceil((v / 5) * 255),
+  mcu2ui: (n) => (n / 255) * 5
+})
+export const useTriggerPos = createHook<number>({
+  key: 'P',
+  ui2mcu: (v) => Math.ceil(v),
+  mcu2ui: (v) => v
+})
+export const useAdcClocks = createHook<number>({
+  key: 'C',
+  ui2mcu: (v) => Math.ceil(v),
+  mcu2ui: (v) => v
+})
+export const useTriggerDirection = createHook<boolean>({
+  key: 'D',
+  ui2mcu: (v) => (v ? 1 : 0),
+  mcu2ui: (v) => !!v
+})

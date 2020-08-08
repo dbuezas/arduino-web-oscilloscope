@@ -14,8 +14,8 @@ type Props = {
 export default function Plot(props: Props) {
   const nodeRef = useRef<SVGSVGElement>(null)
   const [adcClocks] = useAdcClocks()
-  const [triggerVoltage, sendTriggerVoltage] = useTriggerVoltage()
-  const [triggerPosInt, sendTriggerPosInt] = useTriggerPos()
+  const [triggerVoltage, setTriggerVoltage] = useTriggerVoltage()
+  const [triggerPosInt, setTriggerPosInt] = useTriggerPos()
   const [draggingTP, setDraggingTP] = useState(false)
   const [draggingTV, setDraggingTV] = useState(false)
   const samples = props.data[0].length
@@ -83,10 +83,10 @@ export default function Plot(props: Props) {
         if (draggingTP) {
           let scaled = (xScale.invert(e.clientX) / xDomain[1]) * samples
           scaled = constrain(scaled, 0, samples)
-          sendTriggerPosInt(scaled)
+          setTriggerPosInt(scaled)
         }
         if (draggingTV) {
-          sendTriggerVoltage(yScale.invert(e.clientY - offset.top))
+          setTriggerVoltage(yScale.invert(e.clientY - offset.top))
         }
       }}
       onMouseUp={() => {
