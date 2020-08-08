@@ -3,22 +3,28 @@ import React, { useRef, useLayoutEffect, useState, useMemo } from 'react'
 
 import './Plot.css'
 import { Datum, renderXAxis, renderYAxis } from './plot.d3'
-import { useTriggerVoltage, useTriggerPos, useAdcClocks } from './bindings'
+import {
+  useTriggerVoltage,
+  useTriggerPos,
+  useAdcClocks,
+  dataState
+} from './bindings'
+import { useRecoilValue, useRecoilState } from 'recoil'
 const margin = { top: 20, right: 50, bottom: 30, left: 50 }
 const constrain = (n: number, min: number, max: number) =>
   n > max ? max : n < min ? min : n
 
-type Props = {
-  data: Datum[][]
-}
-export default function Plot(props: Props) {
+export default function Plot() {
+  const data = useRecoilValue(dataState)
   const nodeRef = useRef<SVGSVGElement>(null)
-  const [adcClocks] = useAdcClocks()
-  const [triggerVoltage, setTriggerVoltage] = useTriggerVoltage()
-  const [triggerPosInt, setTriggerPosInt] = useTriggerPos()
+  const [adcClocks] = useRecoilState(useAdcClocks.send)
+  const [triggerVoltage, setTriggerVoltage] = useRecoilState(
+    useTriggerVoltage.send
+  )
+  const [triggerPosInt, setTriggerPosInt] = useRecoilState(useTriggerPos.send)
   const [draggingTP, setDraggingTP] = useState(false)
   const [draggingTV, setDraggingTV] = useState(false)
-  const samples = props.data[0].length
+  const samples = data[0].length
 
   const size = useMemo(
     () => ({
@@ -64,7 +70,7 @@ export default function Plot(props: Props) {
     [samples, xDomain, xScale, yScale]
   )
 
-  const ds = props.data.map((data) =>
+  const ds = data.map((data) =>
     // eslint-disable-next-line react-hooks/rules-of-hooks,react-hooks/exhaustive-deps
     useMemo(() => line(data) || undefined, [line, data])
   )

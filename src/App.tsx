@@ -6,7 +6,8 @@ import {
   useTriggerPos,
   useAdcClocks,
   useTriggerVoltage,
-  useTriggerDirection
+  useTriggerDirection,
+  dataState
 } from './bindings'
 import parseSerial from './parseSerial'
 import Plot from './Plot'
@@ -18,6 +19,8 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
 import serial from './Serial'
 import Controls from './Controls'
+import { useSetRecoilState } from 'recoil'
+import ConnectData from './ConnectData'
 
 const serialOptions = {
   baudrate: 115200 * 2,
@@ -25,106 +28,59 @@ const serialOptions = {
 }
 
 function App() {
-  const stoppedRef = useRef<boolean>()
-  const [data, setData] = useState<{ analog: number[]; digital: number[] }>({
-    analog: [],
-    digital: []
-  })
-  const [, , receiveTriggerPos] = useTriggerPos()
-  const [, , receiveTriggerVoltage] = useTriggerVoltage()
-  const [, , receiveTriggerDir] = useTriggerDirection()
-  const [, , receiveAdcClocks] = useAdcClocks()
+  console.log('App')
 
   useEffect(() => {
     serial.connectWithPaired(serialOptions).catch(() => {})
-  }, [])
-  useEffect(() => {
-    serial.onData((newData: number[]) => {
-      if (!stoppedRef.current) {
-        const data = parseSerial(newData)
-        if (data.analog.length > 0) {
-          receiveTriggerPos(data.triggerPos)
-          receiveAdcClocks(data.ADC_MAIN_CLOCK_TICKS)
-          receiveTriggerVoltage(data.triggerVoltageInt)
-          receiveTriggerDir(data.triggerDir)
-          setData(data)
-        }
-      }
-    })
   }, [])
 
   return (
     <div className="App">
       <FPSStats />
-      {useMemo(
-        () => (
-          <IconButton
-            size="lg"
-            onClick={async () => {
-              await serial.connect(serialOptions)
-              console.log('connected')
-            }}
-            icon={<Icon icon="arrow-right" />}
-            placement="right"
-          >
-            Connect
-          </IconButton>
-        ),
-        []
-      )}
-      {useMemo(
-        () => (
-          <IconButton
-            size="lg"
-            onClick={async () => {
-              await serial.close()
-              console.log('closed')
-            }}
-            icon={<Icon icon="stop" />}
-            placement="right"
-          >
-            disConnect
-          </IconButton>
-        ),
-        []
-      )}
-      {useMemo(
-        () => (
-          <IconButton
-            size="lg"
-            onClick={async () => {
-              try {
-                await serial.connectWithPaired(serialOptions)
-              } catch (e) {
-                await serial.connect(serialOptions)
-              }
-            }}
-            icon={<Icon icon="recycle" />}
-            placement="right"
-          >
-            reconnect
-          </IconButton>
-        ),
-        []
-      )}
+
+      <IconButton
+        size="lg"
+        onClick={async () => {
+          await serial.connect(serialOptions)
+          console.log('connected')
+        }}
+        icon={<Icon icon="arrow-right" />}
+        placement="right"
+      >
+        Connect
+      </IconButton>
+
+      <IconButton
+        size="lg"
+        onClick={async () => {
+          await serial.close()
+          console.log('closed')
+        }}
+        icon={<Icon icon="stop" />}
+        placement="right"
+      >
+        disConnect
+      </IconButton>
+
+      <IconButton
+        size="lg"
+        onClick={async () => {
+          try {
+            await serial.connectWithPaired(serialOptions)
+          } catch (e) {
+            await serial.connect(serialOptions)
+          }
+        }}
+        icon={<Icon icon="recycle" />}
+        placement="right"
+      >
+        reconnect
+      </IconButton>
+
+      <ConnectData />
 
       <Controls />
-      <div
-        onMouseDown={() => (stoppedRef.current = true)}
-        onMouseUp={() => (stoppedRef.current = false)}
-      >
-        <Plot
-          data={[
-            data.analog.map((n) => (n / 256) * 5),
-            data.digital.map((n) => (n & 0b100 && 1) * 0.5 + 0.6 * 1),
-            data.digital.map((n) => (n & 0b1000 && 1) * 0.5 + 0.6 * 2),
-            data.digital.map((n) => (n & 0b10000 && 1) * 0.5 + 0.6 * 3),
-            data.digital.map((n) => (n & 0b100000 && 1) * 0.5 + 0.6 * 4),
-            data.digital.map((n) => (n & 0b01000000 && 1) * 0.5 + 0.6 * 5),
-            data.digital.map((n) => (n & 0b10000000 && 1) * 0.5 + 0.6 * 6)
-          ]}
-        />
-      </div>
+      <Plot />
     </div>
   )
 }

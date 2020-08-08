@@ -1,4 +1,4 @@
-import { atom, useRecoilState, selector, DefaultValue } from 'recoil'
+import { atom, selector, DefaultValue } from 'recoil'
 import serial from './Serial'
 
 const synchModeAtom = atom({
@@ -31,7 +31,7 @@ function createHook<T>({
     key,
     default: 0
   })
-  const select = selector<T>({
+  const send = selector<T>({
     key: key + '-selector',
     get: ({ get }) => mcu2ui(get(localState)),
     set: ({ set, get }, newValue) => {
@@ -45,7 +45,7 @@ function createHook<T>({
       }
     }
   })
-  const selectLocally = selector<number>({
+  const receive = selector<number>({
     key: key + '-local-selector',
     get: ({ get }) => get(localState),
     set: ({ set, get }, newValue) => {
@@ -59,12 +59,7 @@ function createHook<T>({
     }
   })
 
-  return function useState(): [T, (n: T) => void, (n: number) => void] {
-    const [value, setValue] = useRecoilState(select)
-    const [, setLocally] = useRecoilState(selectLocally)
-
-    return [value, setValue, setLocally]
-  }
+  return { send, receive }
 }
 export const useTriggerVoltage = createHook<number>({
   key: 'V',
@@ -85,4 +80,9 @@ export const useTriggerDirection = createHook<boolean>({
   key: 'D',
   ui2mcu: (v) => (v ? 1 : 0),
   mcu2ui: (v) => !!v
+})
+
+export const dataState = atom({
+  key: 'data',
+  default: [[0], [0], [0], [0], [0], [0], [0]]
 })

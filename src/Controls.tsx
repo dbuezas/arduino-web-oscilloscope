@@ -4,7 +4,7 @@ import { formatTime } from './formatters'
 //@ts-ignore
 import { Slider } from 'shards-react'
 import { Icon, RadioGroup, Radio } from 'rsuite'
-import { useRecoilState } from 'recoil'
+import { useRecoilState, useSetRecoilState } from 'recoil'
 
 const samples = 500
 const styles = {
@@ -23,10 +23,12 @@ const millisToADCClocks = (msPerFrame: number) => {
 }
 
 function Controls() {
-  const [adcClockTicks, setAdcClockTicks] = useAdcClocks()
-  const [triggerDirection, setTriggerDirection] = useTriggerDirection()
-  const [, setSynchMode] = useRecoilState(synchMode)
-
+  const [adcClockTicks, setAdcClockTicks] = useRecoilState(useAdcClocks.send)
+  const [triggerDirection, setTriggerDirection] = useRecoilState(
+    useTriggerDirection.send
+  )
+  const setSynchMode = useSetRecoilState(synchMode)
+  console.log('Controls', adcClockTicks, triggerDirection)
   return (
     <div style={{ width: 'calc(100% - 50px)' }}>
       {useMemo(
@@ -35,6 +37,7 @@ function Controls() {
             pips={{
               mode: 'steps',
               // stepped: true,
+              connect: true,
               density: 3,
               format: {
                 // from: (a: any) => a,
