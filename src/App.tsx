@@ -10,8 +10,10 @@ import {
 } from './bindings'
 import parseSerial from './parseSerial'
 import Plot from './Plot'
+import 'shards-ui/dist/css/shards.min.css'
 // import 'rsuite/dist/styles/rsuite-default.css'
 import 'rsuite/dist/styles/rsuite-dark.css'
+import 'bootstrap/dist/css/bootstrap.min.css'
 
 import './App.css'
 import serial from './Serial'

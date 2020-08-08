@@ -10,6 +10,7 @@
     "react-scripts": "3.4.1",
     "recoil": "^0.0.10",
     "rsuite": "^4.8.0",
+    "shards-react": "^1.0.3",
     "typescript": "~3.7.2"
   },
   "scripts": {

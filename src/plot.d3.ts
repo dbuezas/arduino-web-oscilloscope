@@ -1,5 +1,5 @@
 import * as d3 from 'd3'
-
+import { formatTime } from './formatters'
 const margin = { top: 20, right: 50, bottom: 30, left: 50 }
 export type Datum = number
 export type Size = { height: number; width: number }
@@ -15,10 +15,10 @@ export function renderXAxis(
       .call(
         d3
           .axisBottom(xScale)
-          .ticks(size.width / 80)
+          .ticks(10)
           .tickPadding(10)
           .tickSize(-size.height + margin.top + margin.bottom)
-          .tickFormat((t) => ((t as number) * 1000).toFixed(3) + 'ms')
+          .tickFormat(formatTime)
           .tickSizeOuter(0)
       )
       .call((g) => g.select('.domain').remove())

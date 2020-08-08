@@ -1,9 +1,8 @@
 import { useEffect, useRef, useMemo, useCallback } from 'react'
-
 import { atom, useRecoilState } from 'recoil'
 import serial from './Serial'
+import { memoize } from 'lodash'
 
-const nop = () => {}
 const synchModeState = atom({
   key: 'synch-mode',
   default: true
@@ -11,12 +10,17 @@ const synchModeState = atom({
 
 const win = window as any
 win.synchMode = true
-export const useSynchMode = () => {
-  const [value, setValue] = useRecoilState(synchModeState)
-  useEffect(() => {
-    // TODO: too lazy to implement properly now
-    win.synchMode = value
-  }, [value])
+export const useSynchMode = (): [boolean, (v: boolean) => void] => {
+  const [value, setValue1] = useRecoilState(synchModeState)
+  const setValue = useCallback(
+    (n: boolean) => {
+      if (win.synchMode !== n) {
+        setValue1(n)
+        win.synchMode = n
+      }
+    },
+    [setValue1]
+  )
   return [value, setValue]
 }
 function createHook<T>(key: string, defaultV: T, web2ardu: (v: T) => number) {
@@ -28,12 +32,12 @@ function createHook<T>(key: string, defaultV: T, web2ardu: (v: T) => number) {
   return function useState(): [T, (n: T) => void, (n: T) => void] {
     const [value, setValue] = useRecoilState<T>(state)
     const lastVal = useRef(value)
-    useEffect(() => {
-      lastVal.current = value
-    }, [value])
     const receiveValue = useCallback(
       (n: T) => {
-        if (win.synchMode && lastVal.current !== n) setValue(n)
+        if (win.synchMode && lastVal.current !== n) {
+          setValue(n)
+          lastVal.current = n
+        }
       },
       [setValue]
     )

@@ -26,7 +26,7 @@ const indexesOfSequence = (needle: number[], haystack: number[]) => {
   for (let i = 0, j = 0; i < haystack.length; i++) {
     if (haystack[i] === needle[j]) {
       j++
-      if (j == needle.length) {
+      if (j === needle.length) {
         result.push(i - j + 1)
         j = 0
       }
