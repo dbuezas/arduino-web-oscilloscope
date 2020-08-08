@@ -83,6 +83,19 @@ void start() {
 
   interrupts();
 }
+ISR(TIMER2_COMPA_vect) {
+  DAL0 = (DAL0 + 1);
+  if (DAL0 == 230) DAL0 = 0;
+}
+void startDACInterrupt() {
+  TCCR2A = 0;
+  TCCR2B = 0;
+  TCNT2 = 0;  // counter = 0
+  OCR2A = 255;
+  TCCR2A |= (1 << WGM21);
+  TCCR2B |= (1 << CS20);
+  TIMSK2 |= (1 << OCIE2A);
+}
 void setup() {
   pinMode(D13, OUTPUT);
   pinMode(DAC0, ANALOG);
@@ -107,6 +120,7 @@ void setup() {
   // counter is TCNT1 andit counts cpu clocks
 
   start();
+  startDACInterrupt();
 }
 
 uint8_t Buffer[SAMPLES];
@@ -132,7 +146,6 @@ uint8_t val;
 uint16_t limit;
 __attribute__((always_inline)) inline void storeOne() {
   while (TCNT1 < ADC_MAIN_CLOCK_TICKS) {
-    DAL0++;
   };
   val = ADCH;
   TCNT1 -= ADC_MAIN_CLOCK_TICKS;
