@@ -270,7 +270,7 @@ void loop() {
     if (idx >= SAMPLES) idx -= SAMPLES;
     if (idx < 0) idx += SAMPLES;
     if (BufferBinary[idx] == 255)
-      Serial.write(254);
+      Serial.write(254);  // TODO: this obviously breaks the binary data
     else
       Serial.write(BufferBinary[idx]);
   }

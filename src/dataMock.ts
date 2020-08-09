@@ -1,14 +1,24 @@
 export default [
-  45,
+  // const triggerVoltageInt = get(myData, 'uint8')
+  145,
+  // const triggerDir = get(myData, 'uint8')
   0,
+  // const ADC_MAIN_CLOCK_TICKS = get(myData, 'uint16')
   79,
   0,
+  // const triggerPos = get(myData, 'int16')
   83,
   0,
+  // const didTrigger = get(myData, 'uint8')
+  1,
+  // const freeMemory = get(myData, 'int16')
   48,
-  3,
+  2,
+  // const SERIAL_SAMPLES = get(myData, 'int16')
   244,
   1,
+
+  // DATA:
   95,
   91,
   81,

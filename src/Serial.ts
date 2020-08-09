@@ -121,6 +121,7 @@ export class Serial {
           this.readbuffer.push(...data.value)
         } catch (e) {
           console.error(e)
+          console.warn(data.value.length)
         }
         const idxs = indexesOfSequence(END_SEQUENCE, this.readbuffer)
         // console.log(idxs.length)

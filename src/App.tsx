@@ -19,7 +19,6 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
 import serial from './Serial'
 import Controls from './Controls'
-import { useSetRecoilState } from 'recoil'
 import ConnectData from './ConnectData'
 
 const serialOptions = {

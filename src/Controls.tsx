@@ -46,16 +46,15 @@ function Controls() {
             }}
             range={{
               min: [79],
-              '10%': [millisToADCClocks(2)],
-              '20%': [millisToADCClocks(5)],
-              '30%': [millisToADCClocks(10)],
-              '40%': [millisToADCClocks(20)],
-              '50%': [millisToADCClocks(50)],
-              '60%': [millisToADCClocks(100)],
-              '70%': [millisToADCClocks(200)],
-              '80%': [millisToADCClocks(500)],
-              '90%': [millisToADCClocks(1000)],
-              max: [millisToADCClocks(2000)]
+              '11%': [millisToADCClocks(2)],
+              '22%': [millisToADCClocks(5)],
+              '33%': [millisToADCClocks(10)],
+              '44%': [millisToADCClocks(20)],
+              '55%': [millisToADCClocks(50)],
+              '66%': [millisToADCClocks(100)],
+              '77%': [millisToADCClocks(200)],
+              '88%': [millisToADCClocks(500)],
+              max: [millisToADCClocks(1000)]
             }}
             connect={true}
             start={[adcClockTicks]}
@@ -67,23 +66,6 @@ function Controls() {
         ),
         [adcClockTicks, setAdcClockTicks]
       )}
-      {/* {useMemo(
-        () => (
-          <InputGroup style={styles.input}>
-            <InputNumber
-              size="lg"
-              min={0}
-              value={adcClockTicks}
-              onChange={setAdcClockTicks as any}
-            />
-            <InputGroup.Addon>
-              <Icon icon="clock-o" />
-            </InputGroup.Addon>
-          </InputGroup>
-        ),
-        [adcClockTicks, setAdcClockTicks]
-      )} */}
-
       {useMemo(
         () => (
           <RadioGroup

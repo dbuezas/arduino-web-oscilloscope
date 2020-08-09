@@ -1,4 +1,4 @@
-type Format = 'uint8' | 'int8' | 'uint16' | 'int16'
+type Format = 'uint8' | 'uint16' | 'int16'
 
 function get(buffer: number[], format: Format) {
   const l = buffer.shift()!
@@ -6,8 +6,6 @@ function get(buffer: number[], format: Format) {
   switch (format) {
     case 'uint8':
       return l
-    case 'int8':
-      return 1 << (8 - 1 - l)
     case 'uint16':
       h = buffer.shift()!
       return (h << 8) | l
@@ -22,7 +20,7 @@ function get(buffer: number[], format: Format) {
     }
   }
 }
-export default function parse(data: number[]) {
+export default function parseSerial(data: number[]) {
   const myData = data.slice()
   const triggerVoltageInt = get(myData, 'uint8')
   const triggerDir = get(myData, 'uint8')
