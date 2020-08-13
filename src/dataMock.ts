@@ -10,7 +10,7 @@ export default [
   83,
   0,
   // const didTrigger = get(myData, 'uint8')
-  1,
+  0,
   // const freeMemory = get(myData, 'int16')
   48,
   2,

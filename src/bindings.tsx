@@ -14,7 +14,6 @@ export const synchMode = selector<boolean>({
     const isSynch = get(isSynchronousMode)
     if (isSynch !== newValue) {
       set(isSynchronousMode, newValue)
-      console.log('set synch', newValue)
     }
   }
 })
@@ -53,7 +52,6 @@ function createHook<T>({
       const current = get(localState)
       if (current !== newValue) {
         const isSynch = get(synchMode)
-        console.log(key, 'received', newValue)
         if (isSynch) set(localState, newValue)
       }
     }
@@ -116,7 +114,7 @@ export const allDataState = selector<number[]>({
   set: ({ set, get }, newData) => {
     if (newData instanceof DefaultValue) return
     const data = parseSerial(newData)
-    if (data.analog.length == 0) return // TODO: some CRC instead?
+    if (data.analog.length === 0) return // TODO: some CRC instead?
     set(useTriggerPos.receive, data.triggerPos)
     set(useAdcClocks.receive, data.ADC_MAIN_CLOCK_TICKS)
     set(useTriggerVoltage.receive, data.triggerVoltageInt)

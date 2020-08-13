@@ -7,17 +7,19 @@ export type Size = { height: number; width: number }
 export function renderXAxis(
   svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
   xScale: d3.ScaleLinear<number, number>,
-  size: Size
+  height: number
 ) {
+  const xTicks = d3.ticks(xScale.domain()[0], xScale.domain()[1], 10)
+
   svg.select<SVGGElement>('g.x.axis').call((g) =>
     g
-      .attr('transform', `translate(0,${size.height - margin.bottom})`)
+      .attr('transform', `translate(0,${height - margin.bottom})`)
       .call(
         d3
           .axisBottom(xScale)
-          .ticks(10)
+          .tickValues(xTicks)
           .tickPadding(10)
-          .tickSize(-size.height + margin.top + margin.bottom)
+          .tickSize(-height + margin.top + margin.bottom)
           .tickFormat(formatTime)
           .tickSizeOuter(0)
       )
@@ -27,7 +29,7 @@ export function renderXAxis(
 export function renderYAxis(
   svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
   yScale: d3.ScaleLinear<number, number>,
-  size: Size
+  width: number
 ) {
   const yTicks = d3.ticks(yScale.domain()[0], yScale.domain()[1], 10)
   svg
@@ -38,7 +40,7 @@ export function renderYAxis(
           .axisLeft(yScale)
           .tickValues(yTicks)
           .tickPadding(10)
-          .tickSize(-size.width + margin.right + margin.left - 1)
+          .tickSize(-width + margin.right + margin.left - 1)
           .tickFormat((v) => v + 'v')
       )
     )
