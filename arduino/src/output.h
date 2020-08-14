@@ -18,34 +18,36 @@ __attribute__((always_inline)) inline void storeOne() {
   limit--;
 }
 
-void fillBuffer() {
-  // fill until triggerPos
-  uint8_t triggerVoltageIntMinus = max(0, (int)state.triggerVoltageInt - 2);
-  uint8_t triggerVoltageIntPlus = min(255, (int)state.triggerVoltageInt + 2);
+uint8_t triggerVoltageIntMinus;
+uint8_t triggerVoltageIntPlus;
+uint16_t headSamples;
+uint16_t tailSamples;
 
-  limit = state.samples * 10;
-  uint16_t headSamples = state.triggerPos;
-  uint16_t tailSamples = state.samples - state.triggerPos;
+__attribute__((always_inline)) inline void fillBuffer_a() {
+  // fill until triggerPos
   startADC();
   TCNT1 = 0;
   while (headSamples--) {
     storeOne();
   }
-  if (state.triggerDir == TriggerDir::rising) {
-    while (val > triggerVoltageIntMinus && limit) {
-      storeOne();
-    }
-    while (val < state.triggerVoltageInt && limit) {
-      storeOne();
-    }
-  } else {
-    while (val < triggerVoltageIntPlus && limit) {
-      storeOne();
-    }
-    while (val > state.triggerVoltageInt && limit) {
-      storeOne();
-    }
+}
+__attribute__((always_inline)) inline void fillBuffer_b_rising() {
+  while (val > triggerVoltageIntMinus && limit) {
+    storeOne();
   }
+  while (val < state.triggerVoltageInt && limit) {
+    storeOne();
+  }
+}
+__attribute__((always_inline)) inline void fillBuffer_b_falling() {
+  while (val < triggerVoltageIntPlus && limit) {
+    storeOne();
+  }
+  while (val > state.triggerVoltageInt && limit) {
+    storeOne();
+  }
+}
+__attribute__((always_inline)) inline void fillBuffer_c() {
   // trigger point found
   state.triggerPtr = WritePtr;
   // fill buffer
@@ -54,6 +56,26 @@ void fillBuffer() {
   }
   stopADC();
   state.didTrigger = limit > 0;
+}
+void fillBuffer() {
+  // trying to reduce checks once readings begin by hoisting the if for the
+  // triggerDir
+  triggerVoltageIntMinus = max(0, (int)state.triggerVoltageInt - 2);
+  triggerVoltageIntPlus = min(255, (int)state.triggerVoltageInt + 2);
+
+  limit = state.samples * 10;
+  headSamples = state.triggerPos;
+  tailSamples = state.samples - state.triggerPos;
+
+  if (state.triggerDir == TriggerDir::rising) {
+    fillBuffer_a();
+    fillBuffer_b_rising();
+    fillBuffer_c();
+  } else {
+    fillBuffer_a();
+    fillBuffer_b_falling();
+    fillBuffer_c();
+  }
 }
 
 void sendBuffer() {
