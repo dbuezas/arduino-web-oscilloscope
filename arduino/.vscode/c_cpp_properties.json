@@ -4,7 +4,9 @@
       "name": "Mac",
       "includePath": [
         "~/code/arduino/libraries/**",
-        "~/code/lgt8fx/lgt8f/",
+        "~/code/lgt8fx/lgt8f/cores/**",
+        "~/code/lgt8fx/lgt8f/libraries/**",
+        "~/code/lgt8fx/lgt8f/variants/**",
         "/System/Library/Frameworks/Kernel.framework/Versions/A/Headers",
         "/Applications/Arduino.app/Contents/Java/hardware/tools/**",
         "~/Library/Arduino15/packages/LGT8fx Boards/hardware/avr/1.0.6/**",
@@ -17,7 +19,7 @@
         "path": [
           "/System/Library/Frameworks/Kernel.framework/Versions/A/Headers",
           "/Applications/Arduino.app/Contents/Java/",
-          "~/code/arduino/**",
+          "~/code/arduino-web-oscilloscope/**",
           "~/code/lgt8fx/lgt8f/"
         ]
       },

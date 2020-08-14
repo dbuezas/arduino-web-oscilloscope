@@ -1,5 +1,5 @@
 {
-    "sketch": "src/dac.ino",
+    "sketch": "src/src.ino",
     "board": "LGT8fx Boards:avr:328",
     "port": "/dev/cu.usbmodem0001",
     "output": "build",
