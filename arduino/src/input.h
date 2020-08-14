@@ -13,11 +13,11 @@ void handleInput() {
       state.triggerVoltageInt = constrain(val, 0, 255);
     }
     if (option == 'P') {  // triggerPos
-      state.triggerPos = constrain(val, 1, state.samples);
+      state.triggerPos = constrain(val, 1, state.samplesPerBuffer);
     }
-    if (option == 'S') {  // samples
-      state.samples = constrain(val, 1, MAX_SAMPLES);
-      state.triggerPos = constrain(state.triggerPos, 1, state.samples);
+    if (option == 'S') {  // samplesPerBuffer
+      state.samplesPerBuffer = constrain(val, 1, MAX_SAMPLES);
+      state.triggerPos = constrain(state.triggerPos, 1, state.samplesPerBuffer);
     }
     if (option == 'D') {  // triggerDirection
       val = constrain(val, 0, 1);
@@ -25,15 +25,15 @@ void handleInput() {
     }
     if (option == '1') {
       val = constrain(val, 0, 1);
-      state.Buffer1_ON = val;
+      state.isBuffer1ON = val;
     }
     if (option == '2') {
       val = constrain(val, 0, 1);
-      state.Buffer2_ON = val;
+      state.isBuffer2ON = val;
     }
     if (option == '3') {
       val = constrain(val, 0, 1);
-      state.Buffer3_ON = val;
+      state.isBuffer3ON = val;
     }
     if (option == 'M') {  // MODE
       val = constrain(val, 0, 2);

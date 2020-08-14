@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useCallback } from 'react'
 import {
   useAdcClocks,
   useTriggerDirection,
@@ -6,7 +6,8 @@ import {
   triggerModeState,
   TriggerMode,
   freeMemoryState,
-  didTriggerState
+  didTriggerState,
+  useSamplesPerBuffer
 } from './bindings'
 import { formatTime } from './formatters'
 import {
@@ -21,7 +22,6 @@ import {
 } from 'rsuite'
 import { useRecoilState, useSetRecoilState, useRecoilValue } from 'recoil'
 
-const samples = 500
 const ButtonToolbarStyle = {
   marginTop: 10,
   display: 'flex',
@@ -30,15 +30,6 @@ const ButtonToolbarStyle = {
 }
 
 const ticksPerMs = 32000000 / 1000
-const millisToADCClocks = (msPerFrame: number) => {
-  const msPerSample = msPerFrame / samples
-  return msPerSample * ticksPerMs
-}
-const ADCClocksToMillis = (clocks: number) => {
-  const msPerSample = clocks / ticksPerMs
-  const msPerFrame = msPerSample * samples
-  return msPerFrame
-}
 
 function Controls() {
   const [voltage, setVoltage] = useState(5)
@@ -50,6 +41,23 @@ function Controls() {
     useTriggerDirection.send
   )
   const setSynchMode = useSetRecoilState(synchMode)
+  const samples = useRecoilValue(useSamplesPerBuffer.send)
+  const ADCClocksToMillis = useCallback(
+    (clocks: number) => {
+      const msPerSample = clocks / ticksPerMs
+      const msPerFrame = msPerSample * samples
+      return msPerFrame
+    },
+    [samples]
+  )
+  const millisToADCClocks = useCallback(
+    (msPerFrame: number) => {
+      const msPerSample = msPerFrame / samples
+      return msPerSample * ticksPerMs
+    },
+    [samples]
+  )
+
   return (
     <div>
       <Panel header="Scales" shaded collapsible defaultExpanded>

@@ -12,14 +12,14 @@ typedef struct {
   uint8_t triggerDir;
   uint16_t clocksPerAdcRead;
   uint16_t triggerPos;
-  uint16_t triggerPtr;
+  uint16_t bufferStartPtr;
   bool didTrigger;
   uint8_t triggerMode;
-  uint16_t freeMemoryAvailable;
-  bool Buffer1_ON;
-  bool Buffer2_ON;
-  bool Buffer3_ON;
-  uint16_t samples;
+  uint16_t freeMemory;
+  bool isBuffer1ON;
+  bool isBuffer2ON;
+  bool isBuffer3ON;
+  uint16_t samplesPerBuffer;
 } State;
 
 State state = {
@@ -28,18 +28,18 @@ State state = {
     TriggerDir::falling,   // uint8_t triggerDir;
     79,                    // uint16_t clocksPerAdcRead;
     MAX_SAMPLES * 1 / 3,   // uint16_t triggerPos;
-    0,                     // uint16_t triggerPtr
+    0,                     // uint16_t bufferStartPtr;
     false,                 // bool didTrigger;
     TriggerMode::autom,    //
-    100,                   // uint16_t freeMemoryAvailable;
-    1,                     // bool Buffer1_ON;
-    0,                     // bool Buffer2_ON;
-    1,                     // bool Buffer3_ON;
-    MAX_SAMPLES            // uint16_t samples;
+    100,                   // uint16_t freeMemory;
+    1,                     // bool isBuffer1ON;
+    0,                     // bool isBuffer2ON;
+    1,                     // bool isBuffer3ON;
+    MAX_SAMPLES            // uint16_t samplesPerBuffer;
 };
 
-uint8_t Buffer1[MAX_SAMPLES];
-uint8_t Buffer2[MAX_SAMPLES];
-uint8_t Buffer3[MAX_SAMPLES];
+uint8_t buffer1[MAX_SAMPLES];
+uint8_t buffer2[MAX_SAMPLES];
+uint8_t buffer3[MAX_SAMPLES];
 
 #endif

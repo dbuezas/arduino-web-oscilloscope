@@ -8,7 +8,8 @@ import {
   useTriggerVoltage,
   useTriggerPos,
   useAdcClocks,
-  dataState
+  dataState,
+  useSamplesPerBuffer
 } from './bindings'
 import { useRecoilValue, useRecoilState } from 'recoil'
 const margin = { top: 20, right: 50, bottom: 30, left: 50 }
@@ -21,14 +22,14 @@ export default function Plot() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [width, height] = useSize(containerRef)
 
-  const [adcClocks] = useRecoilState(useAdcClocks.send)
+  const samples = useRecoilValue(useSamplesPerBuffer.send)
+  const adcClocks = useRecoilValue(useAdcClocks.send)
   const [triggerVoltage, setTriggerVoltage] = useRecoilState(
     useTriggerVoltage.send
   )
   const [triggerPosInt, setTriggerPosInt] = useRecoilState(useTriggerPos.send)
   const [draggingTP, setDraggingTP] = useState(false)
   const [draggingTV, setDraggingTV] = useState(false)
-  const samples = data[0].length
 
   const yDomain = useMemo(() => [0, 5] as [number, number], [])
   const xDomain = useMemo(() => {

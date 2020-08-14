@@ -79,6 +79,11 @@ export const useTriggerDirection = createHook<boolean>({
   ui2mcu: (v) => (v ? 1 : 0),
   mcu2ui: (v) => !!v
 })
+export const useSamplesPerBuffer = createHook<number>({
+  key: 'samples-per-buffer',
+  ui2mcu: (v) => v,
+  mcu2ui: (v) => v
+})
 
 export const dataState = atom({
   key: 'data',
@@ -114,9 +119,10 @@ export const allDataState = selector<number[]>({
   set: ({ set, get }, newData) => {
     if (newData instanceof DefaultValue) return
     const data = parseSerial(newData)
-    if (data.analog.length === 0) return // TODO: some CRC instead?
+
     set(useTriggerPos.receive, data.triggerPos)
-    set(useAdcClocks.receive, data.ADC_MAIN_CLOCK_TICKS)
+    set(useAdcClocks.receive, data.clocksPerAdcRead)
+    set(useSamplesPerBuffer.receive, data.samplesPerBuffer)
     set(useTriggerVoltage.receive, data.triggerVoltageInt)
     set(useTriggerDirection.receive, data.triggerDir)
     const triggerMode = get(triggerModeState)
@@ -130,15 +136,7 @@ export const allDataState = selector<number[]>({
     const shouldUpdate = get(isRunningState) && canUpdate
     if (shouldUpdate) {
       set(didTriggerState, data.didTrigger)
-      set(dataState, [
-        data.analog.map((n) => (n / 256) * 5),
-        data.digital.map((n) => (n & 0b100 && 1) * 0.5 + 0.6 * 1),
-        data.digital.map((n) => (n & 0b1000 && 1) * 0.5 + 0.6 * 2),
-        data.digital.map((n) => (n & 0b10000 && 1) * 0.5 + 0.6 * 3),
-        data.digital.map((n) => (n & 0b100000 && 1) * 0.5 + 0.6 * 4),
-        data.digital.map((n) => (n & 0b01000000 && 1) * 0.5 + 0.6 * 5),
-        data.digital.map((n) => (n & 0b10000000 && 1) * 0.5 + 0.6 * 6)
-      ])
+      set(dataState, data.buffers)
       if (triggerMode === TriggerMode.SINGLE) {
         set(isRunningState, false)
       }
