@@ -1,22 +1,39 @@
 #include "data-struct.h"
 
 uint16_t bufferPtr = 0;
-uint8_t val;
+uint8_t triggerVal;
+uint8_t triggerPoint;
+uint8_t digitalTriggerMask;
 int16_t limit;
 __attribute__((always_inline)) inline void storeOne() {
   while (TCNT1 < state.ticksPerAdcRead) {
   };
-  val = ADCH;
-  /*
-  if (state.triggerChannel==0)val = ADCH;
-  else (state.triggerChannel==1)val = buffer2;
-  else val = buffer3&(1<<(state.triggerChannel-3));
-  */
   TCNT1 -= state.ticksPerAdcRead;  // race condition here
-  buffer1[bufferPtr] = ADCH;
-  buffer2[bufferPtr] = (PINB & 0b00011111) | (PIND & 0b11100000);
-  buffer3[bufferPtr] =
-      PIND & 0b00001111;  // the ADC reading is 1 iterations delayied
+  uint8_t val0 = ADCH;
+  uint8_t val1 = (PINB & 0b00011111) | (PIND & 0b11100000);
+  uint8_t val2 = PIND & 0b00001111;
+
+  switch (state.triggerChannel) {
+    case 0: {
+      triggerVal = val0;
+      break;
+    }
+    case 1: {
+      triggerVal = val1;
+      break;
+    }
+    case 3:
+    case 4:
+    case 5:
+    case 6: {
+      triggerVal = val2 & digitalTriggerMask;
+      break;
+    }
+  }
+
+  buffer0[bufferPtr] = val0;
+  buffer1[bufferPtr] = val1;
+  buffer2[bufferPtr] = val2;
   bufferPtr++;
   if (bufferPtr == state.samplesPerBuffer) bufferPtr = 0;
   limit--;
@@ -36,18 +53,18 @@ __attribute__((always_inline)) inline void fillBuffer_a() {
   }
 }
 __attribute__((always_inline)) inline void fillBuffer_b_rising() {
-  while (val > triggerVoltageMinus && limit) {
+  while (triggerVal > triggerVoltageMinus && limit) {
     storeOne();
   }
-  while (val < state.triggerVoltage && limit) {
+  while (triggerVal < triggerPoint && limit) {
     storeOne();
   }
 }
 __attribute__((always_inline)) inline void fillBuffer_b_falling() {
-  while (val < triggerVoltagePlus && limit) {
+  while (triggerVal < triggerVoltagePlus && limit) {
     storeOne();
   }
-  while (val > state.triggerVoltage && limit) {
+  while (triggerVal > triggerPoint && limit) {
     storeOne();
   }
 }
@@ -61,9 +78,21 @@ __attribute__((always_inline)) inline void fillBuffer_c() {
 void fillBuffer() {
   // trying to reduce checks once readings begin by hoisting the if for the
   // triggerDir
-  triggerVoltageMinus = max(0, (int)state.triggerVoltage - 2);
-  triggerVoltagePlus = min(255, (int)state.triggerVoltage + 2);
+  triggerPoint = state.triggerVoltage;
+  triggerVoltageMinus = max(0, (int)triggerPoint - 2);
+  triggerVoltagePlus = min(255, (int)triggerPoint + 2);
+  digitalTriggerMask = 0;
 
+  if (state.triggerChannel > 1) {
+    digitalTriggerMask = (1 << (state.triggerChannel - 2));
+    triggerVoltageMinus = 0;
+    triggerVoltagePlus = 1;
+    if (state.triggerDir == TriggerDir::rising) {
+      triggerPoint = 1;
+    } else {
+      triggerPoint = 0;
+    }
+  }
   limit = state.samplesPerBuffer * 10;
   headSamples = state.triggerPos;
   tailSamples = state.samplesPerBuffer - state.triggerPos;
@@ -84,4 +113,18 @@ void fillBuffer() {
   state.didTrigger = limit > 0;
   // it is a circular buffer, so the beginning is right after the end
   state.bufferStartPtr = bufferPtr;
+}
+void fillBufferFast() {
+  startADC();
+  for (bufferPtr = 0; bufferPtr != state.samplesPerBuffer; bufferPtr++) {
+    while (TCNT1 < state.ticksPerAdcRead) {
+    };
+    TCNT1 -= state.ticksPerAdcRead;  // race condition here
+    buffer0[bufferPtr] = ADCH;
+    buffer1[bufferPtr] = (PINB & 0b00011111) | (PIND & 0b11100000);
+    buffer2[bufferPtr] = PIND & 0b00001111;
+  }
+  stopADC();
+  state.didTrigger = 0;
+  state.bufferStartPtr = 0;
 }

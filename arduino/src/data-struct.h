@@ -17,9 +17,9 @@ typedef struct {
   uint8_t triggerMode;
   uint8_t triggerChannel;
   uint16_t freeMemory;
-  bool isBuffer1ON;
-  bool isBuffer2ON;
-  bool isBuffer3ON;
+  bool isbuffer0ON;
+  bool isbuffer1ON;
+  bool isbuffer2ON;
   uint16_t samplesPerBuffer;
 } State;
 
@@ -34,14 +34,14 @@ State state = {
     TriggerMode::autom,    // uint8_t triggerMode
     0,                     // uint8_t triggerChannel
     100,                   // uint16_t freeMemory;
-    1,                     // bool isBuffer1ON;
-    0,                     // bool isBuffer2ON;
-    1,                     // bool isBuffer3ON;
+    1,                     // bool isbuffer0ON;
+    0,                     // bool isbuffer1ON;
+    1,                     // bool isbuffer2ON;
     MAX_SAMPLES            // uint16_t samplesPerBuffer;
 };
 
+uint8_t buffer0[MAX_SAMPLES];
 uint8_t buffer1[MAX_SAMPLES];
 uint8_t buffer2[MAX_SAMPLES];
-uint8_t buffer3[MAX_SAMPLES];
 
 #endif

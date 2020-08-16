@@ -23,17 +23,17 @@ void handleInput() {
       val = constrain(val, 0, 1);
       state.triggerDir = val;
     }
+    if (option == '0') {
+      val = constrain(val, 0, 1);
+      state.isbuffer0ON = val;
+    }
     if (option == '1') {
       val = constrain(val, 0, 1);
-      state.isBuffer1ON = val;
+      state.isbuffer1ON = val;
     }
     if (option == '2') {
       val = constrain(val, 0, 1);
-      state.isBuffer2ON = val;
-    }
-    if (option == '3') {
-      val = constrain(val, 0, 1);
-      state.isBuffer3ON = val;
+      state.isbuffer2ON = val;
     }
     if (option == 'M') {
       val = constrain(val, 0, 2);
@@ -41,7 +41,7 @@ void handleInput() {
       // AUTO, TRIGGER, SLOW
     }
     if (option == 'T') {
-      val = constrain(val, 0, 10);
+      val = constrain(val, 0, 5);
       state.triggerChannel = val;
     }
   }
