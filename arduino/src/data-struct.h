@@ -8,7 +8,7 @@ enum TriggerDir { rising, falling };
 
 typedef struct {
   uint8_t prelude[4];
-  uint8_t triggerVoltageInt;
+  uint8_t triggerVoltage;
   uint8_t triggerDir;
   uint16_t ticksPerAdcRead;
   uint16_t triggerPos;
@@ -25,7 +25,7 @@ typedef struct {
 
 State state = {
     {255, 255, 255, 255},  // uint8_t prelude[4];
-    128,                   // uint8_t triggerVoltageInt;
+    128,                   // uint8_t triggerVoltage;
     TriggerDir::falling,   // uint8_t triggerDir;
     79,                    // uint16_t ticksPerAdcRead;
     MAX_SAMPLES * 1 / 3,   // uint16_t triggerPos;

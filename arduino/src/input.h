@@ -10,7 +10,7 @@ void handleInput() {
       state.ticksPerAdcRead = val;
     }
     if (option == 'V') {
-      state.triggerVoltageInt = constrain(val, 0, 255);
+      state.triggerVoltage = constrain(val, 0, 255);
     }
     if (option == 'P') {
       state.triggerPos = constrain(val, 1, state.samplesPerBuffer);

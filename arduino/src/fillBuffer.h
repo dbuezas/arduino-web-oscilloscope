@@ -22,8 +22,8 @@ __attribute__((always_inline)) inline void storeOne() {
   limit--;
 }
 
-uint8_t triggerVoltageIntMinus;
-uint8_t triggerVoltageIntPlus;
+uint8_t triggerVoltageMinus;
+uint8_t triggerVoltagePlus;
 uint16_t headSamples;
 uint16_t tailSamples;
 
@@ -36,18 +36,18 @@ __attribute__((always_inline)) inline void fillBuffer_a() {
   }
 }
 __attribute__((always_inline)) inline void fillBuffer_b_rising() {
-  while (val > triggerVoltageIntMinus && limit) {
+  while (val > triggerVoltageMinus && limit) {
     storeOne();
   }
-  while (val < state.triggerVoltageInt && limit) {
+  while (val < state.triggerVoltage && limit) {
     storeOne();
   }
 }
 __attribute__((always_inline)) inline void fillBuffer_b_falling() {
-  while (val < triggerVoltageIntPlus && limit) {
+  while (val < triggerVoltagePlus && limit) {
     storeOne();
   }
-  while (val > state.triggerVoltageInt && limit) {
+  while (val > state.triggerVoltage && limit) {
     storeOne();
   }
 }
@@ -61,8 +61,8 @@ __attribute__((always_inline)) inline void fillBuffer_c() {
 void fillBuffer() {
   // trying to reduce checks once readings begin by hoisting the if for the
   // triggerDir
-  triggerVoltageIntMinus = max(0, (int)state.triggerVoltageInt - 2);
-  triggerVoltageIntPlus = min(255, (int)state.triggerVoltageInt + 2);
+  triggerVoltageMinus = max(0, (int)state.triggerVoltage - 2);
+  triggerVoltagePlus = min(255, (int)state.triggerVoltage + 2);
 
   limit = state.samplesPerBuffer * 10;
   headSamples = state.triggerPos;
