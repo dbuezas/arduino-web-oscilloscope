@@ -32,11 +32,12 @@ export default function parseSerial(data: number[]) {
   const myData = data.slice()
   const triggerVoltageInt = get_uint8_t(myData)
   const triggerDir = get_uint8_t(myData)
-  const clocksPerAdcRead = get_uint16_t(myData)
+  const ticksPerAdcRead = get_uint16_t(myData)
   const triggerPos = get_uint16_t(myData)
   const bufferStartPtr = get_uint16_t(myData)
   const didTrigger = get_bool(myData)
   const triggerMode = get_uint8_t(myData)
+  const triggerChannel = get_uint8_t(myData)
   const freeMemory = get_uint16_t(myData)
   const isBuffer1ON = get_bool(myData)
   const isBuffer2ON = get_bool(myData)
@@ -54,21 +55,20 @@ export default function parseSerial(data: number[]) {
   const buffers = [
     analog1.map((n) => (n / 256) * 5),
     analog2.map((n) => (n / 256) * 5),
-    digital.map((n) => (n & 0b100 && 1) * 0.5 + 0.6 * 1),
-    digital.map((n) => (n & 0b1000 && 1) * 0.5 + 0.6 * 2),
-    digital.map((n) => (n & 0b10000 && 1) * 0.5 + 0.6 * 3),
-    digital.map((n) => (n & 0b100000 && 1) * 0.5 + 0.6 * 4),
-    digital.map((n) => (n & 0b01000000 && 1) * 0.5 + 0.6 * 5),
-    digital.map((n) => (n & 0b10000000 && 1) * 0.5 + 0.6 * 6)
+    digital.map((n) => (n & 0b0001 && 1) * 0.5 + 0.6 * 1),
+    digital.map((n) => (n & 0b0010 && 1) * 0.5 + 0.6 * 2),
+    digital.map((n) => (n & 0b0100 && 1) * 0.5 + 0.6 * 3),
+    digital.map((n) => (n & 0b1000 && 1) * 0.5 + 0.6 * 4)
   ]
   return {
     triggerVoltageInt,
     triggerDir,
-    clocksPerAdcRead,
+    ticksPerAdcRead,
     triggerPos,
     freeMemory,
     didTrigger,
     triggerMode,
+    triggerChannel,
     isBuffer1ON,
     isBuffer2ON,
     isBuffer3ON,

@@ -6,20 +6,20 @@ void handleInput() {
     String value = Serial.readStringUntil('>');
     if (value.length() == 0) return;
     int val = value.toInt();
-    if (option == 'C') {  // CLOCK TICKS
-      state.clocksPerAdcRead = val;
+    if (option == 'C') {
+      state.ticksPerAdcRead = val;
     }
-    if (option == 'V') {  // triggerVoltage
+    if (option == 'V') {
       state.triggerVoltageInt = constrain(val, 0, 255);
     }
-    if (option == 'P') {  // triggerPos
+    if (option == 'P') {
       state.triggerPos = constrain(val, 1, state.samplesPerBuffer);
     }
-    if (option == 'S') {  // samplesPerBuffer
+    if (option == 'S') {
       state.samplesPerBuffer = constrain(val, 1, MAX_SAMPLES);
       state.triggerPos = constrain(state.triggerPos, 1, state.samplesPerBuffer);
     }
-    if (option == 'D') {  // triggerDirection
+    if (option == 'D') {
       val = constrain(val, 0, 1);
       state.triggerDir = val;
     }
@@ -35,20 +35,24 @@ void handleInput() {
       val = constrain(val, 0, 1);
       state.isBuffer3ON = val;
     }
-    if (option == 'M') {  // MODE
+    if (option == 'M') {
       val = constrain(val, 0, 2);
       state.triggerMode = val;
       // AUTO, TRIGGER, SLOW
     }
+    if (option == 'T') {
+      val = constrain(val, 0, 10);
+      state.triggerChannel = val;
+    }
   }
 }
 
-void send_uint8(uint8_t v) { Serial.write(v); }
-void send_int16(int16_t v) {
-  Serial.write(lowByte(v));
-  Serial.write(highByte(v));
-}
-void send_uint16(uint16_t v) {
-  Serial.write(lowByte(v));
-  Serial.write(highByte(v));
-}
+// void send_uint8(uint8_t v) { Serial.write(v); }
+// void send_int16(int16_t v) {
+//   Serial.write(lowByte(v));
+//   Serial.write(highByte(v));
+// }
+// void send_uint16(uint16_t v) {
+//   Serial.write(lowByte(v));
+//   Serial.write(highByte(v));
+// }

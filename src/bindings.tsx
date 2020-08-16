@@ -69,7 +69,7 @@ export const useTriggerPos = createHook<number>({
   ui2mcu: (v) => Math.ceil(v),
   mcu2ui: (v) => v
 })
-export const useAdcClocks = createHook<number>({
+export const useTicksPerAdcRead = createHook<number>({
   key: 'C',
   ui2mcu: (v) => Math.ceil(v),
   mcu2ui: (v) => v
@@ -78,6 +78,11 @@ export const useTriggerDirection = createHook<boolean>({
   key: 'D',
   ui2mcu: (v) => (v ? 1 : 0),
   mcu2ui: (v) => !!v
+})
+export const useTriggerChannel = createHook<number>({
+  key: 'T',
+  ui2mcu: (v) => v,
+  mcu2ui: (v) => v
 })
 export const useSamplesPerBuffer = createHook<number>({
   key: 'samples-per-buffer',
@@ -121,10 +126,11 @@ export const allDataState = selector<number[]>({
     const data = parseSerial(newData)
 
     set(useTriggerPos.receive, data.triggerPos)
-    set(useAdcClocks.receive, data.clocksPerAdcRead)
+    set(useTicksPerAdcRead.receive, data.ticksPerAdcRead)
     set(useSamplesPerBuffer.receive, data.samplesPerBuffer)
     set(useTriggerVoltage.receive, data.triggerVoltageInt)
     set(useTriggerDirection.receive, data.triggerDir)
+    set(useTriggerChannel.receive, data.triggerChannel)
     const triggerMode = get(triggerModeState)
     const canUpdate = {
       [TriggerMode.AUTO]: true,

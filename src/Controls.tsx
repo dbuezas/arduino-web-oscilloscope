@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback } from 'react'
 import {
-  useAdcClocks,
+  useTicksPerAdcRead,
   useTriggerDirection,
   synchMode,
   triggerModeState,
@@ -33,7 +33,9 @@ const ticksPerMs = 32000000 / 1000
 
 function Controls() {
   const [voltage, setVoltage] = useState(5)
-  const [adcClockTicks, setAdcClockTicks] = useRecoilState(useAdcClocks.send)
+  const [ticksPerAdcRead, setTicksPerAdcRead] = useRecoilState(
+    useTicksPerAdcRead.send
+  )
   const [triggerMode, setTriggerMode] = useRecoilState(triggerModeState)
   const freeMemory = useRecoilValue(freeMemoryState)
   const didTrigger = useRecoilValue(didTriggerState)
@@ -65,13 +67,13 @@ function Controls() {
           () => (
             <SelectPicker
               searchable={true}
-              value={adcClockTicks}
+              value={ticksPerAdcRead}
               cleanable={false}
               onChange={(n: number) => {
                 console.log(n)
                 setSynchMode(false)
                 // setSynchMode(n < millisToADCClocks(20))
-                setAdcClockTicks(n)
+                setTicksPerAdcRead(n)
               }}
               data={[
                 ADCClocksToMillis(79),
@@ -95,7 +97,7 @@ function Controls() {
               style={{ width: 224, marginBottom: 10 }}
             />
           ),
-          [adcClockTicks, setAdcClockTicks, setSynchMode]
+          [ticksPerAdcRead, setTicksPerAdcRead, setSynchMode]
         )}
         {useMemo(
           () => (

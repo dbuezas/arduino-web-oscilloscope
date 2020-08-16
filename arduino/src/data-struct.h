@@ -10,11 +10,12 @@ typedef struct {
   uint8_t prelude[4];
   uint8_t triggerVoltageInt;
   uint8_t triggerDir;
-  uint16_t clocksPerAdcRead;
+  uint16_t ticksPerAdcRead;
   uint16_t triggerPos;
   uint16_t bufferStartPtr;
   bool didTrigger;
   uint8_t triggerMode;
+  uint8_t triggerChannel;
   uint16_t freeMemory;
   bool isBuffer1ON;
   bool isBuffer2ON;
@@ -26,11 +27,12 @@ State state = {
     {255, 255, 255, 255},  // uint8_t prelude[4];
     128,                   // uint8_t triggerVoltageInt;
     TriggerDir::falling,   // uint8_t triggerDir;
-    79,                    // uint16_t clocksPerAdcRead;
+    79,                    // uint16_t ticksPerAdcRead;
     MAX_SAMPLES * 1 / 3,   // uint16_t triggerPos;
     0,                     // uint16_t bufferStartPtr;
     false,                 // bool didTrigger;
-    TriggerMode::autom,    //
+    TriggerMode::autom,    // uint8_t triggerMode
+    0,                     // uint8_t triggerChannel
     100,                   // uint16_t freeMemory;
     1,                     // bool isBuffer1ON;
     0,                     // bool isBuffer2ON;

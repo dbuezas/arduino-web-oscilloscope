@@ -17,7 +17,7 @@
 */
 #define ADC_PRESCALER_conf 2  // 1 to 7
 // #define ADC_PRESCALER (1 << ADC_PRESCALER_conf)
-// uint16_t clocksPerAdcRead =
+// uint16_t ticksPerAdcRead =
 //     ADC_PRESCALER * (15 + 1.5 + 5.5) -
 //     9;  // A normal conversion takes 15 ADC clock cycles
 //         // + 1.5 sample and hold + (5.5 unaccounted for) -9 for timing
