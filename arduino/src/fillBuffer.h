@@ -4,10 +4,10 @@ uint16_t bufferPtr = 0;
 uint8_t triggerVal;
 uint8_t triggerPoint;
 uint8_t digitalTriggerMask;
-int16_t limit;
+uint16_t limit;
+
 __attribute__((always_inline)) inline void storeOne() {
   while (TCNT1 < state.ticksPerAdcRead) {
-    DALR++;
   };
   TCNT1 -= state.ticksPerAdcRead;  // race condition here
   uint8_t val0 = ADCH;
@@ -99,8 +99,6 @@ void fillBuffer() {
   headSamples = state.triggerPos;
   tailSamples = state.samplesPerBuffer - state.triggerPos;
 
-  // __asm__ volatile("nop\n");  // don't move code around please
-
   if (state.triggerDir == TriggerDir::rising) {
     fillBuffer_a();
     fillBuffer_b_rising();
@@ -110,7 +108,6 @@ void fillBuffer() {
     fillBuffer_b_falling();
     fillBuffer_c();
   }
-  // __asm__ volatile("nop\n");  // don't move code around please
   stopADC();
   state.didTrigger = limit > 0;
   // it is a circular buffer, so the beginning is right after the end

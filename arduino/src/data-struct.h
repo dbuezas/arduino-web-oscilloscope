@@ -24,20 +24,21 @@ typedef struct {
 } State;
 
 State state = {
-    {255, 255, 255, 255},  // uint8_t prelude[4];
-    128,                   // uint8_t triggerVoltage;
-    TriggerDir::falling,   // uint8_t triggerDir;
-    79,                    // uint16_t ticksPerAdcRead;
-    MAX_SAMPLES * 1 / 3,   // uint16_t triggerPos;
-    0,                     // uint16_t bufferStartPtr;
-    false,                 // bool didTrigger;
-    TriggerMode::autom,    // uint8_t triggerMode
-    0,                     // uint8_t triggerChannel
-    100,                   // uint16_t freeMemory;
-    1,                     // bool isbuffer0ON;
-    0,                     // bool isbuffer1ON;
-    1,                     // bool isbuffer2ON;
-    MAX_SAMPLES            // uint16_t samplesPerBuffer;
+    // TODO: find a better way to find data
+    {0, 1, 255, 253},     // uint8_t prelude[4];
+    128,                  // uint8_t triggerVoltage;
+    TriggerDir::falling,  // uint8_t triggerDir;
+    79,                   // uint16_t ticksPerAdcRead;
+    MAX_SAMPLES * 1 / 3,  // uint16_t triggerPos;
+    0,                    // uint16_t bufferStartPtr;
+    false,                // bool didTrigger;
+    TriggerMode::autom,   // uint8_t triggerMode
+    0,                    // uint8_t triggerChannel
+    100,                  // uint16_t freeMemory;
+    1,                    // bool isbuffer0ON;
+    0,                    // bool isbuffer1ON;
+    1,                    // bool isbuffer2ON;
+    MAX_SAMPLES           // uint16_t samplesPerBuffer;
 };
 
 uint8_t buffer0[MAX_SAMPLES];

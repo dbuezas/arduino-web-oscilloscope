@@ -20,7 +20,7 @@ declare global {
     serial: NavigatorSerial
   }
 }
-const END_SEQUENCE = [255, 255, 255, 255]
+const END_SEQUENCE = [0, 1, 255, 253]
 const indexesOfSequence = (needle: number[], haystack: number[]) => {
   const result = []
   for (let i = 0, j = 0; i < haystack.length; i++) {
