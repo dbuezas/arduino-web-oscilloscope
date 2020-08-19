@@ -3,7 +3,7 @@
 
 void sendBuffer() {
   state.freeMemory = freeMemory();
-
+  state.freeMemory = receives;
   Serial.write((byte*)&state, sizeof(state));
   if (state.isbuffer0ON) Serial.write((byte*)&buffer0, sizeof(buffer0));
   if (state.isbuffer1ON) Serial.write((byte*)&buffer1, sizeof(buffer1));

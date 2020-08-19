@@ -12,7 +12,6 @@ void setupDAC() {
                             // 10: voltage source is internal reference voltage
                             // (IVSEL0) 11: shut down DAC reference source and
                             // DAC at the sametime
-
   TCCR2A = 0;
   TCCR2B = 0;
   TCNT2 = 0;  // counter = 0
@@ -20,4 +19,6 @@ void setupDAC() {
   TCCR2A |= (1 << WGM21);
   TCCR2B |= (1 << CS20);
   TIMSK2 |= (1 << OCIE2A);
+
+  bitClear(TIMSK2, OCIE2A);  // disable interrupt for DALR
 }

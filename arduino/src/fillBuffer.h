@@ -7,6 +7,7 @@ uint8_t digitalTriggerMask;
 int16_t limit;
 __attribute__((always_inline)) inline void storeOne() {
   while (TCNT1 < state.ticksPerAdcRead) {
+    DALR++;
   };
   TCNT1 -= state.ticksPerAdcRead;  // race condition here
   uint8_t val0 = ADCH;
@@ -36,7 +37,8 @@ __attribute__((always_inline)) inline void storeOne() {
   buffer2[bufferPtr] = val2;
   bufferPtr++;
   if (bufferPtr == state.samplesPerBuffer) bufferPtr = 0;
-  limit--;
+  if (state.triggerMode == TriggerMode::autom) limit--;
+  if (Serial.peek() != -1) limit = 0;
 }
 
 uint8_t triggerVoltageMinus;

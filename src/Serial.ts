@@ -128,9 +128,7 @@ export class Serial {
         if (idxs.length > 1) {
           const head = idxs.pop()!
           const neck = idxs.pop()! + END_SEQUENCE.length
-          const length = head - neck
-          if (length == 0) debugger
-          callback(this.readbuffer.slice(neck, length))
+          callback(this.readbuffer.slice(neck, head))
           // old frames are discarded
           this.readbuffer = this.readbuffer.slice(head)
         }

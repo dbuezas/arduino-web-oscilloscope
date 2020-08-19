@@ -89,20 +89,21 @@ export const useSamplesPerBuffer = createHook<number>({
   ui2mcu: (v) => v,
   mcu2ui: (v) => v
 })
-
-export const dataState = atom({
-  key: 'data',
-  default: [[0], [0], [0], [0], [0], [0]]
-})
-
 export enum TriggerMode {
   AUTO = 'Auto',
   SINGLE = 'Single',
   NORMAL = 'Normal'
 }
-export const triggerModeState = atom<TriggerMode>({
-  key: 'trigger-mode',
-  default: TriggerMode.AUTO
+
+export const useTriggerMode = createHook<TriggerMode>({
+  key: 'M',
+  ui2mcu: (v) => Object.values(TriggerMode).indexOf(v),
+  mcu2ui: (v) => Object.values(TriggerMode)[v]
+})
+
+export const dataState = atom({
+  key: 'data',
+  default: [[0], [0], [0], [0], [0], [0]]
 })
 
 export const isRunningState = atom({
@@ -117,7 +118,8 @@ export const freeMemoryState = atom({
   key: 'free-memory',
   default: 0
 })
-
+// TODO: receive and send are terrible names
+// they should be raw and ui or st like that
 export const allDataState = selector<number[]>({
   key: 'all-data',
   get: () => [], // this is a write only selector
@@ -131,19 +133,15 @@ export const allDataState = selector<number[]>({
     set(useTriggerVoltage.receive, data.triggerVoltageInt)
     set(useTriggerDirection.receive, data.triggerDir)
     set(useTriggerChannel.receive, data.triggerChannel)
-    const triggerMode = get(triggerModeState)
-    const canUpdate = {
-      [TriggerMode.AUTO]: true,
-      [TriggerMode.SINGLE]: Boolean(data.didTrigger),
-      [TriggerMode.NORMAL]: Boolean(data.didTrigger)
-    }[triggerMode]
-
+    set(useTriggerMode.receive, data.triggerMode)
+    if (get(useTriggerMode.send) != TriggerMode.SINGLE)
+      set(isRunningState, true)
     set(freeMemoryState, data.freeMemory)
-    const shouldUpdate = get(isRunningState) && canUpdate
+    const shouldUpdate = get(isRunningState)
     if (shouldUpdate) {
       set(didTriggerState, data.didTrigger)
       set(dataState, data.buffers)
-      if (triggerMode === TriggerMode.SINGLE) {
+      if (get(useTriggerMode.send) === TriggerMode.SINGLE) {
         set(isRunningState, false)
       }
     }

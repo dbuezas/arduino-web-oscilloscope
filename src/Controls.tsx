@@ -3,7 +3,7 @@ import {
   useTicksPerAdcRead,
   useTriggerDirection,
   synchMode,
-  triggerModeState,
+  useTriggerMode,
   TriggerMode,
   freeMemoryState,
   didTriggerState,
@@ -36,7 +36,7 @@ function Controls() {
   const [ticksPerAdcRead, setTicksPerAdcRead] = useRecoilState(
     useTicksPerAdcRead.send
   )
-  const [triggerMode, setTriggerMode] = useRecoilState(triggerModeState)
+  const [triggerMode, setTriggerMode] = useRecoilState(useTriggerMode.send)
   const freeMemory = useRecoilValue(freeMemoryState)
   const didTrigger = useRecoilValue(didTriggerState)
   const [triggerDirection, setTriggerDirection] = useRecoilState(

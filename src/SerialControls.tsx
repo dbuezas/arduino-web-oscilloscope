@@ -24,12 +24,12 @@ function SerialControls() {
   }, [setAllData])
 
   useEffect(() => {
-    let i = 0
-    setInterval(() => {
-      i++
-      const state = ['Connected', 'Disconnected', 'Waiting'][i % 3]
-      setSerialState(state)
-    }, 1000)
+    // let i = 0
+    // setInterval(() => {
+    //   i++
+    //   const state = ['Connected', 'Disconnected', 'Waiting'][i % 3]
+    //   setSerialState(state)
+    // }, 1000)
     serial.connectWithPaired(serialOptions).catch(() => {})
   }, [])
   return (
