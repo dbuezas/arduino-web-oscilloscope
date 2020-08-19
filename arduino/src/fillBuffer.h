@@ -11,7 +11,7 @@ __attribute__((always_inline)) inline void storeOne() {
   TCNT1 -= state.ticksPerAdcRead;  // race condition here
   uint8_t val0 = ADCH;
   uint8_t val1 = (PINB & 0b00011111) | (PIND & 0b11100000);
-  uint8_t val2 = PIND & 0b00001111;
+  uint8_t val2 = PINC & 0b00111100;
 
   switch (state.triggerChannel) {
     case 0: {

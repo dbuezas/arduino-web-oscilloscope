@@ -110,7 +110,7 @@ export class Serial {
     await this.writer.write(text)
   }
   async onData(callback: (data: number[]) => unknown) {
-    callback(dataMock)
+    // callback(dataMock)
     while (1) {
       // React would do this anyway to skip paints, but only after computing the svg
       await new Promise((r) => requestAnimationFrame(r))
@@ -129,6 +129,7 @@ export class Serial {
           const head = idxs.pop()!
           const neck = idxs.pop()! + END_SEQUENCE.length
           const length = head - neck
+          if (length == 0) debugger
           callback(this.readbuffer.slice(neck, length))
           // old frames are discarded
           this.readbuffer = this.readbuffer.slice(head)

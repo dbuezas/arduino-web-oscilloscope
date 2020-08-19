@@ -55,10 +55,10 @@ export default function parseSerial(data: number[]) {
   const buffers = [
     analog1.map((n) => (n / 256) * 5),
     analog2.map((n) => (n / 256) * 5),
-    digital.map((n) => (n & 0b0001 && 1) * 0.5 + 0.6 * 1),
-    digital.map((n) => (n & 0b0010 && 1) * 0.5 + 0.6 * 2),
-    digital.map((n) => (n & 0b0100 && 1) * 0.5 + 0.6 * 3),
-    digital.map((n) => (n & 0b1000 && 1) * 0.5 + 0.6 * 4)
+    digital.map((n) => (n & 0b000100 && 1) * 0.5 + 0.6 * 1),
+    digital.map((n) => (n & 0b001000 && 1) * 0.5 + 0.6 * 2),
+    digital.map((n) => (n & 0b010000 && 1) * 0.5 + 0.6 * 3),
+    digital.map((n) => (n & 0b100000 && 1) * 0.5 + 0.6 * 4)
   ]
   return {
     triggerVoltageInt,

@@ -92,7 +92,7 @@ export const useSamplesPerBuffer = createHook<number>({
 
 export const dataState = atom({
   key: 'data',
-  default: [[0], [0], [0], [0], [0], [0], [0]]
+  default: [[0], [0], [0], [0], [0], [0]]
 })
 
 export enum TriggerMode {
@@ -123,8 +123,8 @@ export const allDataState = selector<number[]>({
   get: () => [], // this is a write only selector
   set: ({ set, get }, newData) => {
     if (newData instanceof DefaultValue) return
+    if (newData.length === 0) return
     const data = parseSerial(newData)
-
     set(useTriggerPos.receive, data.triggerPos)
     set(useTicksPerAdcRead.receive, data.ticksPerAdcRead)
     set(useSamplesPerBuffer.receive, data.samplesPerBuffer)

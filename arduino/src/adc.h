@@ -76,12 +76,24 @@ void setupADC() {
           0b110 << DNS0 |  // (-) GND
           0b00 << DPS0;    // (+) ADC0 through mux
 
-  pinMode(D2, INPUT);
-  pinMode(D3, INPUT);
-  // pinMode(D4, INPUT); // this is the dac output
+  // uint8_t val1 = (PINB & 0b00011111) | (PIND & 0b11100000);
+  // uint8_t val2 = PINC & 0b00111100;
+
+  // PB0::4 // part 2 of external ADC
+  pinMode(D8, INPUT);
+  pinMode(D9, INPUT);
+  pinMode(D10, INPUT);
+  pinMode(D11, INPUT);
+  pinMode(D12, INPUT);
+  // PD5::7 // part 2 of external ADC
   pinMode(D5, INPUT);
   pinMode(D6, INPUT);
   pinMode(D7, INPUT);
+  // PC2::5 // 4 digital channels
+  pinMode(A2, INPUT);
+  pinMode(A3, INPUT);
+  pinMode(A4, INPUT);
+  pinMode(A5, INPUT);
 
   interrupts();
 }

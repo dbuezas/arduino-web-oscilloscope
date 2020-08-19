@@ -1,3 +1,4 @@
+#include "MySerial.h"
 #include "adc.h"
 #include "dac.h"
 #include "data-struct.h"
@@ -9,7 +10,6 @@ void setup() {
   pinMode(D13, OUTPUT);
   Serial.begin(115200 * 2);
   Serial.setTimeout(100);  // TODO: remove?
-
   setupADC();
   setupDAC();
 }
