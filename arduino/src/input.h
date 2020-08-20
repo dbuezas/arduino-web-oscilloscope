@@ -1,7 +1,7 @@
 #include "data-struct.h"
 
 void handleInput() {
-  while (Serial.available() > 2) {
+  while (Serial.available()) {
     char option = Serial.read();
     String value = Serial.readStringUntil('>');
     if (value.length() == 0) return;

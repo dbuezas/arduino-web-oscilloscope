@@ -134,16 +134,18 @@ export const allDataState = selector<number[]>({
     set(useTriggerDirection.receive, data.triggerDir)
     set(useTriggerChannel.receive, data.triggerChannel)
     set(useTriggerMode.receive, data.triggerMode)
-    if (get(useTriggerMode.send) != TriggerMode.SINGLE)
-      set(isRunningState, true)
-    set(freeMemoryState, data.freeMemory)
-    const shouldUpdate = get(isRunningState)
+    // if (get(useTriggerMode.send) != TriggerMode.SINGLE)
+    //   set(isRunningState, true)
+    // set(freeMemoryState, data.freeMemory)
+    const shouldUpdate =
+      // todo use isRunning state in board for this
+      get(isRunningState) && data.buffers.some((buffer) => buffer.length > 0)
     if (shouldUpdate) {
-      set(didTriggerState, data.didTrigger)
+      // set(didTriggerState, data.didTrigger)
       set(dataState, data.buffers)
-      if (get(useTriggerMode.send) === TriggerMode.SINGLE) {
-        set(isRunningState, false)
-      }
+      // if (get(useTriggerMode.send) === TriggerMode.SINGLE) {
+      //   set(isRunningState, false)
+      // }
     }
   }
 })

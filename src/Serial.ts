@@ -126,11 +126,11 @@ export class Serial {
         const idxs = indexesOfSequence(END_SEQUENCE, this.readbuffer)
         // console.log(idxs.length)
         if (idxs.length > 1) {
-          const head = idxs.pop()!
-          const neck = idxs.pop()! + END_SEQUENCE.length
-          callback(this.readbuffer.slice(neck, head))
+          const end = idxs.pop()!
+          const start = idxs.pop()! + END_SEQUENCE.length
+          callback(this.readbuffer.slice(start, end))
           // old frames are discarded
-          this.readbuffer = this.readbuffer.slice(head)
+          this.readbuffer = this.readbuffer.slice(end)
         }
       }
     }

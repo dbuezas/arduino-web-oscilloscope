@@ -1,15 +1,15 @@
 #include "data-struct.h"
 
-uint16_t bufferPtr = 0;
 uint8_t triggerVal;
 uint8_t triggerPoint;
 uint8_t digitalTriggerMask;
-uint16_t limit;
+// uint16_t limit;
 
 __attribute__((always_inline)) inline void storeOne() {
   while (TCNT1 < state.ticksPerAdcRead) {
   };
-  TCNT1 -= state.ticksPerAdcRead;  // race condition here
+  TCNT1 -= state.ticksPerAdcRead -
+           9;  // race condition here (this operation actually takes 9 clocks)
   uint8_t val0 = ADCH;
   uint8_t val1 = (PINB & 0b00011111) | (PIND & 0b11100000);
   uint8_t val2 = PINC & 0b00111100;
@@ -23,22 +23,25 @@ __attribute__((always_inline)) inline void storeOne() {
       triggerVal = val1;
       break;
     }
+    case 2:
     case 3:
     case 4:
     case 5:
-    case 6: {
+    case 6:
+    case 7:
+    case 8: {
       triggerVal = val2 & digitalTriggerMask;
       break;
     }
   }
 
-  buffer0[bufferPtr] = val0;
-  buffer1[bufferPtr] = val1;
-  buffer2[bufferPtr] = val2;
-  bufferPtr++;
-  if (bufferPtr == state.samplesPerBuffer) bufferPtr = 0;
-  if (state.triggerMode == TriggerMode::autom) limit--;
-  if (Serial.peek() != -1) limit = 0;
+  buffer0[state.bufferStartPtr] = val0;
+  buffer1[state.bufferStartPtr] = val1;
+  buffer2[state.bufferStartPtr] = val2;
+  state.bufferStartPtr++;
+  if (state.bufferStartPtr == state.samplesPerBuffer) state.bufferStartPtr = 0;
+  // if (state.triggerMode == TriggerMode::autom) limit--;
+  // if (Serial.peek() != -1) limit = 0;
 }
 
 uint8_t triggerVoltageMinus;
@@ -55,18 +58,18 @@ __attribute__((always_inline)) inline void fillBuffer_a() {
   }
 }
 __attribute__((always_inline)) inline void fillBuffer_b_rising() {
-  while (triggerVal > triggerVoltageMinus && limit) {
+  while (triggerVal > triggerVoltageMinus) {
     storeOne();
   }
-  while (triggerVal < triggerPoint && limit) {
+  while (triggerVal < triggerPoint) {
     storeOne();
   }
 }
 __attribute__((always_inline)) inline void fillBuffer_b_falling() {
-  while (triggerVal < triggerVoltagePlus && limit) {
+  while (triggerVal < triggerVoltagePlus) {
     storeOne();
   }
-  while (triggerVal > triggerPoint && limit) {
+  while (triggerVal > triggerPoint) {
     storeOne();
   }
 }
@@ -95,7 +98,7 @@ void fillBuffer() {
       triggerPoint = 0;
     }
   }
-  limit = state.samplesPerBuffer * 10;
+  // limit = state.samplesPerBuffer * 10;
   headSamples = state.triggerPos;
   tailSamples = state.samplesPerBuffer - state.triggerPos;
 
@@ -109,21 +112,21 @@ void fillBuffer() {
     fillBuffer_c();
   }
   stopADC();
-  state.didTrigger = limit > 0;
+  // state.didTrigger = limit > 0;
   // it is a circular buffer, so the beginning is right after the end
-  state.bufferStartPtr = bufferPtr;
+  // state.bufferStartPtr = state.bufferStartPtr;
 }
-void fillBufferFast() {
-  startADC();
-  for (bufferPtr = 0; bufferPtr != state.samplesPerBuffer; bufferPtr++) {
-    while (TCNT1 < state.ticksPerAdcRead) {
-    };
-    TCNT1 -= state.ticksPerAdcRead;  // race condition here
-    buffer0[bufferPtr] = ADCH;
-    buffer1[bufferPtr] = (PINB & 0b00011111) | (PIND & 0b11100000);
-    buffer2[bufferPtr] = PIND & 0b00001111;
-  }
-  stopADC();
-  state.didTrigger = 0;
-  state.bufferStartPtr = 0;
-}
+// void fillBufferFast() {
+//   startADC();
+//   for (bufferPtr = 0; bufferPtr != state.samplesPerBuffer; bufferPtr++) {
+//     while (TCNT1 < state.ticksPerAdcRead) {
+//     };
+//     TCNT1 -= state.ticksPerAdcRead;  // race condition here
+//     buffer0[bufferPtr] = ADCH;
+//     buffer1[bufferPtr] = (PINB & 0b00011111) | (PIND & 0b11100000);
+//     buffer2[bufferPtr] = PIND & 0b00001111;
+//   }
+//   stopADC();
+//   state.didTrigger = 0;
+//   state.bufferStartPtr = 0;
+// }

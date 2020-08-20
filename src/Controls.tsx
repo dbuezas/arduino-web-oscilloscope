@@ -71,7 +71,7 @@ function Controls() {
               cleanable={false}
               onChange={(n: number) => {
                 console.log(n)
-                setSynchMode(false)
+                // setSynchMode(false)
                 // setSynchMode(n < millisToADCClocks(20))
                 setTicksPerAdcRead(n)
               }}

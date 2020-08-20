@@ -6,8 +6,8 @@
 enum TriggerMode { autom, normal, single };
 enum TriggerDir { rising, falling };
 
+uint8_t prelude[4] = {0, 1, 255, 253};
 typedef struct {
-  uint8_t prelude[4];
   uint8_t triggerVoltage;
   uint8_t triggerDir;
   uint16_t ticksPerAdcRead;
@@ -25,7 +25,6 @@ typedef struct {
 
 State state = {
     // TODO: find a better way to find data
-    {0, 1, 255, 253},     // uint8_t prelude[4];
     128,                  // uint8_t triggerVoltage;
     TriggerDir::falling,  // uint8_t triggerDir;
     79,                   // uint16_t ticksPerAdcRead;

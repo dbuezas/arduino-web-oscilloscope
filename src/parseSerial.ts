@@ -1,6 +1,6 @@
 function pull(buffer: number[], count: number) {
   const result = []
-  while (count--) {
+  while (count-- && buffer.length) {
     result.push(buffer.shift()!)
   }
   return result
