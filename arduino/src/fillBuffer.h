@@ -6,7 +6,7 @@ uint8_t triggerVal;
 __attribute__((always_inline)) byte storeOne(byte channel) {
   while (TCNT1 < state.ticksPerAdcRead) {
   } /* race condition here (what's with the 7 clocks?) */
-  TCNT1 -= state.ticksPerAdcRead - 7;
+  TCNT1 -= state.ticksPerAdcRead;
   uint8_t val0 = ADCH;
   uint8_t val1 = (PINB & 0b00011111) | (PIND & 0b11100000);
   uint8_t val2 = PINC & 0b00111100;
@@ -17,7 +17,7 @@ __attribute__((always_inline)) byte storeOne(byte channel) {
   state.bufferStartPtr = (state.bufferStartPtr + 1) & 0b111111111;
   if (channel == 0) return val0;
   if (channel == 1) return val1;
-  if (channel > 1) return val2 & (1 << channel);
+  if (channel > 1) return 1 && (val2 & (1 << channel));
 }
 
 __attribute__((always_inline)) void fillBufferAnalog(uint8_t channel,
@@ -82,7 +82,7 @@ void fillBuffer() {
   if (ch < 2)
     fillBufferAnalog(ch, d);
   else
-    fillBufferAnalog(ch, d);
+    fillBufferDigital(ch, d);
   return;
   // if (d == TriggerDir::falling) {
   //   if (ch == 0) fillBufferAnalog(ch, d);

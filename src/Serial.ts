@@ -1,6 +1,7 @@
 // based in wonky  https://github.com/yaakov-h/uniden-web-controller/blob/master/serial.js
 import dataMock from './dataMock'
 import { fill } from 'lodash'
+import { profileE, profileS } from './profile'
 
 type Port = {
   readable: ReadableStream
@@ -117,26 +118,34 @@ export class Serial {
       while (1) {
         if (!this.reader) await sleep(100)
         const data = this.reader && (await this.reader.read())
+        profileS('onData')
         if (data && data.value !== undefined) {
-          try {
-            this.readbuffer.push(...data.value)
-          } catch (e) {
-            console.error(e)
-            console.warn(data.value.length)
-          }
+          if (this.readbuffer.length > 10000)
+            this.readbuffer = this.readbuffer.slice(-10000) // cap the size of the buffer
+          this.readbuffer.push(...data.value)
         }
+        profileE('onData')
       }
     }
     const consume = async () => {
       while (1) {
         // React would do this anyway to skip paints, but only after computing the svg
+        profileS('indexes')
         const [end, start] = indexesOfSequence(END_SEQUENCE, this.readbuffer)
+        profileE('indexes')
         // console.log(idxs.length)
         if (start > -1 && end > -1) {
           await new Promise((r) => requestAnimationFrame(r))
-          callback(this.readbuffer.slice(start + END_SEQUENCE.length, end))
-          // old frames are discarded
+          const dataFrame = this.readbuffer.slice(
+            start + END_SEQUENCE.length,
+            end
+          )
           this.readbuffer = this.readbuffer.slice(end)
+          profileS('callback')
+          callback(dataFrame)
+          profileE('callback')
+          ;(window as any).discarded = (window as any).discarded || 0
+          ;(window as any).discarded += start
         } else {
           await sleep(1)
         }

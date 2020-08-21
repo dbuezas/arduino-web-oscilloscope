@@ -32,7 +32,7 @@ State state = {
     0,                    // uint16_t bufferStartPtr;
     false,                // bool didTrigger;
     TriggerMode::autom,   // uint8_t triggerMode
-    0,                    // uint8_t triggerChannel
+    2,                    // uint8_t triggerChannel
     100,                  // uint16_t freeMemory;
     1,                    // bool isbuffer0ON;
     0,                    // bool isbuffer1ON;

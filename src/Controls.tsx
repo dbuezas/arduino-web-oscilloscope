@@ -7,7 +7,8 @@ import {
   TriggerMode,
   freeMemoryState,
   didTriggerState,
-  useSamplesPerBuffer
+  useSamplesPerBuffer,
+  useTriggerChannel
 } from './bindings'
 import { formatTime } from './formatters'
 import {
@@ -37,6 +38,9 @@ function Controls() {
     useTicksPerAdcRead.send
   )
   const [triggerMode, setTriggerMode] = useRecoilState(useTriggerMode.send)
+  const [triggerChannel, setTriggerChannel] = useRecoilState(
+    useTriggerChannel.send
+  )
   const freeMemory = useRecoilValue(freeMemoryState)
   const didTrigger = useRecoilValue(didTriggerState)
   const [triggerDirection, setTriggerDirection] = useRecoilState(
@@ -122,6 +126,27 @@ function Controls() {
       </Panel>
 
       <Panel header="Trigger" shaded collapsible defaultExpanded>
+        {useMemo(
+          () => (
+            <ButtonToolbar style={ButtonToolbarStyle}>
+              <div>Channel:</div>
+
+              <ButtonGroup>
+                {['A0', 'A1', 'A2', 'A3', 'A4', 'A5'].map((name, idx) => (
+                  <Button
+                    key={idx}
+                    appearance={triggerChannel === idx ? 'primary' : 'default'}
+                    size="sm"
+                    onClick={() => setTriggerChannel(idx)}
+                  >
+                    {name}-{idx}
+                  </Button>
+                ))}
+              </ButtonGroup>
+            </ButtonToolbar>
+          ),
+          [setTriggerChannel, triggerChannel]
+        )}
         {useMemo(
           () => (
             <ButtonToolbar style={ButtonToolbarStyle}>
