@@ -1,5 +1,6 @@
 // based in wonky  https://github.com/yaakov-h/uniden-web-controller/blob/master/serial.js
 import dataMock from './dataMock'
+import { fill } from 'lodash'
 
 type Port = {
   readable: ReadableStream
@@ -23,16 +24,17 @@ declare global {
 const END_SEQUENCE = [0, 1, 255, 253]
 const indexesOfSequence = (needle: number[], haystack: number[]) => {
   const result = []
-  for (let i = 0, j = 0; i < haystack.length; i++) {
+  for (let i = haystack.length - 1, j = needle.length - 1; i >= 0; i--) {
     if (haystack[i] === needle[j]) {
-      j++
-      if (j === needle.length) {
-        result.push(i - j + 1)
-        j = 0
+      j--
+      if (j == -1) {
+        result.push(i)
+        if (result.length == 2) return result
+        j = needle.length - 1
       }
-    } else j = 0
+    } else j = needle.length - 1
   }
-  return result
+  return [-1, -1]
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -111,29 +113,37 @@ export class Serial {
   }
   async onData(callback: (data: number[]) => unknown) {
     // callback(dataMock)
-    while (1) {
-      // React would do this anyway to skip paints, but only after computing the svg
-      await new Promise((r) => requestAnimationFrame(r))
-      if (!this.reader) await sleep(100)
-      const data = this.reader && (await this.reader.read())
-      if (data && data.value !== undefined) {
-        try {
-          this.readbuffer.push(...data.value)
-        } catch (e) {
-          console.error(e)
-          console.warn(data.value.length)
-        }
-        const idxs = indexesOfSequence(END_SEQUENCE, this.readbuffer)
-        // console.log(idxs.length)
-        if (idxs.length > 1) {
-          const end = idxs.pop()!
-          const start = idxs.pop()! + END_SEQUENCE.length
-          callback(this.readbuffer.slice(start, end))
-          // old frames are discarded
-          this.readbuffer = this.readbuffer.slice(end)
+    const produce = async () => {
+      while (1) {
+        if (!this.reader) await sleep(100)
+        const data = this.reader && (await this.reader.read())
+        if (data && data.value !== undefined) {
+          try {
+            this.readbuffer.push(...data.value)
+          } catch (e) {
+            console.error(e)
+            console.warn(data.value.length)
+          }
         }
       }
     }
+    const consume = async () => {
+      while (1) {
+        // React would do this anyway to skip paints, but only after computing the svg
+        const [end, start] = indexesOfSequence(END_SEQUENCE, this.readbuffer)
+        // console.log(idxs.length)
+        if (start > -1 && end > -1) {
+          await new Promise((r) => requestAnimationFrame(r))
+          callback(this.readbuffer.slice(start + END_SEQUENCE.length, end))
+          // old frames are discarded
+          this.readbuffer = this.readbuffer.slice(end)
+        } else {
+          await sleep(1)
+        }
+      }
+    }
+    produce()
+    consume()
   }
 }
 const serial = new Serial()

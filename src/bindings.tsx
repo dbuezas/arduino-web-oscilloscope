@@ -129,6 +129,7 @@ export const allDataState = selector<number[]>({
     const data = parseSerial(newData)
     set(useTriggerPos.receive, data.triggerPos)
     set(useTicksPerAdcRead.receive, data.ticksPerAdcRead)
+    ;(window as any).setTicks = (t: number) => set(useTicksPerAdcRead.send, t)
     set(useSamplesPerBuffer.receive, data.samplesPerBuffer)
     set(useTriggerVoltage.receive, data.triggerVoltageInt)
     set(useTriggerDirection.receive, data.triggerDir)

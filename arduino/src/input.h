@@ -5,7 +5,7 @@ void handleInput() {
     char option = Serial.read();
     String value = Serial.readStringUntil('>');
     if (value.length() == 0) return;
-    int val = value.toInt();
+    int16_t val = value.toInt();
     if (option == 'C') {
       state.ticksPerAdcRead = val;
     }
@@ -13,7 +13,7 @@ void handleInput() {
       state.triggerVoltage = constrain(val, 0, 255);
     }
     if (option == 'P') {
-      state.triggerPos = constrain(val, 1, state.samplesPerBuffer);
+      state.triggerPos = constrain(val, 0, state.samplesPerBuffer);
     }
     if (option == 'S') {
       state.samplesPerBuffer = constrain(val, 1, MAX_SAMPLES);

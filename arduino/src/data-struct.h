@@ -1,7 +1,7 @@
 #ifndef DATA_STRUCT_H
 #define DATA_STRUCT_H
 
-#define MAX_SAMPLES 500
+#define MAX_SAMPLES 512
 
 enum TriggerMode { autom, normal, single };
 enum TriggerDir { rising, falling };
@@ -28,7 +28,7 @@ State state = {
     128,                  // uint8_t triggerVoltage;
     TriggerDir::falling,  // uint8_t triggerDir;
     79,                   // uint16_t ticksPerAdcRead;
-    MAX_SAMPLES * 1 / 3,  // uint16_t triggerPos;
+    MAX_SAMPLES * 0 / 3,  // uint16_t triggerPos;
     0,                    // uint16_t bufferStartPtr;
     false,                // bool didTrigger;
     TriggerMode::autom,   // uint8_t triggerMode
