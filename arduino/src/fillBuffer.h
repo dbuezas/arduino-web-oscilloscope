@@ -1,12 +1,49 @@
 #include "data-struct.h"
 
-uint8_t triggerVal;
-// uint16_t limit;
+uint8_t prescaledTicksPerADCRead;
+uint8_t prescaledTicksPerADCReadTuned;
+#define prescaledTicksCount TCNT2
+void startCPUCounter() {
+  // counter for adcREad
+  TCCR2A = 0;
+  TCCR2B = 0;
+  if (state.ticksPerAdcRead < 256) {
+    TCCR2B = 1 << CS00;
+    prescaledTicksPerADCRead = state.ticksPerAdcRead;
+  } else if (state.ticksPerAdcRead < 256 * 8) {
+    TCCR2B = 2 << CS00;
+    prescaledTicksPerADCRead = state.ticksPerAdcRead / 8;
+  } else if (state.ticksPerAdcRead < 256 * 32) {
+    TCCR2B = 3 << CS00;
+    prescaledTicksPerADCRead = state.ticksPerAdcRead / 32;
+  } else if (state.ticksPerAdcRead < 256 * 64) {
+    TCCR2B = 4 << CS00;
+    prescaledTicksPerADCRead = state.ticksPerAdcRead / 64;
+  } else if (state.ticksPerAdcRead < 256 * 128) {
+    TCCR2B = 5 << CS00;
+    prescaledTicksPerADCRead = state.ticksPerAdcRead / 128;
+  } else if (state.ticksPerAdcRead < 256 * 256) {
+    TCCR2B = 6 << CS00;
+    prescaledTicksPerADCRead = state.ticksPerAdcRead / 256;
+  } else if (state.ticksPerAdcRead < 256 * 1024) {
+    TCCR2B = 7 << CS00;
+    prescaledTicksPerADCRead = state.ticksPerAdcRead / 1024;
+  }
+  prescaledTicksPerADCReadTuned =
+      prescaledTicksPerADCRead - 5;  // it takes 5 clocks to update the counter
+  // counter is TCNT1 and it counts cpu clocks
+  prescaledTicksCount = 0;
+  // con 16 bits: 51 for triggering and 47 after -> cae en 74% y deberia ser 79%
+  // (79 ticks per sample)
+  // con 8 bits: 48 for triggering and 44 after -> cae en 76%
+  // con prescaledTicksCount = 0, llega hasta 40, pero pierde resolucion
+  //
+}
 
 __attribute__((always_inline)) byte storeOne(byte channel) {
-  while (TCNT1 < state.ticksPerAdcRead) {
-  } /* race condition here (what's with the 7 clocks?) */
-  TCNT1 -= state.ticksPerAdcRead;
+  while (prescaledTicksCount < prescaledTicksPerADCRead) {
+  } /* race condition here */
+  prescaledTicksCount -= prescaledTicksPerADCReadTuned;
   uint8_t val0 = ADCH;
   uint8_t val1 = (PINB & 0b00011111) | (PIND & 0b11100000);
   uint8_t val2 = PINC & 0b00111100;
@@ -17,7 +54,7 @@ __attribute__((always_inline)) byte storeOne(byte channel) {
   state.bufferStartPtr = (state.bufferStartPtr + 1) & 0b111111111;
   if (channel == 0) return val0;
   if (channel == 1) return val1;
-  if (channel > 1) return 1 && (val2 & (1 << channel));
+  if (channel > 1) return bitRead(val2, channel);
 }
 
 __attribute__((always_inline)) void fillBufferAnalog(uint8_t channel,
@@ -28,7 +65,7 @@ __attribute__((always_inline)) void fillBufferAnalog(uint8_t channel,
   uint16_t headSamples = state.triggerPos;
   uint16_t tailSamples = state.samplesPerBuffer - state.triggerPos;
   startADC();
-  TCNT1 = 0;
+  startCPUCounter();
   while (headSamples--) {
     storeOne(channel);
   }
@@ -54,7 +91,7 @@ __attribute__((always_inline)) inline void fillBufferDigital(uint8_t channel,
   uint16_t headSamples = state.triggerPos;
   uint16_t tailSamples = state.samplesPerBuffer - state.triggerPos;
   startADC();
-  TCNT1 = 0;
+  startCPUCounter();
   while (headSamples--) {
     storeOne(channel);
   }
@@ -76,42 +113,25 @@ __attribute__((always_inline)) inline void fillBufferDigital(uint8_t channel,
 }
 
 void fillBuffer() {
-  // got it to 57 ticks, now 55, now 58, now 56
+  // got it to 57 ticks, now 55, now 58, now 56, now 49. 8bit counter = 46. 42=
+  // 8 bit cunter and pure pin c 42. 43 for adc. 47 before trigger 85 is min adc
+  // counter=
   uint8_t ch = state.triggerChannel;
   TriggerDir d = state.triggerDir;
   if (ch < 2)
     fillBufferAnalog(ch, d);
   else
     fillBufferDigital(ch, d);
-  return;
-  // if (d == TriggerDir::falling) {
-  //   if (ch == 0) fillBufferAnalog(ch, d);
-  //   if (ch == 1) fillBufferAnalog(ch, d);
-  //   if (ch == 2) fillBufferDigital(ch, d);
-  //   if (ch == 3) fillBufferDigital(ch, d);
-  //   if (ch == 4) fillBufferDigital(ch, d);
-  //   if (ch == 5) fillBufferDigital(ch, d);
-  // } else if (d == TriggerDir::rising) {
-  //   if (ch == 0) fillBufferAnalog(ch, d);
-  //   if (ch == 1) fillBufferAnalog(ch, d);
-  //   if (ch == 2) fillBufferDigital(ch, d);
-  //   if (ch == 3) fillBufferDigital(ch, d);
-  //   if (ch == 4) fillBufferDigital(ch, d);
-  //   if (ch == 5) fillBufferDigital(ch, d);
-  // }
 }
 
-// void fillBufferFast() {
-//   startADC();
-//   for (bufferPtr = 0; bufferPtr != state.samplesPerBuffer; bufferPtr++) {
-//     while (TCNT1 < state.ticksPerAdcRead) {
-//     };
-//     TCNT1 -= state.ticksPerAdcRead;  // race condition here
-//     buffer0[bufferPtr] = ADCH;
-//     buffer1[bufferPtr] = (PINB & 0b00011111) | (PIND & 0b11100000);
-//     buffer2[bufferPtr] = PIND & 0b00001111;
-//   }
-//   stopADC();
-//   state.didTrigger = 0;
-//   state.bufferStartPtr = 0;
-// }
+void fillBuffer2() {
+  startADC();
+  uint16_t i = 1;
+  do {
+    buffer2[i] = ADCH;
+    i = (i + 1) & 0b111111111;
+  } while (i != 0);
+  stopADC();
+  state.didTrigger = 0;
+  state.bufferStartPtr = 1;
+}

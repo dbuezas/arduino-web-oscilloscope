@@ -33,22 +33,13 @@ inline void startADC() {
 inline void stopADC() { ADCSRA = 0; }
 
 void setupADC() {
-  // counter for adcREad
-  TCCR1A = 0;
-  TCCR1B = (1 << CS00);  // normal, top is 0xFFFF, no prescaler
-  // counter is TCNT1 andit counts cpu clocks
-
   // analogReference(INTERNAL1V024);  // 4v
   bitSet(DIDR0, ADC0D);  // disable digital input (reduce noise)
   // disable all timer interrupts (millis() gone)
-  // TIMSK0 = 0;
-  // TIMSK1 = 0;
-  // TIMSK2 = 0;
-  // TIMSK3 = 0;
-  TIMSK0 &= ~_BV(TOIE0);
-  TIMSK1 &= ~_BV(TOIE1);
-  TIMSK2 &= ~_BV(TOIE2);
-  TIMSK3 &= ~_BV(TOIE3);
+  bitWrite(TIMSK0, TOIE0, 0);
+  bitWrite(TIMSK1, TOIE1, 0);
+  bitWrite(TIMSK2, TOIE2, 0);
+  bitWrite(TIMSK3, TOIE3, 0);
 
   noInterrupts();
 
