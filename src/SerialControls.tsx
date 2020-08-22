@@ -15,9 +15,10 @@ const ButtonToolbarStyle = {
   justifyContent: 'space-between',
   alignItems: 'center'
 }
+type ConnectedState = 'Connected' | 'Disconnected' | 'Connecting...' | 'Error'
 
 function SerialControls() {
-  const [serialState, setSerialState] = useState('Connected')
+  const [serialState, setSerialState] = useState<ConnectedState>('Disconnected')
   const setAllData = useSetRecoilState(allDataState)
   useEffect(() => {
     serial.onData(setAllData)
@@ -27,10 +28,14 @@ function SerialControls() {
     // let i = 0
     // setInterval(() => {
     //   i++
-    //   const state = ['Connected', 'Disconnected', 'Waiting'][i % 3]
+    //   const state = ['Connected', 'Disconnected', 'Waiting', 'Error'][i % 3]
     //   setSerialState(state)
     // }, 1000)
-    serial.connectWithPaired(serialOptions).catch(() => {})
+    setSerialState('Connecting...')
+    serial
+      .connectWithPaired(serialOptions)
+      .then(() => setSerialState('Connected'))
+      .catch(() => setSerialState('Error'))
   }, [])
   return (
     <>
@@ -39,8 +44,10 @@ function SerialControls() {
           appearance="primary"
           size="lg"
           onClick={async () => {
-            await serial.connect(serialOptions)
-            console.log('connected')
+            serial
+              .connect(serialOptions)
+              .then(() => setSerialState('Connected'))
+              .catch(() => setSerialState('Error'))
           }}
           icon={<Icon icon="arrow-right" />}
           placement="right"
@@ -48,8 +55,10 @@ function SerialControls() {
         <IconButton
           size="lg"
           onClick={async () => {
-            await serial.close()
-            console.log('closed')
+            serial
+              .close()
+              .then(() => setSerialState('Disconnected'))
+              .catch(() => setSerialState('Error'))
           }}
           icon={<Icon icon="stop" />}
           placement="right"
@@ -58,11 +67,13 @@ function SerialControls() {
         <IconButton
           size="lg"
           onClick={async () => {
-            try {
-              await serial.connectWithPaired(serialOptions)
-            } catch (e) {
-              await serial.connect(serialOptions)
-            }
+            setSerialState('Connecting...')
+
+            await serial
+              .connectWithPaired(serialOptions)
+              .catch(() => serial.connect(serialOptions))
+              .then(() => setSerialState('Connected'))
+              .catch(() => setSerialState('Error'))
           }}
           icon={<Icon icon="recycle" />}
           placement="right"
@@ -74,16 +85,14 @@ function SerialControls() {
           <ButtonToolbar style={ButtonToolbarStyle}>
             State:&nbsp;
             {(() => {
-              console.log(serialState)
-              switch (serialState) {
-                case 'Connected':
-                  return <Tag color="green">Connected</Tag>
-                case 'Disconnected':
-                  return <Tag color="red">Disconnected</Tag>
-                case 'Waiting':
-                  return <Tag color="yellow">No activity</Tag>
-              }
-              return <Tag>WAT</Tag>
+              const color = {
+                Connected: 'green',
+                'Connecting...': 'yellow',
+                Error: 'red',
+                Disconnected: 'grey'
+              }[serialState]
+
+              return <Tag color={color}>{serialState}</Tag>
             })()}
           </ButtonToolbar>
         ),

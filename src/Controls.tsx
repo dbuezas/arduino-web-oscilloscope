@@ -31,6 +31,8 @@ const ButtonToolbarStyle = {
 }
 
 const ticksPerMs = 32000000 / 1000
+const msPerTick = 1000 / 32000000
+const divisionsPerFrame = 10
 
 function Controls() {
   const [voltage, setVoltage] = useState(5)
@@ -48,18 +50,21 @@ function Controls() {
   )
   const setSynchMode = useSetRecoilState(synchMode)
   const samples = useRecoilValue(useSamplesPerBuffer.send)
-  const ADCClocksToMillis = useCallback(
-    (clocks: number) => {
-      const msPerSample = clocks / ticksPerMs
+  const ticksPerSampleToMSPerDivision = useCallback(
+    (ticksPerSample: number) => {
+      const msPerSample = msPerTick * ticksPerSample
       const msPerFrame = msPerSample * samples
-      return msPerFrame
+      const msPerDivision = msPerFrame / divisionsPerFrame
+      return msPerDivision
     },
     [samples]
   )
-  const millisToADCClocks = useCallback(
-    (msPerFrame: number) => {
+  const millisPerDivisionToTicksPerSample = useCallback(
+    (msPerDivision: number) => {
+      const msPerFrame = msPerDivision * divisionsPerFrame
       const msPerSample = msPerFrame / samples
-      return msPerSample * ticksPerMs
+      const ticksPerSample = ticksPerMs * msPerSample
+      return ticksPerSample
     },
     [samples]
   )
@@ -76,32 +81,38 @@ function Controls() {
               onChange={(n: number) => {
                 console.log(n)
                 // setSynchMode(false)
-                // setSynchMode(n < millisToADCClocks(20))
+                // setSynchMode(n < millisPerDivisionToTicksPerSample(20))
                 setTicksPerAdcRead(n)
+                console.log(n)
               }}
               data={[
-                ADCClocksToMillis(79),
+                0.1,
+                ticksPerSampleToMSPerDivision(79),
+                0.2,
+                0.5,
+                1,
                 2,
                 5,
                 10,
                 20,
                 50,
-                100,
-                200,
-                500,
-                1000
-              ].map((ms) => {
-                const clocks = millisToADCClocks(ms)
-                const msPerDivision = ms / 10
+                100
+              ].map((msPerDivision) => {
+                const ticks = millisPerDivisionToTicksPerSample(msPerDivision)
                 return {
                   label: formatTime(msPerDivision / 1000),
-                  value: clocks
+                  value: Math.round(ticks)
                 }
               })}
               style={{ width: 224, marginBottom: 10 }}
             />
           ),
-          [ticksPerAdcRead, setTicksPerAdcRead, setSynchMode]
+          [
+            ticksPerAdcRead,
+            ticksPerSampleToMSPerDivision,
+            setTicksPerAdcRead,
+            millisPerDivisionToTicksPerSample
+          ]
         )}
         {useMemo(
           () => (
