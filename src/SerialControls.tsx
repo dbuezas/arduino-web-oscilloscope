@@ -4,9 +4,10 @@ import { allDataState } from './bindings'
 
 import serial from './Serial'
 import { useSetRecoilState } from 'recoil'
+import parseSerial from './parseSerial'
 
 const serialOptions = {
-  baudrate: 115200 * 2,
+  baudrate: 115200 * 1,
   buffersize: 1000000 //500 * 100
 }
 const ButtonToolbarStyle = {
@@ -16,7 +17,6 @@ const ButtonToolbarStyle = {
   alignItems: 'center'
 }
 type ConnectedState = 'Connected' | 'Disconnected' | 'Connecting...' | 'Error'
-
 function SerialControls() {
   const [serialState, setSerialState] = useState<ConnectedState>('Disconnected')
   const setAllData = useSetRecoilState(allDataState)

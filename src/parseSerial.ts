@@ -39,17 +39,17 @@ export default function parseSerial(data: number[]) {
   const triggerMode = get_uint8_t(myData)
   const triggerChannel = get_uint8_t(myData)
   const freeMemory = get_uint16_t(myData)
+  const isBuffer0ON = get_bool(myData)
   const isBuffer1ON = get_bool(myData)
   const isBuffer2ON = get_bool(myData)
-  const isBuffer3ON = get_bool(myData)
   const samplesPerBuffer = get_uint16_t(myData)
-  const analog1 = isBuffer1ON
+  const analog1 = isBuffer0ON
     ? align(pull(myData, samplesPerBuffer), bufferStartPtr)
     : []
-  const analog2 = isBuffer2ON
+  const analog2 = isBuffer1ON
     ? align(pull(myData, samplesPerBuffer), bufferStartPtr)
     : []
-  const digital = isBuffer3ON
+  const digital = isBuffer2ON
     ? align(pull(myData, samplesPerBuffer), bufferStartPtr)
     : []
   const buffers = [
@@ -69,9 +69,9 @@ export default function parseSerial(data: number[]) {
     didTrigger,
     triggerMode,
     triggerChannel,
+    isBuffer0ON,
     isBuffer1ON,
     isBuffer2ON,
-    isBuffer3ON,
     samplesPerBuffer,
     buffers
   }

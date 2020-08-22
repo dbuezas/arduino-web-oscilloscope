@@ -12,7 +12,8 @@ path.plot-area-d0 {
   stroke-width: 3;
 }
 path.plot-area-d1 {
-  stroke: burlywood;
+  stroke: crimson;
+  stroke-width: 3;
 }
 path.plot-area-d2 {
   stroke: lightcoral;

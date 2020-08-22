@@ -13,7 +13,7 @@
 #include "output.h"
 void setup() {
   pinMode(D13, OUTPUT);
-  Serial.begin(115200 * 2);
+  Serial.begin(115200 * 1);
   Serial.setTimeout(100);  // TODO: remove?
   setupADC();
   setupDAC();

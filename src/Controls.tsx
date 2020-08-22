@@ -8,7 +8,10 @@ import {
   freeMemoryState,
   didTriggerState,
   useSamplesPerBuffer,
-  useTriggerChannel
+  useTriggerChannel,
+  useIsBuffer0ON,
+  useIsBuffer1ON,
+  useIsBuffer2ON
 } from './bindings'
 import { formatTime } from './formatters'
 import {
@@ -43,6 +46,9 @@ function Controls() {
   const [triggerChannel, setTriggerChannel] = useRecoilState(
     useTriggerChannel.send
   )
+  const [isBuffer0ON, setIsBuffer0ON] = useRecoilState(useIsBuffer0ON.send)
+  const [isBuffer1ON, setIsBuffer1ON] = useRecoilState(useIsBuffer1ON.send)
+  const [isBuffer2ON, setIsBuffer2ON] = useRecoilState(useIsBuffer2ON.send)
   const freeMemory = useRecoilValue(freeMemoryState)
   const didTrigger = useRecoilValue(didTriggerState)
   const [triggerDirection, setTriggerDirection] = useRecoilState(
@@ -87,7 +93,7 @@ function Controls() {
               }}
               data={[
                 0.1,
-                ticksPerSampleToMSPerDivision(79),
+                ticksPerSampleToMSPerDivision(88),
                 0.2,
                 0.5,
                 1,
@@ -200,6 +206,44 @@ function Controls() {
             </ButtonToolbar>
           ),
           [setTriggerDirection, triggerDirection]
+        )}
+        {useMemo(
+          () => (
+            <ButtonToolbar style={ButtonToolbarStyle}>
+              <div>Channels:</div>
+              <ButtonGroup>
+                <Button
+                  size="sm"
+                  appearance={isBuffer0ON ? 'primary' : 'default'}
+                  onClick={() => setIsBuffer0ON(isBuffer0ON ? 0 : 1)}
+                >
+                  0
+                </Button>
+                <Button
+                  size="sm"
+                  appearance={isBuffer1ON ? 'primary' : 'default'}
+                  onClick={() => setIsBuffer1ON(isBuffer1ON ? 0 : 1)}
+                >
+                  1
+                </Button>
+                <Button
+                  size="sm"
+                  appearance={isBuffer2ON ? 'primary' : 'default'}
+                  onClick={() => setIsBuffer2ON(isBuffer2ON ? 0 : 1)}
+                >
+                  2
+                </Button>
+              </ButtonGroup>
+            </ButtonToolbar>
+          ),
+          [
+            isBuffer0ON,
+            isBuffer1ON,
+            isBuffer2ON,
+            setIsBuffer0ON,
+            setIsBuffer1ON,
+            setIsBuffer2ON
+          ]
         )}
         {useMemo(
           () => (

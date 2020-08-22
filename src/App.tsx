@@ -1,6 +1,4 @@
 import React from 'react'
-// @ts-ignore
-import FPSStats from 'react-fps-stats'
 import Plot from './Plot'
 import 'rsuite/dist/styles/rsuite-default.css'
 
@@ -15,7 +13,6 @@ function App() {
 
   return (
     <div className="App">
-      <FPSStats left="auto" right="0" top="auto" bottom="0" />
       <Container>
         <Content>
           <Panel shaded>

@@ -84,6 +84,21 @@ export const useTriggerChannel = createHook<number>({
   ui2mcu: (v) => v,
   mcu2ui: (v) => v
 })
+export const useIsBuffer0ON = createHook<number>({
+  key: '0',
+  ui2mcu: (v) => v,
+  mcu2ui: (v) => v
+})
+export const useIsBuffer1ON = createHook<number>({
+  key: '1',
+  ui2mcu: (v) => v,
+  mcu2ui: (v) => v
+})
+export const useIsBuffer2ON = createHook<number>({
+  key: '2',
+  ui2mcu: (v) => v,
+  mcu2ui: (v) => v
+})
 export const useSamplesPerBuffer = createHook<number>({
   key: 'samples-per-buffer',
   ui2mcu: (v) => v,
@@ -135,6 +150,9 @@ export const allDataState = selector<number[]>({
     set(useTriggerDirection.receive, data.triggerDir)
     set(useTriggerChannel.receive, data.triggerChannel)
     set(useTriggerMode.receive, data.triggerMode)
+    set(useIsBuffer0ON.receive, data.isBuffer0ON)
+    set(useIsBuffer1ON.receive, data.isBuffer1ON)
+    set(useIsBuffer2ON.receive, data.isBuffer2ON)
     // if (get(useTriggerMode.send) != TriggerMode.SINGLE)
     //   set(isRunningState, true)
     // set(freeMemoryState, data.freeMemory)

@@ -1,0 +1,8 @@
+{
+    "sketch": "src/src.ino",
+    "board": "LGT8fx Boards:avr:328",
+    "port": "/dev/tty.usbmodem0001",
+    "output": "build",
+    "programmer": "AVR ISP",
+    "configuration": "arduino_isp=disable,clock_source=internal,clock=32MHz,variant=modelP"
+}

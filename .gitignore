@@ -23,5 +23,6 @@ yarn-debug.log*
 yarn-error.log*
 
 #arduino
-/arduino/build
+
 arduino/build
+arduino analog2/build
