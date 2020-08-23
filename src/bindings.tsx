@@ -1,6 +1,7 @@
-import { atom, selector, DefaultValue } from 'recoil'
+import { atom, selector, DefaultValue, RecoilState } from 'recoil'
 import serial from './Serial'
 import parseSerial from './parseSerial'
+import { throttle } from 'lodash'
 
 const isSynchronousMode = atom({
   key: 'synch-mode',
@@ -18,6 +19,19 @@ export const synchMode = selector<boolean>({
   }
 })
 
+function makeSelector<T>(theAtom: RecoilState<T>) {
+  return selector<T>({
+    key: theAtom.key + '_selector',
+    get: ({ get }) => get(theAtom),
+    set: ({ set, get }, newValue) => {
+      const old = get(theAtom)
+      if (old !== newValue) {
+        set(theAtom, newValue)
+      }
+    }
+  })
+}
+
 function createHook<T>({
   key,
   ui2mcu,
@@ -31,6 +45,13 @@ function createHook<T>({
     key,
     default: 0
   })
+
+  // throttle to avoid filling the MCU serial buffer
+  const serial_write = throttle(serial.write, 25, {
+    leading: true,
+    trailing: true
+  })
+  let last = performance.now()
   const send = selector<T>({
     key: key + '-selector',
     get: ({ get }) => mcu2ui(get(localState)),
@@ -41,7 +62,8 @@ function createHook<T>({
       if (current !== mcuValue) {
         const isSynch = get(synchMode)
         if (!isSynch) set(localState, mcuValue)
-        serial.write(key + mcuValue + '>')
+        serial_write(key + mcuValue + '>')
+        last = performance.now()
       }
     }
   })
@@ -100,14 +122,14 @@ export const useIsBuffer2ON = createHook<number>({
   mcu2ui: (v) => v
 })
 export const useSamplesPerBuffer = createHook<number>({
-  key: 'samples-per-buffer',
+  key: 'S',
   ui2mcu: (v) => v,
   mcu2ui: (v) => v
 })
 export enum TriggerMode {
   AUTO = 'Auto',
-  SINGLE = 'Single',
-  NORMAL = 'Normal'
+  NORMAL = 'Normal',
+  SINGLE = 'Single'
 }
 
 export const useTriggerMode = createHook<TriggerMode>({
@@ -121,18 +143,24 @@ export const dataState = atom({
   default: [[0], [0], [0], [0], [0], [0]]
 })
 
-export const isRunningState = atom({
-  key: 'is-running',
-  default: true
-})
-export const didTriggerState = atom({
-  key: 'did-trigger',
-  default: false
-})
-export const freeMemoryState = atom({
-  key: 'free-memory',
-  default: 0
-})
+export const isRunningState = makeSelector(
+  atom({
+    key: 'is-running',
+    default: true
+  })
+)
+export const didTriggerState = makeSelector(
+  atom({
+    key: 'did-trigger',
+    default: false
+  })
+)
+export const freeMemoryState = makeSelector(
+  atom({
+    key: 'free-memory',
+    default: 0
+  })
+)
 // TODO: receive and send are terrible names
 // they should be raw and ui or st like that
 export const allDataState = selector<number[]>({
@@ -155,12 +183,12 @@ export const allDataState = selector<number[]>({
     set(useIsBuffer2ON.receive, data.isBuffer2ON)
     // if (get(useTriggerMode.send) != TriggerMode.SINGLE)
     //   set(isRunningState, true)
-    // set(freeMemoryState, data.freeMemory)
+    set(freeMemoryState, data.freeMemory)
+    set(didTriggerState, data.didTrigger)
     const shouldUpdate =
       // todo use isRunning state in board for this
       get(isRunningState) && data.buffers.some((buffer) => buffer.length > 0)
     if (shouldUpdate) {
-      // set(didTriggerState, data.didTrigger)
       set(dataState, data.buffers)
       // if (get(useTriggerMode.send) === TriggerMode.SINGLE) {
       //   set(isRunningState, false)

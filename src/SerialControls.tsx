@@ -1,6 +1,6 @@
 import { IconButton, Icon, ButtonToolbar, Tag, ButtonGroup } from 'rsuite'
 import React, { useEffect, useMemo, useState } from 'react'
-import { allDataState } from './bindings'
+import { allDataState, synchMode } from './bindings'
 
 import serial from './Serial'
 import { useSetRecoilState } from 'recoil'
@@ -19,11 +19,17 @@ const ButtonToolbarStyle = {
 type ConnectedState = 'Connected' | 'Disconnected' | 'Connecting...' | 'Error'
 function SerialControls() {
   const [serialState, setSerialState] = useState<ConnectedState>('Disconnected')
+  const setSynchMode = useSetRecoilState(synchMode)
   const setAllData = useSetRecoilState(allDataState)
   useEffect(() => {
-    serial.onData(setAllData)
-  }, [setAllData])
-
+    serial.onData((data) => {
+      setAllData(data)
+      // setSynchMode(false)
+    })
+  }, [setAllData, setSynchMode])
+  useEffect(() => {
+    setSynchMode(true)
+  }, [serialState, setSynchMode])
   useEffect(() => {
     // let i = 0
     // setInterval(() => {

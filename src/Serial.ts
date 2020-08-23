@@ -106,7 +106,7 @@ export class Serial {
     this.writer = textOutputStream.getWriter()
   }
 
-  async write(text: string) {
+  write = async (text: string) => {
     if (!this.writer) return
     await this.writer.write(text)
   }
@@ -115,13 +115,28 @@ export class Serial {
     const produce = async () => {
       while (1) {
         if (!this.reader) await sleep(100)
-        await new Promise((r) => requestAnimationFrame(r))
-
+        await sleep(16)
         const data = this.reader && (await this.reader.read())
         if (data && data.value !== undefined) {
           if (this.readbuffer.length > 10000)
             this.readbuffer = this.readbuffer.slice(-10000) // cap the size of the buffer
           this.readbuffer.push(...data.value)
+          // const w = window as any
+          // w.i = w.i || 0
+          // w.i++
+          // w.test = w.test || []
+          // w.testMs = 16
+          // w.test.push(data.value)
+          // if (w.i == 1000) {
+          //   while (1) {
+          //     for (let i = 0; i < w.test.length; i++) {
+          //       await sleep(w.testMs)
+          //       if (this.readbuffer.length > 10000)
+          //         this.readbuffer = this.readbuffer.slice(-10000) // cap the size of the buffer
+          //       this.readbuffer.push(...w.test[i])
+          //     }
+          //   }
+          // }
         }
       }
     }
@@ -131,7 +146,8 @@ export class Serial {
         const [end, start] = indexesOfSequence(END_SEQUENCE, this.readbuffer)
         // console.log(idxs.length)
         if (start > -1 && end > -1) {
-          await new Promise((r) => requestAnimationFrame(r))
+          // await new Promise((r) => requestAnimationFrame(r))
+          await sleep(16)
           const dataFrame = this.readbuffer.slice(
             start + END_SEQUENCE.length,
             end

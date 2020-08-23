@@ -1,3 +1,4 @@
+#include "MemoryFree.h"
 #pragma push_macro("USART_RX_vect")
 #define USART_RX_vect _VECTOR(0)  // unused vector 0
 #include <HardwareSerial0.cpp>
@@ -22,22 +23,22 @@ void setup() {
 jmp_buf env;
 volatile bool canStop;
 void loop() {
+  state.freeMemory = freeMemory();
+
   for (;;) {
-    noInterrupts();
     bool isJump = setjmp(env);
+    if (isJump) offAutoInterrupt();
     canStop = false;
-    interrupts();
-    handleInput();
-    if (isJump) {
-      digitalWrite(D13, 1);
-      sendUIOnly();
-      digitalWrite(D13, 0);
+    state.didTrigger = false;
+    bool change = handleInput();
+    if (change) {
+      sendData(false);
     }
     canStop = true;
     fillBuffer();
     digitalWrite(D13, 1);
     canStop = false;
-    sendBuffer();
+    sendData(true);
     digitalWrite(D13, 0);
   }
 }

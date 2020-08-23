@@ -71,7 +71,6 @@ export default function Plot() {
     // eslint-disable-next-line react-hooks/rules-of-hooks,react-hooks/exhaustive-deps
     useMemo(() => line(data) || undefined, [line, data])
   )
-  const offsetTop = nodeRef.current?.getBoundingClientRect().top || 0
 
   return (
     <div className="plotContainer" ref={containerRef}>
@@ -80,11 +79,14 @@ export default function Plot() {
         ref={nodeRef}
         onMouseMove={(e) => {
           if (draggingTP) {
-            let scaled = (xScale.invert(e.clientX) / xDomain[1]) * samples
+            const offsetLeft = nodeRef.current!.getBoundingClientRect().left
+            let scaled =
+              (xScale.invert(e.clientX - offsetLeft) / xDomain[1]) * samples
             scaled = constrain(scaled, 0, samples)
             setTriggerPosInt(scaled)
           }
           if (draggingTV) {
+            const offsetTop = nodeRef.current!.getBoundingClientRect().top
             setTriggerVoltage(yScale.invert(e.clientY - offsetTop))
           }
         }}

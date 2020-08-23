@@ -1,58 +1,58 @@
+#include "MemoryFree.h"
 #include "data-struct.h"
 
-void handleInput() {
-  while (Serial.available()) {
-    char option = Serial.read();
-    String value = Serial.readStringUntil('>');
-    if (value.length() == 0) return;
-    int16_t val = value.toInt();
-    if (option == 'C') {
+void saveInput(char option, int16_t val) {
+  switch (option) {
+    case 'C':
       state.ticksPerAdcRead = val;
-    }
-    if (option == 'V') {
+      break;
+    case 'V':
       state.triggerVoltage = constrain(val, 0, 255);
-    }
-    if (option == 'P') {
+      break;
+    case 'P':
       state.triggerPos = constrain(val, 0, state.samplesPerBuffer);
-    }
-    if (option == 'S') {
+      break;
+    case 'S':
       state.samplesPerBuffer = constrain(val, 1, MAX_SAMPLES);
       state.triggerPos = constrain(state.triggerPos, 1, state.samplesPerBuffer);
-    }
-    if (option == 'D') {
-      val = constrain(val, 0, 1);
-      state.triggerDir = val;
-    }
-    if (option == '0') {
-      val = constrain(val, 0, 1);
-      state.isbuffer0ON = val;
-    }
-    if (option == '1') {
-      val = constrain(val, 0, 1);
-      state.isbuffer1ON = val;
-    }
-    if (option == '2') {
-      val = constrain(val, 0, 1);
-      state.isbuffer2ON = val;
-    }
-    if (option == 'M') {
-      val = constrain(val, 0, 2);
-      state.triggerMode = val;
+      break;
+    case 'D':
+      state.triggerDir = constrain(val, 0, 1);
+      break;
+    case '0':
+      state.isbuffer0ON = constrain(val, 0, 1);
+      break;
+    case '1':
+      state.isbuffer1ON = constrain(val, 0, 1);
+      break;
+    case '2':
+      state.isbuffer2ON = constrain(val, 0, 1);
+      break;
+    case 'M':
+      state.triggerMode = constrain(val, 0, 2);
       // AUTO, TRIGGER, SLOW
-    }
-    if (option == 'T') {
-      val = constrain(val, 0, 5);
-      state.triggerChannel = val;
-    }
+      break;
+    case 'T':
+      state.triggerChannel = constrain(val, 0, 5);
+      break;
   }
 }
 
-// void send_uint8(uint8_t v) { Serial.write(v); }
-// void send_int16(int16_t v) {
-//   Serial.write(lowByte(v));
-//   Serial.write(highByte(v));
-// }
-// void send_uint16(uint16_t v) {
-//   Serial.write(lowByte(v));
-//   Serial.write(highByte(v));
-// }
+String inputBuffer = String("");
+bool handleInput() {
+  bool change = false;
+  while (Serial.available()) {
+    int s = Serial.read();
+    if (s == '>') {
+      char option = inputBuffer.charAt(0);
+      int16_t val = inputBuffer.substring(1).toInt();
+      state.freeMemory = freeMemory();
+      inputBuffer = String("");
+      saveInput(option, val);
+      change = true;
+    } else {
+      inputBuffer += (char)s;
+    }
+  }
+  return change;
+}

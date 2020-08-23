@@ -1,12 +1,14 @@
+#define TCNT3 _SFR_MEM16(0x94)
+
 #include "data-struct.h"
 uint16_t prescaledTicksPerADCRead;
 uint16_t prescaledTicksPerADCReadTuned;
-#define prescaledTicksCount TCNT1
+#define prescaledTicksCount TCNT3
 void startCPUCounter() {
   // counter for adcREad
-  TCCR1A = 0;
-  TCCR1B = 0;
-  TCCR1B = 1 << CS00;
+  TCCR3A = 0;
+  TCCR3B = 0;
+  TCCR3B = 1 << CS30;
   prescaledTicksPerADCRead = state.ticksPerAdcRead;
 
   prescaledTicksPerADCReadTuned =
@@ -42,8 +44,8 @@ __attribute__((always_inline)) void fillBufferAnalog(uint8_t channel,
   uint8_t triggerPoint = state.triggerVoltage;
   byte triggerVoltageMinus = max(0, (int)triggerPoint - 2);
   byte triggerVoltagePlus = min(255, (int)triggerPoint + 2);
-  uint16_t headSamples = state.triggerPos + 1;
-  uint16_t tailSamples = state.samplesPerBuffer - state.triggerPos - 1;
+  uint16_t headSamples = state.triggerPos;
+  uint16_t tailSamples = state.samplesPerBuffer - state.triggerPos;
   startADC();
   startCPUCounter();
   while (headSamples--) {
@@ -153,7 +155,41 @@ void fillBufferFast() {
   state.bufferStartPtr = (MAX_SAMPLES + i - state.triggerPos) % MAX_SAMPLES;
 }
 
+void offAutoInterrupt() {
+  TIMSK1 = 0;
+  TCCR1A = 0;
+  TCCR1B = 0;
+}
+void setupAutoInterrupt() {
+  TIMSK1 = 0;
+  TCCR1A = 0;
+  TCCR1B = 5 << CS10;      // 1024 prescaler
+  TCCR1B |= (1 << WGM12);  // turn on CTC mode
+  int prescaler = 1024;
+  unsigned long ticksPerFrame = (unsigned long)state.ticksPerAdcRead *
+                                state.samplesPerBuffer /
+                                prescaler;  //  4,294,967,295 (2^32 - 1).
+  uint16_t overhead = 100;                  // 100*1024/32000000=3.2ms
+  uint16_t timeoutTicks =
+      min((unsigned long)ticksPerFrame + overhead, (unsigned long)255 * 255);
+  // timeoutTicks = 3500;
+  OCR1A = timeoutTicks;  // will interrupt when this value is reached
+  TCNT1 = 0;             // counter reset
+
+  TIMSK1 |= (1 << OCIE1A);  // enable ISR
+}
+jmp_buf envAutoTimeout;
 void fillBuffer() {
+  if (state.triggerMode == TriggerMode::autom) {
+    bool timeouted = setjmp(envAutoTimeout);
+    if (timeouted) {
+      offAutoInterrupt();
+      state.didTrigger = false;
+      return;
+    } else {
+      setupAutoInterrupt();
+    }
+  }
   if (state.ticksPerAdcRead < 61) {
     // not enough time for triggering
     fillBufferFast();
@@ -162,5 +198,9 @@ void fillBuffer() {
       fillBufferAnalog(state.triggerChannel, state.triggerDir);
     else
       fillBufferDigital(state.triggerChannel, state.triggerDir);
+    state.didTrigger = true;
   }
+  offAutoInterrupt();
 }
+
+ISR(TIMER1_COMPA_vect) { longjmp(envAutoTimeout, 1); }

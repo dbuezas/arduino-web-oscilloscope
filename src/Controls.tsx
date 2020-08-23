@@ -54,7 +54,6 @@ function Controls() {
   const [triggerDirection, setTriggerDirection] = useRecoilState(
     useTriggerDirection.send
   )
-  const setSynchMode = useSetRecoilState(synchMode)
   const samples = useRecoilValue(useSamplesPerBuffer.send)
   const ticksPerSampleToMSPerDivision = useCallback(
     (ticksPerSample: number) => {
@@ -85,9 +84,6 @@ function Controls() {
               value={ticksPerAdcRead}
               cleanable={false}
               onChange={(n: number) => {
-                console.log(n)
-                // setSynchMode(false)
-                // setSynchMode(n < millisPerDivisionToTicksPerSample(20))
                 setTicksPerAdcRead(n)
                 console.log(n)
               }}
