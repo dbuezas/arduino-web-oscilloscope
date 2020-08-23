@@ -4,7 +4,9 @@
   "private": true,
   "dependencies": {
     "@react-hook/size": "^2.1.0",
+    "@types/mousetrap": "^1.6.3",
     "d3": "^5.16.0",
+    "mousetrap": "^1.6.5",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-fps-stats": "^0.1.3",

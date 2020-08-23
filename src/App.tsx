@@ -9,8 +9,6 @@ import SerialControls from './SerialControls'
 import { Panel, Container, Content, Sidebar } from 'rsuite'
 
 function App() {
-  console.log('App')
-
   return (
     <div className="App">
       <Container>

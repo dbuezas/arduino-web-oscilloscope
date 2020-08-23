@@ -1,8 +1,9 @@
-import React, { useMemo, useState, useCallback } from 'react'
+import MouseTrap from 'mousetrap'
+import React, { useMemo, useState, useCallback, useEffect } from 'react'
 import {
   useTicksPerAdcRead,
   useTriggerDirection,
-  synchMode,
+  isRunningState,
   useTriggerMode,
   TriggerMode,
   freeMemoryState,
@@ -24,7 +25,7 @@ import {
   Button,
   IconButton
 } from 'rsuite'
-import { useRecoilState, useSetRecoilState, useRecoilValue } from 'recoil'
+import { useRecoilState, useRecoilValue } from 'recoil'
 
 const ButtonToolbarStyle = {
   marginTop: 10,
@@ -39,6 +40,8 @@ const divisionsPerFrame = 10
 
 function Controls() {
   const [voltage, setVoltage] = useState(5)
+
+  const [isRunning, setIsRunning] = useRecoilState(isRunningState)
   const [ticksPerAdcRead, setTicksPerAdcRead] = useRecoilState(
     useTicksPerAdcRead.send
   )
@@ -73,10 +76,71 @@ function Controls() {
     },
     [samples]
   )
+  const [timeDivisions, setTimeDivisions] = useState<
+    {
+      label: string
+      value: number
+    }[]
+  >([])
+  useEffect(() => {
+    setTimeDivisions(
+      [
+        0.1,
+        ticksPerSampleToMSPerDivision(88),
+        0.2,
+        0.5,
+        1,
+        2,
+        5,
+        10,
+        20,
+        50,
+        100
+      ].map((msPerDivision) => {
+        const ticks = millisPerDivisionToTicksPerSample(msPerDivision)
+        return {
+          label: formatTime(msPerDivision / 1000),
+          value: Math.round(ticks)
+        }
+      })
+    )
+  }, [ticksPerSampleToMSPerDivision, millisPerDivisionToTicksPerSample])
+
+  useEffect(() => {
+    MouseTrap.bind('space', () => setIsRunning((isRunning) => !isRunning))
+    return () => {
+      MouseTrap.unbind('space')
+    }
+  }, [setIsRunning])
+  useEffect(() => {
+    MouseTrap.bind('right', () => setTicksPerAdcRead(1000))
+    MouseTrap.bind('left', () => setTicksPerAdcRead(1))
+    return () => {
+      MouseTrap.unbind('right')
+      MouseTrap.unbind('left')
+    }
+  }, [setTicksPerAdcRead])
 
   return (
     <div>
       <Panel header="Scales" shaded collapsible defaultExpanded>
+        {useMemo(
+          () => (
+            <Button
+              style={{
+                color: 'white',
+                backgroundColor: isRunning ? 'green' : 'red',
+                width: '100%',
+                marginBottom: '10px'
+              }}
+              size="sm"
+              onClick={() => setIsRunning(!isRunning)}
+            >
+              {isRunning ? 'Run' : 'Hold'}
+            </Button>
+          ),
+          [isRunning, setIsRunning]
+        )}
         {useMemo(
           () => (
             <SelectPicker
@@ -87,25 +151,7 @@ function Controls() {
                 setTicksPerAdcRead(n)
                 console.log(n)
               }}
-              data={[
-                0.1,
-                ticksPerSampleToMSPerDivision(88),
-                0.2,
-                0.5,
-                1,
-                2,
-                5,
-                10,
-                20,
-                50,
-                100
-              ].map((msPerDivision) => {
-                const ticks = millisPerDivisionToTicksPerSample(msPerDivision)
-                return {
-                  label: formatTime(msPerDivision / 1000),
-                  value: Math.round(ticks)
-                }
-              })}
+              data={timeDivisions}
               style={{ width: 224, marginBottom: 10 }}
             />
           ),

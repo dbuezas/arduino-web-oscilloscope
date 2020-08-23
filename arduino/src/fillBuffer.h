@@ -171,7 +171,7 @@ void setupAutoInterrupt() {
                                 prescaler;  //  4,294,967,295 (2^32 - 1).
   uint16_t overhead = 100;                  // 100*1024/32000000=3.2ms
   uint16_t timeoutTicks =
-      min((unsigned long)ticksPerFrame + overhead, (unsigned long)255 * 255);
+      min((unsigned long)ticksPerFrame * 2 + overhead, (unsigned long)65025);
   // timeoutTicks = 3500;
   OCR1A = timeoutTicks;  // will interrupt when this value is reached
   TCNT1 = 0;             // counter reset

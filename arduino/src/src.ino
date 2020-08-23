@@ -14,7 +14,7 @@
 #include "output.h"
 void setup() {
   pinMode(D13, OUTPUT);
-  Serial.begin(115200 * 1);
+  Serial.begin(115200 * 2);
   Serial.setTimeout(100);  // TODO: remove?
   setupADC();
   setupDAC();
@@ -31,9 +31,9 @@ void loop() {
     canStop = false;
     state.didTrigger = false;
     bool change = handleInput();
-    if (change) {
-      sendData(false);
-    }
+    // if (change) {
+    //   sendData(false);
+    // }
     canStop = true;
     fillBuffer();
     digitalWrite(D13, 1);
@@ -46,7 +46,9 @@ void loop() {
 volatile byte receives;
 ISR(USART_RX_vect) {
   Serial._rx_complete_irq();
-  if (canStop) longjmp(env, 1);
+  if (canStop && state.triggerMode != TriggerMode::autom) {
+    longjmp(env, 1);
+  }
 }
 
 /*

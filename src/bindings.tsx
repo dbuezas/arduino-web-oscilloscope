@@ -14,6 +14,10 @@ export const synchMode = selector<boolean>({
   set: ({ set, get }, newValue) => {
     const isSynch = get(isSynchronousMode)
     if (isSynch !== newValue) {
+      // TODO: this synch mode thing needs rework
+      // Ideally the state is stored only in the board, but
+      // that makes the UI laggy for long frames, since the MCU
+      // doesn't have time to respond to UI changes
       set(isSynchronousMode, newValue)
     }
   }
@@ -47,8 +51,8 @@ function createHook<T>({
   })
 
   // throttle to avoid filling the MCU serial buffer
-  const serial_write = throttle(serial.write, 25, {
-    leading: true,
+  const serial_write = throttle(serial.write, 50, {
+    leading: false,
     trailing: true
   })
   let last = performance.now()
@@ -181,8 +185,6 @@ export const allDataState = selector<number[]>({
     set(useIsBuffer0ON.receive, data.isBuffer0ON)
     set(useIsBuffer1ON.receive, data.isBuffer1ON)
     set(useIsBuffer2ON.receive, data.isBuffer2ON)
-    // if (get(useTriggerMode.send) != TriggerMode.SINGLE)
-    //   set(isRunningState, true)
     set(freeMemoryState, data.freeMemory)
     set(didTriggerState, data.didTrigger)
     const shouldUpdate =
@@ -190,9 +192,9 @@ export const allDataState = selector<number[]>({
       get(isRunningState) && data.buffers.some((buffer) => buffer.length > 0)
     if (shouldUpdate) {
       set(dataState, data.buffers)
-      // if (get(useTriggerMode.send) === TriggerMode.SINGLE) {
-      //   set(isRunningState, false)
-      // }
+      if (get(useTriggerMode.send) === TriggerMode.SINGLE) {
+        set(isRunningState, false)
+      }
     }
   }
 })

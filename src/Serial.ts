@@ -116,27 +116,14 @@ export class Serial {
       while (1) {
         if (!this.reader) await sleep(100)
         await sleep(16)
+        if ((window as any).stopIt) continue
         const data = this.reader && (await this.reader.read())
         if (data && data.value !== undefined) {
-          if (this.readbuffer.length > 10000)
-            this.readbuffer = this.readbuffer.slice(-10000) // cap the size of the buffer
+          if (data.value.length > 10000 || this.readbuffer.length > 10000) {
+            this.readbuffer = [] // cap the size of the buffer
+            data.value = []
+          }
           this.readbuffer.push(...data.value)
-          // const w = window as any
-          // w.i = w.i || 0
-          // w.i++
-          // w.test = w.test || []
-          // w.testMs = 16
-          // w.test.push(data.value)
-          // if (w.i == 1000) {
-          //   while (1) {
-          //     for (let i = 0; i < w.test.length; i++) {
-          //       await sleep(w.testMs)
-          //       if (this.readbuffer.length > 10000)
-          //         this.readbuffer = this.readbuffer.slice(-10000) // cap the size of the buffer
-          //       this.readbuffer.push(...w.test[i])
-          //     }
-          //   }
-          // }
         }
       }
     }

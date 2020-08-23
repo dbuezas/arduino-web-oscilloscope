@@ -4,11 +4,10 @@ import { allDataState, synchMode } from './bindings'
 
 import serial from './Serial'
 import { useSetRecoilState } from 'recoil'
-import parseSerial from './parseSerial'
 
 const serialOptions = {
-  baudrate: 115200 * 1,
-  buffersize: 1000000 //500 * 100
+  baudrate: 115200 * 2,
+  buffersize: 20000
 }
 const ButtonToolbarStyle = {
   marginTop: 10,
@@ -18,25 +17,23 @@ const ButtonToolbarStyle = {
 }
 type ConnectedState = 'Connected' | 'Disconnected' | 'Connecting...' | 'Error'
 function SerialControls() {
+  const [frameCount, setFrameCount] = useState(0)
   const [serialState, setSerialState] = useState<ConnectedState>('Disconnected')
   const setSynchMode = useSetRecoilState(synchMode)
   const setAllData = useSetRecoilState(allDataState)
   useEffect(() => {
     serial.onData((data) => {
       setAllData(data)
-      // setSynchMode(false)
+      setFrameCount((frameCount) => {
+        setSynchMode(frameCount > 5)
+        return frameCount + 1
+      })
     })
   }, [setAllData, setSynchMode])
   useEffect(() => {
-    setSynchMode(true)
-  }, [serialState, setSynchMode])
+    setFrameCount(0)
+  }, [serialState])
   useEffect(() => {
-    // let i = 0
-    // setInterval(() => {
-    //   i++
-    //   const state = ['Connected', 'Disconnected', 'Waiting', 'Error'][i % 3]
-    //   setSerialState(state)
-    // }, 1000)
     setSerialState('Connecting...')
     serial
       .connectWithPaired(serialOptions)
@@ -47,7 +44,7 @@ function SerialControls() {
     <>
       <ButtonGroup>
         <IconButton
-          appearance="primary"
+          appearance={serialState == 'Connected' ? 'primary' : undefined}
           size="lg"
           onClick={async () => {
             serial
@@ -60,6 +57,7 @@ function SerialControls() {
         />
         <IconButton
           size="lg"
+          appearance={serialState != 'Connected' ? 'primary' : undefined}
           onClick={async () => {
             serial
               .close()
