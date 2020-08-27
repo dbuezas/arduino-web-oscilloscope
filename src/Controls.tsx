@@ -5,6 +5,7 @@ import {
   useTriggerDirection,
   isRunningState,
   useTriggerMode,
+  useAmplifier,
   TriggerMode,
   freeMemoryState,
   didTriggerState,
@@ -12,7 +13,8 @@ import {
   useTriggerChannel,
   useIsBuffer0ON,
   useIsBuffer1ON,
-  useIsBuffer2ON
+  useIsBuffer2ON,
+  isOversamplingState
 } from './bindings'
 import { formatTime } from './formatters'
 import {
@@ -23,7 +25,8 @@ import {
   ButtonToolbar,
   ButtonGroup,
   Button,
-  IconButton
+  IconButton,
+  Toggle
 } from 'rsuite'
 import { useRecoilState, useRecoilValue } from 'recoil'
 
@@ -39,7 +42,10 @@ const msPerTick = 1000 / 32000000
 const divisionsPerFrame = 10
 
 function Controls() {
-  const [voltage, setVoltage] = useState(5)
+  const [amplifier, setAmplifier] = useRecoilState(useAmplifier.send)
+  const [isOversampling, setIsOversampling] = useRecoilState(
+    isOversamplingState
+  )
 
   const [isRunning, setIsRunning] = useRecoilState(isRunningState)
   const [ticksPerAdcRead, setTicksPerAdcRead] = useRecoilState(
@@ -113,13 +119,13 @@ function Controls() {
     }
   }, [setIsRunning])
   useEffect(() => {
-    MouseTrap.bind('right', () => setTicksPerAdcRead(1000))
-    MouseTrap.bind('left', () => setTicksPerAdcRead(1))
+    MouseTrap.bind('right', () => setTicksPerAdcRead((ticksPerAdcRead * 3) / 2))
+    MouseTrap.bind('left', () => setTicksPerAdcRead((ticksPerAdcRead * 2) / 3))
     return () => {
       MouseTrap.unbind('right')
       MouseTrap.unbind('left')
     }
-  }, [setTicksPerAdcRead])
+  }, [setTicksPerAdcRead, ticksPerAdcRead])
 
   return (
     <div>
@@ -155,32 +161,29 @@ function Controls() {
               style={{ width: 224, marginBottom: 10 }}
             />
           ),
-          [
-            ticksPerAdcRead,
-            ticksPerSampleToMSPerDivision,
-            setTicksPerAdcRead,
-            millisPerDivisionToTicksPerSample
-          ]
+          [ticksPerAdcRead, timeDivisions, setTicksPerAdcRead]
         )}
         {useMemo(
           () => (
             <SelectPicker
               searchable={false}
-              value={voltage}
+              value={
+                [5, 4.096, 2.048, 1.024][
+                  ({ 1: 0, 4: 1, 2: 2, 3: 3 } as any)[amplifier]
+                ]
+              }
               cleanable={false}
-              onChange={setVoltage}
-              data={[5, 4, 2, 1, 4 / 8, 2 / 8, 1 / 8, 1 / 16, 1 / 32].map(
-                (peakToPeak) => {
-                  return {
-                    label: peakToPeak / 10 + 'v (not implemented)',
-                    value: peakToPeak
-                  }
+              onChange={setAmplifier}
+              data={[5, 4.096, 2.048, 1.024].map((peakToPeak, i) => {
+                return {
+                  label: peakToPeak / 10,
+                  value: ({ 0: 1, 1: 4, 2: 2, 3: 3 } as any)[i]
                 }
-              )}
+              })}
               style={{ width: 224 }}
             />
           ),
-          [voltage, setVoltage]
+          [amplifier, setAmplifier]
         )}
       </Panel>
 
@@ -289,16 +292,27 @@ function Controls() {
         )}
         {useMemo(
           () => (
+            <div style={ButtonToolbarStyle}>
+              Oversample
+              <Toggle value={isOversampling} onChange={setIsOversampling} />
+            </div>
+          ),
+          [isOversampling, setIsOversampling]
+        )}
+        {useMemo(
+          () => (
             <ButtonToolbar style={ButtonToolbarStyle}>
               State:&nbsp;
-              {didTrigger ? (
+              {!isRunning ? (
+                <Tag color="red">Hold</Tag>
+              ) : didTrigger ? (
                 <Tag color="green">Triggered</Tag>
               ) : (
                 <Tag color="yellow">Searching</Tag>
               )}
             </ButtonToolbar>
           ),
-          [didTrigger]
+          [isRunning, didTrigger]
         )}
       </Panel>
       <Panel header="Board" shaded collapsible defaultExpanded>

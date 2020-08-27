@@ -23,13 +23,28 @@
 //         // + 1.5 sample and hold + (5.5 unaccounted for) -9 for timing
 //         overhead
 
-inline void startADC() {
+inline void startADC(uint8_t prescaler, uint8_t amplifier) {
   ADCSRA = 1 << ADEN |   // enable ADC
            1 << ADSC |   // start conversion
            1 << ADATE |  // ADC auto triggering enable
            0 << ADIE |   // disable ADC interrupt
-           ADC_PRESCALER_conf << ADPS0;
+           prescaler << ADPS0;
+  ADMUX = bitRead(amplifier, 0)
+              << REFS0 |  // ADC refference is AVCC [seel also: ADCSRD:REFS2]
+
+          bitRead(amplifier, 1)
+              << REFS1 |   // ADC refference is AVCC [seel also: ADCSRD:REFS2]
+          1 << ADLAR |     // ADC data register is left adjustment
+          0b0000 << MUX0;  // ADC0
+                           // 0b1000 << MUX0;  // 1/5 ADC0
+
+  ADCSRD = bitRead(amplifier, 2)
+               << REFS2 |    // part of ADC reference voltage [see ADMUX:REFS0]
+           0b00 << IVSEL0 |  // 2v DAC output
+           0b000 << VDS0;    // shut down voltage division
+                             //  0b001 << VDS0;    // ADC0 voltage division
 }
+
 inline void stopADC() { ADCSRA = 0; }
 
 void setupADC() {
@@ -44,10 +59,11 @@ void setupADC() {
   noInterrupts();
 
   pinMode(A0, INPUT);
-  ADMUX = 0b01 << REFS0 |  // ADC refference is AVCC [seel also: ADCSRD:REFS2]
+  ADMUX = 0b10 << REFS0 |  // ADC refference is AVCC [seel also: ADCSRD:REFS2]
+                           // ADMUX = 0b01 << REFS0 |  // ADC refference is AVCC
+                           // [seel also: ADCSRD:REFS2]
           1 << ADLAR |     // ADC data register is left adjustment
-          0b0000 << MUX0;  // ADC0 (but multiplexer is not used now, i go for
-                           // diff amplifier)
+          0b1111 << MUX0;  // gnd
 
   ADCSRD = 0b0 << REFS2 |    // part of ADC reference voltage [see ADMUX:REFS0]
            0b00 << IVSEL0 |  // 2v DAC output
@@ -55,7 +71,7 @@ void setupADC() {
 
   ADCSRB = 0 << ADTS0;  // Continuous conversion
 
-  ADCSRC = 1 << DIFFS |   // from diff amplifier
+  ADCSRC = 1 << DIFFS |   // 1 = from diff amplifier, 0=multiplexer
            0 << SPD;      // 1: high speed conversion (can't hear a difference)
   DAPCR = 0b1 << DAPEN |  // Enable
           0b00 << GA0 |   // gain
@@ -65,7 +81,8 @@ void setupADC() {
           // 0b11 << DPS0;    // (+) GND
 
           0b110 << DNS0 |  // (-) GND
-          0b00 << DPS0;    // (+) ADC0 through mux
+          // 0b01 << DPS0;    // (+) ADC0
+          0b00 << DPS0;  // (+) MUX
 
   // uint8_t val1 = (PINB & 0b00011111) | (PIND & 0b11100000);
   // uint8_t val2 = PINC & 0b00111100;

@@ -9,6 +9,9 @@ void saveInput(char option, int16_t val) {
     case 'V':
       state.triggerVoltage = constrain(val, 0, 255);
       break;
+    case 'A':
+      state.amplifier = constrain(val, 1, 4);
+      break;
     case 'P':
       state.triggerPos = constrain(val, 0, state.samplesPerBuffer);
       break;

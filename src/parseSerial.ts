@@ -34,6 +34,7 @@ export default function parseSerial(data: number[]) {
   const triggerDir = get_uint8_t(myData)
   const ticksPerAdcRead = get_uint16_t(myData)
   const triggerPos = get_uint16_t(myData)
+  const amplifier = get_uint8_t(myData)
   const bufferStartPtr = get_uint16_t(myData)
   const didTrigger = get_bool(myData)
   const triggerMode = get_uint8_t(myData)
@@ -42,16 +43,23 @@ export default function parseSerial(data: number[]) {
   const isBuffer0ON = get_bool(myData)
   const isBuffer1ON = get_bool(myData)
   const isBuffer2ON = get_bool(myData)
+  const trashedSamples = get_uint16_t(myData)
   const samplesPerBuffer = get_uint16_t(myData)
-  const analog1 = isBuffer0ON
+  let analog1 = isBuffer0ON
     ? align(pull(myData, samplesPerBuffer), bufferStartPtr)
     : []
-  const analog2 = isBuffer1ON
+  let analog2 = isBuffer1ON
     ? align(pull(myData, samplesPerBuffer), bufferStartPtr)
     : []
-  const digital = isBuffer2ON
+  let digital = isBuffer2ON
     ? align(pull(myData, samplesPerBuffer), bufferStartPtr)
     : []
+
+  if (trashedSamples > 0) {
+    analog1 = analog1.slice(0, -trashedSamples)
+    analog2 = analog2.slice(0, -trashedSamples)
+    digital = digital.slice(0, -trashedSamples)
+  }
   const buffers = [
     analog1.map((n) => (n / 256) * 5),
     analog2.map((n) => (n / 256) * 5),
@@ -65,6 +73,7 @@ export default function parseSerial(data: number[]) {
     triggerDir,
     ticksPerAdcRead,
     triggerPos,
+    amplifier,
     freeMemory,
     didTrigger,
     triggerMode,

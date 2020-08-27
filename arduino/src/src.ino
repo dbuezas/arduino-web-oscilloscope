@@ -34,7 +34,7 @@ void loop() {
     // if (change) {
     //   sendData(false);
     // }
-    canStop = true;
+    canStop = (state.triggerMode != TriggerMode::autom);
     fillBuffer();
     digitalWrite(D13, 1);
     canStop = false;
@@ -46,7 +46,7 @@ void loop() {
 volatile byte receives;
 ISR(USART_RX_vect) {
   Serial._rx_complete_irq();
-  if (canStop && state.triggerMode != TriggerMode::autom) {
+  if (canStop) {
     longjmp(env, 1);
   }
 }

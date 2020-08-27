@@ -12,6 +12,7 @@ typedef struct {
   uint8_t triggerDir;
   uint16_t ticksPerAdcRead;
   uint16_t triggerPos;
+  uint8_t amplifier;
   uint16_t bufferStartPtr;
   bool didTrigger;
   uint8_t triggerMode;
@@ -20,6 +21,7 @@ typedef struct {
   bool isbuffer0ON;
   bool isbuffer1ON;
   bool isbuffer2ON;
+  uint16_t trashedSamples;
   uint16_t samplesPerBuffer;
 } State;
 
@@ -29,6 +31,7 @@ State state = {
     TriggerDir::falling,  // uint8_t triggerDir;
     79,                   // uint16_t ticksPerAdcRead;
     MAX_SAMPLES * 0 / 3,  // uint16_t triggerPos;
+    1,                    // uint8_t amplifier;
     0,                    // uint16_t bufferStartPtr;
     false,                // bool didTrigger;
     TriggerMode::autom,   // uint8_t triggerMode
@@ -37,6 +40,7 @@ State state = {
     1,                    // bool isbuffer0ON;
     0,                    // bool isbuffer1ON;
     1,                    // bool isbuffer2ON;
+    MAX_SAMPLES,          // uint16_t trashedSamples;
     MAX_SAMPLES           // uint16_t samplesPerBuffer;
 };
 

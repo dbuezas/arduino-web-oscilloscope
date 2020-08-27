@@ -1,4 +1,5 @@
 import { atom, selector, DefaultValue, RecoilState } from 'recoil'
+import ft from 'fourier-transform'
 import serial from './Serial'
 import parseSerial from './parseSerial'
 import { throttle } from 'lodash'
@@ -125,6 +126,11 @@ export const useIsBuffer2ON = createHook<number>({
   ui2mcu: (v) => v,
   mcu2ui: (v) => v
 })
+export const useAmplifier = createHook<number>({
+  key: 'A',
+  ui2mcu: (v) => v,
+  mcu2ui: (v) => v
+})
 export const useSamplesPerBuffer = createHook<number>({
   key: 'S',
   ui2mcu: (v) => v,
@@ -144,13 +150,19 @@ export const useTriggerMode = createHook<TriggerMode>({
 
 export const dataState = atom({
   key: 'data',
-  default: [[0], [0], [0], [0], [0], [0]]
+  default: [[0], [0], [0], [0], [0], [0], [0]]
 })
 
 export const isRunningState = makeSelector(
   atom({
     key: 'is-running',
     default: true
+  })
+)
+export const isOversamplingState = makeSelector(
+  atom({
+    key: 'is-oversampling',
+    default: false
   })
 )
 export const didTriggerState = makeSelector(
@@ -181,6 +193,7 @@ export const allDataState = selector<number[]>({
     set(useTriggerVoltage.receive, data.triggerVoltageInt)
     set(useTriggerDirection.receive, data.triggerDir)
     set(useTriggerChannel.receive, data.triggerChannel)
+    set(useAmplifier.receive, data.amplifier)
     set(useTriggerMode.receive, data.triggerMode)
     set(useIsBuffer0ON.receive, data.isBuffer0ON)
     set(useIsBuffer1ON.receive, data.isBuffer1ON)
@@ -191,7 +204,61 @@ export const allDataState = selector<number[]>({
       // todo use isRunning state in board for this
       get(isRunningState) && data.buffers.some((buffer) => buffer.length > 0)
     if (shouldUpdate) {
-      set(dataState, data.buffers)
+      if (get(isOversamplingState)) {
+        const smoothingFactor = 0.9
+        const oldData = get(dataState)
+        const avrData = data.buffers.map((b, i) =>
+          b.map(
+            (n, j) =>
+              (oldData[i][j] || 0) * smoothingFactor + n * (1 - smoothingFactor)
+          )
+        )
+        const fourier = ft(avrData[0])
+
+        set(dataState, [...avrData, fourier])
+      } else {
+        const fourier = ft(data.buffers[0])
+        {
+          const d = data.buffers[0]
+          const max = Math.max(...d)
+          const min = Math.min(...d)
+          const mid = (max - min) / 2
+          let firstCross = -1
+          let lastCross = 0
+          let count = 0
+          for (let i = 1; i < d.length; i++) {
+            if (d[i - 1] < mid && d[i] >= mid) {
+              count++
+              if (firstCross < 0) firstCross = i
+              lastCross = i
+            }
+          }
+
+          let maxA = 0
+          let maxI = 0
+          for (let i = 1; i < fourier.length; i++) {
+            if (maxA < fourier[i]) {
+              maxA = fourier[i]
+              maxI = i
+            }
+          }
+          const sPerFrame =
+            (data.ticksPerAdcRead / 32000000) * data.samplesPerBuffer
+          let sFirstToLast =
+            ((lastCross - firstCross) / data.samplesPerBuffer) * sPerFrame
+          if (firstCross < 0) sFirstToLast = Number.MAX_VALUE
+          console.log(
+            'freq count',
+            (count - 1) / sFirstToLast,
+            'freq fft',
+            maxI / sPerFrame
+          )
+          set(dataState, [...data.buffers, fourier])
+        }
+        // set(dataState, [...data.buffers, fourier])
+      }
+
+      // set(dataState, data.buffers)
       if (get(useTriggerMode.send) === TriggerMode.SINGLE) {
         set(isRunningState, false)
       }

@@ -25,7 +25,7 @@ function SerialControls() {
     serial.onData((data) => {
       setAllData(data)
       setFrameCount((frameCount) => {
-        setSynchMode(frameCount > 5)
+        setSynchMode(frameCount < 5)
         return frameCount + 1
       })
     })

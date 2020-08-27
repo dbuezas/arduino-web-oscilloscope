@@ -34,8 +34,9 @@ void setupADC() {
   pinMode(A0, INPUT);
   ADMUX = 0b01 << REFS0 |  // ADC refference is AVCC [seel also: ADCSRD:REFS2]
           1 << ADLAR |     // ADC data register is left adjustment
-          0b0000 << MUX0;  // ADC0 (but multiplexer is not used now, i go for
-                           // diff amplifier)
+                        // ADC0 (but multiplexer is not used now, i go for diff
+                        // amplifier)
+          0b0000 << MUX0;
 
   ADCSRD = 0b0 << REFS2 |    // part of ADC reference voltage [see ADMUX:REFS0]
            0b00 << IVSEL0 |  // 2v DAC output
