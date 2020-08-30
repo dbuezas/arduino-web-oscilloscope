@@ -11,7 +11,7 @@ import {
   dataState,
   useSamplesPerBuffer,
   voltageRangeState
-} from './bindings'
+} from '../../communication/bindings'
 import { useRecoilValue, useRecoilState } from 'recoil'
 const margin = { top: 20, right: 50, bottom: 30, left: 50 }
 const constrain = (n: number, min: number, max: number) =>

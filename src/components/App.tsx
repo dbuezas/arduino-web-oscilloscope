@@ -1,13 +1,12 @@
 import React from 'react'
-import Plot from './Plot'
+import Plot from './Plot/Plot'
 import 'rsuite/dist/styles/rsuite-default.css'
 
 import './App.css'
 
 import Controls from './Controls'
-import SerialControls from './SerialControls'
 import { Panel, Container, Content, Sidebar } from 'rsuite'
-import AnalysisControls from './AnalysisControls'
+import About from './About'
 
 function App() {
   return (
@@ -19,9 +18,8 @@ function App() {
           </Panel>
         </Content>
         <Sidebar>
-          <SerialControls />
           <Controls />
-          <AnalysisControls />
+          <About />
         </Sidebar>
       </Container>
     </div>

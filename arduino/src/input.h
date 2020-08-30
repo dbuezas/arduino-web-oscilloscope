@@ -2,6 +2,7 @@
 #include "data-struct.h"
 
 void saveInput(char option, int16_t val) {
+  state.needData = false;
   switch (option) {
     case 'C':
       state.ticksPerAdcRead = val;
@@ -22,14 +23,8 @@ void saveInput(char option, int16_t val) {
     case 'D':
       state.triggerDir = constrain(val, 0, 1);
       break;
-    case '0':
-      state.isbuffer0ON = constrain(val, 0, 1);
-      break;
-    case '1':
-      state.isbuffer1ON = constrain(val, 0, 1);
-      break;
-    case '2':
-      state.isbuffer2ON = constrain(val, 0, 1);
+    case 'B':
+      state.isChannelOn = val;
       break;
     case 'M':
       state.triggerMode = constrain(val, 0, 2);

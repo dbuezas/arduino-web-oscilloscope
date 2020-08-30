@@ -1,5 +1,6 @@
 import ft from 'fourier-transform'
 export function getFFT(signal: number[]) {
+  if (signal.length === 0) return []
   const nextPowerOf2 = Math.ceil(Math.log2(signal.length))
   const padding = Math.pow(2, nextPowerOf2) - signal.length
   let paddedSignal = signal
@@ -13,7 +14,7 @@ export function getFFT(signal: number[]) {
 }
 
 export function average(signal: number[]) {
-  // averaging is used to remove wrong frequency readings due to noise
+  // exponential averaging is used to remove wrong frequency readings due to noise
   let last = signal[0]
   return signal.map((n) => {
     last = last * 0.5 + n * 0.5

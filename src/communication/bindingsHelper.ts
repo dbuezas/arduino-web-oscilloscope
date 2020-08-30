@@ -1,6 +1,6 @@
 import { atom, selector, DefaultValue, RecoilState, RecoilValue } from 'recoil'
 import serial from './Serial'
-import { throttle, identity } from 'lodash'
+import { throttle } from 'lodash'
 
 export function memoSelector<T>(theAtom: RecoilState<T>) {
   return selector<T>({
@@ -18,16 +18,18 @@ type GetRecoilValue = <T>(recoilVal: RecoilValue<T>) => T
 export function createHook<T>({
   key,
   ui2mcu,
-  mcu2ui
+  mcu2ui,
+  default: defaultValue
 }: {
   key: string
   ui2mcu: (v: T, get: GetRecoilValue | null) => number
   mcu2ui: (v: number, get: GetRecoilValue | null) => T
+  default: T
 }) {
   const remoteState = memoSelector(
     atom<number>({
       key,
-      default: 0
+      default: ui2mcu(defaultValue, null)
     })
   )
 
@@ -39,8 +41,8 @@ export function createHook<T>({
   const send = selector<T>({
     key: key + '-selector',
     get: ({ get }) => mcu2ui(get(remoteState), get),
-    set: ({ set, get }, newValue) => {
-      if (newValue instanceof DefaultValue) throw new Error('no reset allowed')
+    set: ({ set, get, reset }, newValue) => {
+      if (newValue instanceof DefaultValue) return reset(remoteState)
       set(remoteState, ui2mcu(newValue, get))
       serial_write(key + ui2mcu(newValue, get) + '>')
     }

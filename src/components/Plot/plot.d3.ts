@@ -1,5 +1,5 @@
 import * as d3 from 'd3'
-import { formatTime } from './formatters'
+import { formatTime } from '../formatters'
 const margin = { top: 20, right: 50, bottom: 30, left: 50 }
 export type Datum = number
 export type Size = { height: number; width: number }

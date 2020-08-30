@@ -1,10 +1,14 @@
 import React from 'react'
-import { freeMemoryState, frequencyState, voltagesState } from './bindings'
-import { formatFreq, formatVoltage } from './formatters'
+import {
+  freeMemoryState,
+  frequencyState,
+  voltagesState
+} from '../../communication/bindings'
+import { formatFreq, formatVoltage } from '../formatters'
 import { Panel, Tag } from 'rsuite'
 import { useRecoilValue } from 'recoil'
 
-export default function AnalysisControls() {
+export default function Voltages() {
   const voltages = useRecoilValue(voltagesState)
   const frequency = useRecoilValue(frequencyState)
   const freeMemory = useRecoilValue(freeMemoryState)

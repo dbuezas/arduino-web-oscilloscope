@@ -1,5 +1,4 @@
 // based in wonky  https://github.com/yaakov-h/uniden-web-controller/blob/master/serial.js
-import { profileE, profileS } from './profile'
 
 type Port = {
   readable: ReadableStream
@@ -26,9 +25,9 @@ const indexesOfSequence = (needle: number[], haystack: number[]) => {
   for (let i = haystack.length - 1, j = needle.length - 1; i >= 0; i--) {
     if (haystack[i] === needle[j]) {
       j--
-      if (j == -1) {
+      if (j === -1) {
         result.push(i)
-        if (result.length == 2) return result
+        if (result.length === 2) return result
         j = needle.length - 1
       }
     } else j = needle.length - 1

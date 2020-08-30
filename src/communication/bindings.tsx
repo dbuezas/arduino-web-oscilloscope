@@ -1,65 +1,78 @@
-import { atom, selector, DefaultValue } from 'recoil'
+import { atom, selector, DefaultValue, ReadWriteSelectorOptions } from 'recoil'
 import parseSerial from './parseSerial'
 import { createHook, memoSelector } from './bindingsHelper'
-import { getFFT, getFrequencyCount } from './spectrum'
+import { getFFT, getFrequencyCount } from '../spectrum/spectrum'
 
 export const useTriggerVoltage = createHook<number>({
   key: 'V',
   ui2mcu: (v, get) => {
-    if (!get) return 0
-    const [vmin, , vpp] = get(voltageRangeState)
+    const [vmin, , vpp] = get ? get(voltageRangeState) : [0, 5, 5]
     return Math.ceil(((v + vmin) / vpp) * 255)
   },
   mcu2ui: (n, get) => {
-    if (!get) return 0
-    const [vmin, , vpp] = get(voltageRangeState)
+    const [vmin, , vpp] = get ? get(voltageRangeState) : [0, 5, 5]
     return (n / 255) * vpp + vmin
-  }
+  },
+  default: 2.5
 })
 export const useTriggerPos = createHook<number>({
   key: 'P',
   ui2mcu: (v) => Math.ceil(v),
-  mcu2ui: (v) => v
+  mcu2ui: (v) => v,
+  default: 512 * 0.5 // TODO: use percentage in ui
 })
 export const useTicksPerAdcRead = createHook<number>({
   key: 'C',
   ui2mcu: (v) => Math.ceil(v),
-  mcu2ui: (v) => v
+  mcu2ui: (v) => v,
+  default: 88 // TODO: use frame total time or per division
 })
-export const useTriggerDirection = createHook<boolean>({
+export enum TriggerDirection {
+  FALLING = 'Falling',
+  RISING = 'Rising'
+}
+export const useTriggerDirection = createHook<TriggerDirection>({
   key: 'D',
-  ui2mcu: (v) => (v ? 1 : 0),
-  mcu2ui: (v) => !!v
+  ui2mcu: (v) => (v == TriggerDirection.RISING ? 0 : 1),
+  mcu2ui: (v) => (v ? TriggerDirection.FALLING : TriggerDirection.RISING),
+  default: TriggerDirection.FALLING
 })
 export const useTriggerChannel = createHook<number>({
   key: 'T',
   ui2mcu: (v) => v,
-  mcu2ui: (v) => v
+  mcu2ui: (v) => v,
+  default: 0
 })
-export const useIsBuffer0ON = createHook<number>({
-  key: '0',
-  ui2mcu: (v) => v,
-  mcu2ui: (v) => v
+export const useIsChannelOn = createHook<boolean[]>({
+  key: 'B',
+  ui2mcu: (v) => {
+    const result = v
+      .map((b) => (b ? 1 : 0) as number)
+      .reduce((acc, n, i) => acc + (n << i), 0)
+    console.log('ui2mcu', v, result)
+    return result
+  },
+  mcu2ui: (v) => {
+    const result = Array(8)
+      .fill(0)
+      .map((_, i) => Boolean(v & (1 << i)))
+    console.log('mcu2ui', v, result)
+    return result
+  },
+  default: [true, false, false, false, false, false]
 })
-export const useIsBuffer1ON = createHook<number>({
-  key: '1',
-  ui2mcu: (v) => v,
-  mcu2ui: (v) => v
-})
-export const useIsBuffer2ON = createHook<number>({
-  key: '2',
-  ui2mcu: (v) => v,
-  mcu2ui: (v) => v
-})
+
 export const useAmplifier = createHook<number>({
   key: 'A',
   ui2mcu: (v) => Math.floor(v),
-  mcu2ui: (v) => v
+  mcu2ui: (v) => v,
+  default: 1 //TODO: use volt range or per division
 })
 export const useSamplesPerBuffer = createHook<number>({
   key: 'S',
   ui2mcu: (v) => v,
-  mcu2ui: (v) => v
+  mcu2ui: (v) => v,
+  default: 512 // TODO: this shouldn't be a setter
 })
 export enum TriggerMode {
   AUTO = 'Auto',
@@ -70,7 +83,8 @@ export enum TriggerMode {
 export const useTriggerMode = createHook<TriggerMode>({
   key: 'M',
   ui2mcu: (v) => Object.values(TriggerMode).indexOf(v),
-  mcu2ui: (v) => Object.values(TriggerMode)[v]
+  mcu2ui: (v) => Object.values(TriggerMode)[v],
+  default: TriggerMode.AUTO
 })
 
 export const dataState = atom({
@@ -130,9 +144,13 @@ export const voltagesState = selector({
     }
   }
 })
+
 export const voltageRangeState = selector({
   key: 'voltage-range',
   get: ({ get }) => {
+    //https://docs.google.com/spreadsheets/d/1urWB28qDmB_LL_khdBBfB-djku5h4lSx-Cw9l7Rz1u8/edit?usp=sharing
+    // TODO: do this in another way
+    // account for the last fifth of the ADC, which is not usable
     const vmax = [
       25,
       6.25,
@@ -152,6 +170,20 @@ export const voltageRangeState = selector({
   }
 })
 
+type Set = Parameters<ReadWriteSelectorOptions<never>['set']>[0]['set']
+type Get = Parameters<ReadWriteSelectorOptions<never>['set']>[0]['get']
+const sendFullState = ({ set, get }: { set: Set; get: Get }) => {
+  set(useTriggerPos.send, get(useTriggerPos.send))
+  set(useTicksPerAdcRead.send, get(useTicksPerAdcRead.send))
+  set(useSamplesPerBuffer.send, get(useSamplesPerBuffer.send))
+  set(useAmplifier.send, get(useAmplifier.send))
+  set(useTriggerVoltage.send, get(useTriggerVoltage.send))
+  set(useTriggerDirection.send, get(useTriggerDirection.send))
+  set(useTriggerChannel.send, get(useTriggerChannel.send))
+  set(useTriggerMode.send, get(useTriggerMode.send))
+  set(useIsChannelOn.send, get(useIsChannelOn.send))
+}
+
 const win = window as any
 export const allDataState = selector<number[]>({
   key: 'all-data',
@@ -160,19 +192,20 @@ export const allDataState = selector<number[]>({
     if (newData instanceof DefaultValue) return
     if (newData.length === 0) return
     const data = parseSerial(newData)
+    if (data.needData) {
+      return sendFullState({ set, get })
+    }
     win.setTicks = (n: number) => set(useTicksPerAdcRead.send, n)
     if (data.forceUIUpdate) {
       set(useTriggerPos.receive, data.triggerPos)
       set(useTicksPerAdcRead.receive, data.ticksPerAdcRead)
       set(useSamplesPerBuffer.receive, data.samplesPerBuffer)
       set(useAmplifier.receive, data.amplifier)
-      set(useTriggerVoltage.receive, data.triggerVoltageInt)
+      set(useTriggerVoltage.receive, data.triggerVoltage)
       set(useTriggerDirection.receive, data.triggerDir)
       set(useTriggerChannel.receive, data.triggerChannel)
       set(useTriggerMode.receive, data.triggerMode)
-      set(useIsBuffer0ON.receive, data.isBuffer0ON)
-      set(useIsBuffer1ON.receive, data.isBuffer1ON)
-      set(useIsBuffer2ON.receive, data.isBuffer2ON)
+      set(useIsChannelOn.receive, data.isChannelOn)
     }
 
     const [vmin, , vpp] = get(voltageRangeState)

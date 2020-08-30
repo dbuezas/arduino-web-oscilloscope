@@ -7,9 +7,8 @@ import {
   Panel
 } from 'rsuite'
 import React, { useEffect, useMemo, useState } from 'react'
-import { allDataState } from './bindings'
-
-import serial from './Serial'
+import { allDataState } from '../../communication/bindings'
+import serial from '../../communication/Serial'
 import { useSetRecoilState } from 'recoil'
 
 const serialOptions = {
@@ -42,7 +41,7 @@ function SerialControls() {
     <Panel shaded header="Serial">
       <ButtonGroup>
         <IconButton
-          appearance={serialState == 'Connected' ? 'primary' : undefined}
+          appearance={serialState === 'Connected' ? 'primary' : undefined}
           size="lg"
           onClick={async () => {
             serial
@@ -55,7 +54,7 @@ function SerialControls() {
         />
         <IconButton
           size="lg"
-          appearance={serialState != 'Connected' ? 'primary' : undefined}
+          appearance={serialState !== 'Connected' ? 'primary' : undefined}
           onClick={async () => {
             serial
               .close()
