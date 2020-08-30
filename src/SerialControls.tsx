@@ -1,12 +1,19 @@
-import { IconButton, Icon, ButtonToolbar, Tag, ButtonGroup } from 'rsuite'
+import {
+  IconButton,
+  Icon,
+  ButtonToolbar,
+  Tag,
+  ButtonGroup,
+  Panel
+} from 'rsuite'
 import React, { useEffect, useMemo, useState } from 'react'
-import { allDataState, synchMode } from './bindings'
+import { allDataState } from './bindings'
 
 import serial from './Serial'
 import { useSetRecoilState } from 'recoil'
 
 const serialOptions = {
-  baudrate: 115200 * 2,
+  baudrate: 115200 * 1,
   buffersize: 20000
 }
 const ButtonToolbarStyle = {
@@ -17,22 +24,13 @@ const ButtonToolbarStyle = {
 }
 type ConnectedState = 'Connected' | 'Disconnected' | 'Connecting...' | 'Error'
 function SerialControls() {
-  const [frameCount, setFrameCount] = useState(0)
   const [serialState, setSerialState] = useState<ConnectedState>('Disconnected')
-  const setSynchMode = useSetRecoilState(synchMode)
   const setAllData = useSetRecoilState(allDataState)
   useEffect(() => {
     serial.onData((data) => {
       setAllData(data)
-      setFrameCount((frameCount) => {
-        setSynchMode(frameCount < 5)
-        return frameCount + 1
-      })
     })
-  }, [setAllData, setSynchMode])
-  useEffect(() => {
-    setFrameCount(0)
-  }, [serialState])
+  }, [setAllData])
   useEffect(() => {
     setSerialState('Connecting...')
     serial
@@ -41,7 +39,7 @@ function SerialControls() {
       .catch(() => setSerialState('Error'))
   }, [])
   return (
-    <>
+    <Panel shaded header="Serial">
       <ButtonGroup>
         <IconButton
           appearance={serialState == 'Connected' ? 'primary' : undefined}
@@ -102,7 +100,7 @@ function SerialControls() {
         ),
         [serialState]
       )}
-    </>
+    </Panel>
   )
 }
 

@@ -126,14 +126,15 @@ void fillBufferFast() {
       buffer2[i] = val2;
     }
     state.ticksPerAdcRead = prescaledTicksCount / 512;
+    state.forceUIUpdate = true;
     stopADC();
 
     // start looking after the trigger pos to minimize waste
     uint16_t i = state.triggerPos;
     if (state.triggerChannel < 2) {
       uint8_t triggerPoint = state.triggerVoltage;
-      byte triggerVoltageMinus = max(0, (int)triggerPoint - 2);
-      byte triggerVoltagePlus = min(255, (int)triggerPoint + 2);
+      byte triggerVoltageMinus = max(0, (int)triggerPoint - 10);
+      byte triggerVoltagePlus = min(255, (int)triggerPoint + 10);
       if (state.triggerDir == TriggerDir::rising) {
         while (buffer0[i] > triggerVoltageMinus && i < MAX_SAMPLES) {
           i++;

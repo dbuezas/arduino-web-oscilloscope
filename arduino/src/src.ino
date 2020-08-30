@@ -14,7 +14,7 @@
 #include "output.h"
 void setup() {
   pinMode(D13, OUTPUT);
-  Serial.begin(115200 * 2);
+  Serial.begin(115200 * 1);
   Serial.setTimeout(100);  // TODO: remove?
   setupADC();
   setupDAC();
@@ -24,22 +24,24 @@ jmp_buf env;
 volatile bool canStop;
 void loop() {
   state.freeMemory = freeMemory();
-
+  state.forceUIUpdate = true;
+  sendData();
+  state.forceUIUpdate = true;
+  sendData();
   for (;;) {
     bool isJump = setjmp(env);
     if (isJump) offAutoInterrupt();
     canStop = false;
-    state.didTrigger = false;
     bool change = handleInput();
-    // if (change) {
-    //   sendData(false);
-    // }
-    canStop = (state.triggerMode != TriggerMode::autom);
+    if (change) {
+      // sendData(false);
+    }
+    canStop = true;
     fillBuffer();
-    digitalWrite(D13, 1);
+    // digitalWrite(D13, 1);
     canStop = false;
-    sendData(true);
-    digitalWrite(D13, 0);
+    sendData();
+    // digitalWrite(D13, 0);
   }
 }
 

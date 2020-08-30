@@ -7,6 +7,7 @@ import './App.css'
 import Controls from './Controls'
 import SerialControls from './SerialControls'
 import { Panel, Container, Content, Sidebar } from 'rsuite'
+import AnalysisControls from './AnalysisControls'
 
 function App() {
   return (
@@ -18,10 +19,9 @@ function App() {
           </Panel>
         </Content>
         <Sidebar>
-          <Panel shaded header="Serial">
-            <SerialControls />
-          </Panel>
+          <SerialControls />
           <Controls />
+          <AnalysisControls />
         </Sidebar>
       </Container>
     </div>

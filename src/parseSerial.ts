@@ -30,6 +30,7 @@ function get_int16_t(buffer: number[]) {
 }
 export default function parseSerial(data: number[]) {
   const myData = data.slice()
+  const forceUIUpdate = get_bool(myData)
   const triggerVoltageInt = get_uint8_t(myData)
   const triggerDir = get_uint8_t(myData)
   const ticksPerAdcRead = get_uint16_t(myData)
@@ -69,6 +70,7 @@ export default function parseSerial(data: number[]) {
     digital.map((n) => (n & 0b100000 && 1) * 0.5 + 0.6 * 4)
   ]
   return {
+    forceUIUpdate,
     triggerVoltageInt,
     triggerDir,
     ticksPerAdcRead,

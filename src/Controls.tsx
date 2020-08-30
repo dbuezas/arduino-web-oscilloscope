@@ -14,9 +14,10 @@ import {
   useIsBuffer0ON,
   useIsBuffer1ON,
   useIsBuffer2ON,
-  isOversamplingState
+  isOversamplingState,
+  frequencyState
 } from './bindings'
-import { formatTime } from './formatters'
+import { formatTime, formatFreq } from './formatters'
 import {
   Icon,
   Panel,
@@ -58,7 +59,6 @@ function Controls() {
   const [isBuffer0ON, setIsBuffer0ON] = useRecoilState(useIsBuffer0ON.send)
   const [isBuffer1ON, setIsBuffer1ON] = useRecoilState(useIsBuffer1ON.send)
   const [isBuffer2ON, setIsBuffer2ON] = useRecoilState(useIsBuffer2ON.send)
-  const freeMemory = useRecoilValue(freeMemoryState)
   const didTrigger = useRecoilValue(didTriggerState)
   const [triggerDirection, setTriggerDirection] = useRecoilState(
     useTriggerDirection.send
@@ -101,6 +101,7 @@ function Controls() {
         10,
         20,
         50,
+        50.055,
         100
       ].map((msPerDivision) => {
         const ticks = millisPerDivisionToTicksPerSample(msPerDivision)
@@ -314,9 +315,6 @@ function Controls() {
           ),
           [isRunning, didTrigger]
         )}
-      </Panel>
-      <Panel header="Board" shaded collapsible defaultExpanded>
-        <Tag>Free mem: {freeMemory}bytes</Tag>
       </Panel>
     </div>
   )
