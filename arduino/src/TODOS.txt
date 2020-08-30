@@ -1,9 +1,10 @@
+done
+14. add fft
+
+todo
 1. add amplifier control
 2. remove all about changing ref voltage measurement is super noisy
 3. add gain control (1, fake 4, 8, 16, 32)
-4. add local & remote state
-5. represent local & remote state independently
-6. make custom 3 state btns
 7. separate controls into many files
 8. make axis in react without plot.d3.ts
     - <g ref={node=>select(node).call(axisLeft(y).ticks(10,'%'))}/>
@@ -14,7 +15,6 @@
 12. add zoom
 13. drag the zero for each plot
 13.1 add "zero" function
-14. add fft
 15. add measure ∂t and ∂v
 16. add frequency, vpp, vmin and vmax, and vavr
 17 final clean up

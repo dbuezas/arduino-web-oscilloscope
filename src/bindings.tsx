@@ -5,8 +5,16 @@ import { getFFT, getFrequencyCount } from './spectrum'
 
 export const useTriggerVoltage = createHook<number>({
   key: 'V',
-  ui2mcu: (v) => Math.ceil((v / 5) * 255),
-  mcu2ui: (n) => (n / 255) * 5
+  ui2mcu: (v, get) => {
+    if (!get) return 0
+    const [vmin, , vpp] = get(voltageRangeState)
+    return Math.ceil(((v + vmin) / vpp) * 255)
+  },
+  mcu2ui: (n, get) => {
+    if (!get) return 0
+    const [vmin, , vpp] = get(voltageRangeState)
+    return (n / 255) * vpp + vmin
+  }
 })
 export const useTriggerPos = createHook<number>({
   key: 'P',
@@ -45,7 +53,7 @@ export const useIsBuffer2ON = createHook<number>({
 })
 export const useAmplifier = createHook<number>({
   key: 'A',
-  ui2mcu: (v) => v,
+  ui2mcu: (v) => Math.floor(v),
   mcu2ui: (v) => v
 })
 export const useSamplesPerBuffer = createHook<number>({
@@ -122,6 +130,27 @@ export const voltagesState = selector({
     }
   }
 })
+export const voltageRangeState = selector({
+  key: 'voltage-range',
+  get: ({ get }) => {
+    const vmax = [
+      25,
+      6.25,
+      5,
+      3.125,
+      1.5625,
+      0.78125,
+      0.78125,
+      0.625,
+      0.390625,
+      0.3125,
+      0.1953125,
+      0.15625
+    ][get(useAmplifier.send)]
+    const vmin = 0
+    return [vmin, vmax, vmax - vmin]
+  }
+})
 
 const win = window as any
 export const allDataState = selector<number[]>({
@@ -131,31 +160,41 @@ export const allDataState = selector<number[]>({
     if (newData instanceof DefaultValue) return
     if (newData.length === 0) return
     const data = parseSerial(newData)
+    win.setTicks = (n: number) => set(useTicksPerAdcRead.send, n)
     if (data.forceUIUpdate) {
       set(useTriggerPos.receive, data.triggerPos)
       set(useTicksPerAdcRead.receive, data.ticksPerAdcRead)
-      win.setTicks = (n: number) => set(useTicksPerAdcRead.send, n)
       set(useSamplesPerBuffer.receive, data.samplesPerBuffer)
+      set(useAmplifier.receive, data.amplifier)
       set(useTriggerVoltage.receive, data.triggerVoltageInt)
       set(useTriggerDirection.receive, data.triggerDir)
       set(useTriggerChannel.receive, data.triggerChannel)
-      set(useAmplifier.receive, data.amplifier)
       set(useTriggerMode.receive, data.triggerMode)
       set(useIsBuffer0ON.receive, data.isBuffer0ON)
       set(useIsBuffer1ON.receive, data.isBuffer1ON)
       set(useIsBuffer2ON.receive, data.isBuffer2ON)
     }
 
+    const [vmin, , vpp] = get(voltageRangeState)
+    const buffers = [
+      data.buffers[0].map((n) => (n / 256) * vpp + vmin),
+      data.buffers[1].map((n) => (n / 256) * vpp + vmin),
+      data.buffers[2].map((n) => n * (vpp / 6) + vmin + 0.2 * vpp),
+      data.buffers[3].map((n) => n * (vpp / 6) + vmin + 0.4 * vpp),
+      data.buffers[4].map((n) => n * (vpp / 6) + vmin + 0.6 * vpp),
+      data.buffers[5].map((n) => n * (vpp / 6) + vmin + 0.8 * vpp)
+    ]
+
     set(freeMemoryState, data.freeMemory)
     set(didTriggerState, data.didTrigger)
     const shouldUpdate =
       // todo use isRunning state in board for this
-      get(isRunningState) && data.buffers.some((buffer) => buffer.length > 0)
+      get(isRunningState) && buffers.some((buffer) => buffer.length > 0)
     if (shouldUpdate) {
       if (get(isOversamplingState)) {
         const smoothingFactor = 0.9
         const oldData = get(dataState)
-        const avrData = data.buffers.map((b, i) =>
+        const avrData = buffers.map((b, i) =>
           b.map(
             (n, j) =>
               (oldData[i][j] || 0) * smoothingFactor + n * (1 - smoothingFactor)
@@ -163,7 +202,7 @@ export const allDataState = selector<number[]>({
         )
         set(dataState, [...avrData, getFFT(avrData[0])])
       } else {
-        set(dataState, [...data.buffers, getFFT(data.buffers[0])])
+        set(dataState, [...buffers, getFFT(buffers[0])])
       }
       if (get(useTriggerMode.send) === TriggerMode.SINGLE) {
         set(isRunningState, false)

@@ -9,7 +9,8 @@ import {
   useTriggerPos,
   useTicksPerAdcRead,
   dataState,
-  useSamplesPerBuffer
+  useSamplesPerBuffer,
+  voltageRangeState
 } from './bindings'
 import { useRecoilValue, useRecoilState } from 'recoil'
 const margin = { top: 20, right: 50, bottom: 30, left: 50 }
@@ -30,8 +31,7 @@ export default function Plot() {
   const [triggerPosInt, setTriggerPosInt] = useRecoilState(useTriggerPos.send)
   const [draggingTP, setDraggingTP] = useState(false)
   const [draggingTV, setDraggingTV] = useState(false)
-
-  const yDomain = useMemo(() => [0, 5] as [number, number], [])
+  const yDomain = useRecoilValue(voltageRangeState)
   const xDomain = useMemo(() => {
     return [0, (ticksPerAdcRead / 32000000) * samples] as [number, number]
   }, [ticksPerAdcRead, samples])

@@ -33,7 +33,7 @@ State state = {
     TriggerDir::falling,  // uint8_t triggerDir;
     79,                   // uint16_t ticksPerAdcRead;
     MAX_SAMPLES * 0 / 3,  // uint16_t triggerPos;
-    1,                    // uint8_t amplifier;
+    2,                    // uint8_t amplifier;
     0,                    // uint16_t bufferStartPtr;
     false,                // bool didTrigger;
     TriggerMode::autom,   // uint8_t triggerMode

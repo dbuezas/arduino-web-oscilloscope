@@ -7,17 +7,15 @@ import {
   useTriggerMode,
   useAmplifier,
   TriggerMode,
-  freeMemoryState,
   didTriggerState,
   useSamplesPerBuffer,
   useTriggerChannel,
   useIsBuffer0ON,
   useIsBuffer1ON,
   useIsBuffer2ON,
-  isOversamplingState,
-  frequencyState
+  isOversamplingState
 } from './bindings'
-import { formatTime, formatFreq } from './formatters'
+import { formatTime, formatVoltage } from './formatters'
 import {
   Icon,
   Panel,
@@ -122,11 +120,15 @@ function Controls() {
   useEffect(() => {
     MouseTrap.bind('right', () => setTicksPerAdcRead((ticksPerAdcRead * 3) / 2))
     MouseTrap.bind('left', () => setTicksPerAdcRead((ticksPerAdcRead * 2) / 3))
+    MouseTrap.bind('up', () => setAmplifier(amplifier + 1))
+    MouseTrap.bind('down', () => setAmplifier(amplifier - 1))
     return () => {
       MouseTrap.unbind('right')
       MouseTrap.unbind('left')
+      MouseTrap.unbind('up')
+      MouseTrap.unbind('down')
     }
-  }, [setTicksPerAdcRead, ticksPerAdcRead])
+  }, [amplifier, setAmplifier, setTicksPerAdcRead, ticksPerAdcRead])
 
   return (
     <div>
@@ -168,17 +170,26 @@ function Controls() {
           () => (
             <SelectPicker
               searchable={false}
-              value={
-                [5, 4.096, 2.048, 1.024][
-                  ({ 1: 0, 4: 1, 2: 2, 3: 3 } as any)[amplifier]
-                ]
-              }
+              value={amplifier}
               cleanable={false}
               onChange={setAmplifier}
-              data={[5, 4.096, 2.048, 1.024].map((peakToPeak, i) => {
+              data={[
+                2.5,
+                0.625,
+                0.5,
+                0.3125,
+                0.15625,
+                0.078125,
+                0.078125,
+                0.0625,
+                0.0390625,
+                0.03125,
+                0.01953125,
+                0.015625
+              ].map((perDiv, i) => {
                 return {
-                  label: peakToPeak / 10,
-                  value: ({ 0: 1, 1: 4, 2: 2, 3: 3 } as any)[i]
+                  label: formatVoltage(perDiv),
+                  value: i
                 }
               })}
               style={{ width: 224 }}
@@ -191,22 +202,25 @@ function Controls() {
       <Panel header="Trigger" shaded collapsible defaultExpanded>
         {useMemo(
           () => (
-            <ButtonToolbar style={ButtonToolbarStyle}>
+            <>
               <div>Channel:</div>
-
-              <ButtonGroup>
-                {['A0', 'A1', 'A2', 'A3', 'A4', 'A5'].map((name, idx) => (
-                  <Button
-                    key={idx}
-                    appearance={triggerChannel === idx ? 'primary' : 'default'}
-                    size="sm"
-                    onClick={() => setTriggerChannel(idx)}
-                  >
-                    {name}-{idx}
-                  </Button>
-                ))}
-              </ButtonGroup>
-            </ButtonToolbar>
+              <ButtonToolbar style={ButtonToolbarStyle}>
+                <ButtonGroup>
+                  {['A0', 'AS', 'A2', 'A3', 'A4', 'A5'].map((name, idx) => (
+                    <Button
+                      key={idx}
+                      appearance={
+                        triggerChannel === idx ? 'primary' : 'default'
+                      }
+                      size="sm"
+                      onClick={() => setTriggerChannel(idx)}
+                    >
+                      {name}
+                    </Button>
+                  ))}
+                </ButtonGroup>
+              </ButtonToolbar>
+            </>
           ),
           [setTriggerChannel, triggerChannel]
         )}

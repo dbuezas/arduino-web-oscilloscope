@@ -1,6 +1,6 @@
-import { atom, selector, DefaultValue, RecoilState } from 'recoil'
+import { atom, selector, DefaultValue, RecoilState, RecoilValue } from 'recoil'
 import serial from './Serial'
-import { throttle } from 'lodash'
+import { throttle, identity } from 'lodash'
 
 export function memoSelector<T>(theAtom: RecoilState<T>) {
   return selector<T>({
@@ -14,20 +14,20 @@ export function memoSelector<T>(theAtom: RecoilState<T>) {
     }
   })
 }
-
+type GetRecoilValue = <T>(recoilVal: RecoilValue<T>) => T
 export function createHook<T>({
   key,
   ui2mcu,
   mcu2ui
 }: {
   key: string
-  ui2mcu: (v: T) => number
-  mcu2ui: (v: number) => T
+  ui2mcu: (v: T, get: GetRecoilValue | null) => number
+  mcu2ui: (v: number, get: GetRecoilValue | null) => T
 }) {
-  const state = memoSelector(
-    atom<T>({
+  const remoteState = memoSelector(
+    atom<number>({
       key,
-      default: mcu2ui(0)
+      default: 0
     })
   )
 
@@ -38,11 +38,11 @@ export function createHook<T>({
   })
   const send = selector<T>({
     key: key + '-selector',
-    get: ({ get }) => get(state),
-    set: ({ set }, newValue) => {
+    get: ({ get }) => mcu2ui(get(remoteState), get),
+    set: ({ set, get }, newValue) => {
       if (newValue instanceof DefaultValue) throw new Error('no reset allowed')
-      set(state, newValue)
-      serial_write(key + ui2mcu(newValue) + '>')
+      set(remoteState, ui2mcu(newValue, get))
+      serial_write(key + ui2mcu(newValue, get) + '>')
     }
   })
   const receive = selector<number>({
@@ -52,7 +52,7 @@ export function createHook<T>({
     },
     set: ({ set }, newValue) => {
       if (newValue instanceof DefaultValue) throw new Error('no reset allowed')
-      set(state, mcu2ui(newValue))
+      set(remoteState, newValue)
     }
   })
 

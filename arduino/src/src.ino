@@ -38,10 +38,10 @@ void loop() {
     }
     canStop = true;
     fillBuffer();
-    // digitalWrite(D13, 1);
+    digitalWrite(D13, 1);
     canStop = false;
     sendData();
-    // digitalWrite(D13, 0);
+    digitalWrite(D13, 0);
   }
 }
 
