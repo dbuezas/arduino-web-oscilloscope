@@ -13,7 +13,7 @@ export function getFFT(signal: number[]) {
   return ft(paddedSignal)
 }
 
-export function average(signal: number[]) {
+export function rollingAverage(signal: number[]) {
   // exponential averaging is used to remove wrong frequency readings due to noise
   let last = signal[0]
   return signal.map((n) => {
@@ -22,7 +22,7 @@ export function average(signal: number[]) {
   })
 }
 export function getFrequencyCount(signal: number[], windowTimeWidth: number) {
-  signal = average(signal)
+  signal = rollingAverage(signal)
   const max = Math.max(...signal)
   const min = Math.min(...signal)
   const mid = (max - min) / 2
@@ -42,4 +42,14 @@ export function getFrequencyCount(signal: number[], windowTimeWidth: number) {
     ((lastCross - firstCross) / signal.length) * windowTimeWidth
   const dominantFreq = (count - 1) / sFirstToLast
   return dominantFreq
+}
+
+export function oversample(
+  factor: number,
+  newBuffer: number[],
+  oldBuffer: number[]
+) {
+  return newBuffer.map(
+    (n, j) => (oldBuffer[j] || 0) * factor + n * (1 - factor)
+  )
 }

@@ -5,13 +5,17 @@ done
 * remove all about changing ref voltage measurement is super noisy
 * add frequency, vpp, vmin and vmax, and vavr
 * make each channel independant
+* separate controls into many files
+* put isOversamplingState handling inside a function
+* make smoothing factor a slider
 
 todo
-* separate controls into many files
+* Find another way to synchronise packages (e.g. better than end of message or prelude)
+* Do the buffer alignment in the board
+* use time window per frame instead of adc clock ticks per sample
 * make axis in react without plot.d3.ts
     - <g ref={node=>select(node).call(axisLeft(y).ticks(10,'%'))}/>
     - or just really make it manually with d3.ticks
-* make smoothing factor a slider
 * separate analog and digital inputs in different pannels
 * add slow mode by frame 1 reading at a time and accumulating in client
 * add zoom

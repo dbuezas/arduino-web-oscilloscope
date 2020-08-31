@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react'
 import {
   useIsChannelOn,
-  isOversamplingState
+  oversamplingFactorState
 } from '../../communication/bindings'
-import { Panel, ButtonToolbar, ButtonGroup, Button, Toggle } from 'rsuite'
+import { Panel, ButtonToolbar, ButtonGroup, Button, Slider } from 'rsuite'
 import { useRecoilState } from 'recoil'
 
 const ButtonToolbarStyle = {
@@ -14,8 +14,8 @@ const ButtonToolbarStyle = {
 }
 
 export default function Channels() {
-  const [isOversampling, setIsOversampling] = useRecoilState(
-    isOversamplingState
+  const [oversamplingFactor, setOversamplingFactor] = useRecoilState(
+    oversamplingFactorState
   )
   const [isChannelOn, setIsChannelOn] = useRecoilState(useIsChannelOn.send)
 
@@ -50,10 +50,17 @@ export default function Channels() {
         () => (
           <div style={ButtonToolbarStyle}>
             Oversample
-            <Toggle value={isOversampling} onChange={setIsOversampling} />
+            <Slider
+              style={{ width: '50%' }}
+              value={oversamplingFactor}
+              onChange={setOversamplingFactor}
+              max={0.99}
+              min={0}
+              step={0.01}
+            />
           </div>
         ),
-        [isOversampling, setIsOversampling]
+        [oversamplingFactor, setOversamplingFactor]
       )}
     </Panel>
   )

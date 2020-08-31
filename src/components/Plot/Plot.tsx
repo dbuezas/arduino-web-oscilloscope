@@ -54,10 +54,10 @@ export default function Plot() {
 
   useLayoutEffect(() => {
     renderYAxis(svg, yScale, width)
-  }, [svg, yScale, width, height])
+  }, [svg, yScale, width])
   useLayoutEffect(() => {
     renderXAxis(svg, xScale, height)
-  }, [svg, xScale, width, height])
+  }, [svg, xScale, height])
   const line = useMemo(
     () =>
       d3

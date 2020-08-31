@@ -1,9 +1,9 @@
-import { atom, selector, DefaultValue, ReadWriteSelectorOptions } from 'recoil'
+import { atom, selector, DefaultValue } from 'recoil'
 import parseSerial from './parseSerial'
-import { createHook, memoSelector } from './bindingsHelper'
-import { getFFT, getFrequencyCount } from '../spectrum/spectrum'
+import { makeIntercom, memoSelector } from './bindingsHelper'
+import { getFFT, getFrequencyCount, oversample } from '../dsp/spectrum'
 
-export const useTriggerVoltage = createHook<number>({
+export const useTriggerVoltage = makeIntercom<number>({
   key: 'V',
   ui2mcu: (v, get) => {
     const [vmin, , vpp] = get ? get(voltageRangeState) : [0, 5, 5]
@@ -15,13 +15,13 @@ export const useTriggerVoltage = createHook<number>({
   },
   default: 2.5
 })
-export const useTriggerPos = createHook<number>({
+export const useTriggerPos = makeIntercom<number>({
   key: 'P',
   ui2mcu: (v) => Math.ceil(v),
   mcu2ui: (v) => v,
   default: 512 * 0.5 // TODO: use percentage in ui
 })
-export const useTicksPerAdcRead = createHook<number>({
+export const useTicksPerAdcRead = makeIntercom<number>({
   key: 'C',
   ui2mcu: (v) => Math.ceil(v),
   mcu2ui: (v) => v,
@@ -31,19 +31,19 @@ export enum TriggerDirection {
   FALLING = 'Falling',
   RISING = 'Rising'
 }
-export const useTriggerDirection = createHook<TriggerDirection>({
+export const useTriggerDirection = makeIntercom<TriggerDirection>({
   key: 'D',
   ui2mcu: (v) => (v == TriggerDirection.RISING ? 0 : 1),
   mcu2ui: (v) => (v ? TriggerDirection.FALLING : TriggerDirection.RISING),
   default: TriggerDirection.FALLING
 })
-export const useTriggerChannel = createHook<number>({
+export const useTriggerChannel = makeIntercom<number>({
   key: 'T',
   ui2mcu: (v) => v,
   mcu2ui: (v) => v,
   default: 0
 })
-export const useIsChannelOn = createHook<boolean[]>({
+export const useIsChannelOn = makeIntercom<boolean[]>({
   key: 'B',
   ui2mcu: (v) => {
     const result = v
@@ -62,13 +62,13 @@ export const useIsChannelOn = createHook<boolean[]>({
   default: [true, false, false, false, false, false]
 })
 
-export const useAmplifier = createHook<number>({
+export const useAmplifier = makeIntercom<number>({
   key: 'A',
   ui2mcu: (v) => Math.floor(v),
   mcu2ui: (v) => v,
   default: 1 //TODO: use volt range or per division
 })
-export const useSamplesPerBuffer = createHook<number>({
+export const useSamplesPerBuffer = makeIntercom<number>({
   key: 'S',
   ui2mcu: (v) => v,
   mcu2ui: (v) => v,
@@ -80,7 +80,7 @@ export enum TriggerMode {
   SINGLE = 'Single'
 }
 
-export const useTriggerMode = createHook<TriggerMode>({
+export const useTriggerMode = makeIntercom<TriggerMode>({
   key: 'M',
   ui2mcu: (v) => Object.values(TriggerMode).indexOf(v),
   mcu2ui: (v) => Object.values(TriggerMode)[v],
@@ -98,10 +98,10 @@ export const isRunningState = memoSelector(
     default: true
   })
 )
-export const isOversamplingState = memoSelector(
+export const oversamplingFactorState = memoSelector(
   atom({
-    key: 'is-oversampling',
-    default: false
+    key: 'oversampling-factor',
+    default: 0
   })
 )
 export const didTriggerState = memoSelector(
@@ -170,46 +170,56 @@ export const voltageRangeState = selector({
   }
 })
 
-type Set = Parameters<ReadWriteSelectorOptions<never>['set']>[0]['set']
-type Get = Parameters<ReadWriteSelectorOptions<never>['set']>[0]['get']
-const sendFullState = ({ set, get }: { set: Set; get: Get }) => {
-  set(useTriggerPos.send, get(useTriggerPos.send))
-  set(useTicksPerAdcRead.send, get(useTicksPerAdcRead.send))
-  set(useSamplesPerBuffer.send, get(useSamplesPerBuffer.send))
-  set(useAmplifier.send, get(useAmplifier.send))
-  set(useTriggerVoltage.send, get(useTriggerVoltage.send))
-  set(useTriggerDirection.send, get(useTriggerDirection.send))
-  set(useTriggerChannel.send, get(useTriggerChannel.send))
-  set(useTriggerMode.send, get(useTriggerMode.send))
-  set(useIsChannelOn.send, get(useIsChannelOn.send))
-}
+const sendFullState = selector<null>({
+  key: 'sendFullState-this shouldnt be a selector',
+  get: () => null,
+  set: ({ get, set }) => {
+    set(useTriggerPos.send, get(useTriggerPos.send))
+    set(useTicksPerAdcRead.send, get(useTicksPerAdcRead.send))
+    set(useSamplesPerBuffer.send, get(useSamplesPerBuffer.send))
+    set(useAmplifier.send, get(useAmplifier.send))
+    set(useTriggerVoltage.send, get(useTriggerVoltage.send))
+    set(useTriggerDirection.send, get(useTriggerDirection.send))
+    set(useTriggerChannel.send, get(useTriggerChannel.send))
+    set(useTriggerMode.send, get(useTriggerMode.send))
+    set(useIsChannelOn.send, get(useIsChannelOn.send))
+  }
+})
+
+type Data = ReturnType<typeof parseSerial>
+const receiveFullState = selector<Data>({
+  key: 'receiveFullState-this shouldnt be a selector',
+  get: () => {
+    throw new Error('write only selector')
+  },
+  set: ({ set }, data) => {
+    if (data instanceof DefaultValue) return
+    set(useTriggerPos.receive, data.triggerPos)
+    set(useTicksPerAdcRead.receive, data.ticksPerAdcRead)
+    set(useSamplesPerBuffer.receive, data.samplesPerBuffer)
+    set(useAmplifier.receive, data.amplifier)
+    set(useTriggerVoltage.receive, data.triggerVoltage)
+    set(useTriggerDirection.receive, data.triggerDir)
+    set(useTriggerChannel.receive, data.triggerChannel)
+    set(useTriggerMode.receive, data.triggerMode)
+    set(useIsChannelOn.receive, data.isChannelOn)
+  }
+})
 
 const win = window as any
 export const allDataState = selector<number[]>({
   key: 'all-data',
   get: () => [], // this is a write only selector
   set: ({ set, get }, newData) => {
+    win.setTicks = (n: number) => set(useTicksPerAdcRead.send, n)
     if (newData instanceof DefaultValue) return
     if (newData.length === 0) return
     const data = parseSerial(newData)
-    if (data.needData) {
-      return sendFullState({ set, get })
-    }
-    win.setTicks = (n: number) => set(useTicksPerAdcRead.send, n)
-    if (data.forceUIUpdate) {
-      set(useTriggerPos.receive, data.triggerPos)
-      set(useTicksPerAdcRead.receive, data.ticksPerAdcRead)
-      set(useSamplesPerBuffer.receive, data.samplesPerBuffer)
-      set(useAmplifier.receive, data.amplifier)
-      set(useTriggerVoltage.receive, data.triggerVoltage)
-      set(useTriggerDirection.receive, data.triggerDir)
-      set(useTriggerChannel.receive, data.triggerChannel)
-      set(useTriggerMode.receive, data.triggerMode)
-      set(useIsChannelOn.receive, data.isChannelOn)
-    }
+    if (data.needData) set(sendFullState, null)
+    if (data.forceUIUpdate) set(receiveFullState, data)
 
     const [vmin, , vpp] = get(voltageRangeState)
-    const buffers = [
+    let buffers = [
       data.buffers[0].map((n) => (n / 256) * vpp + vmin),
       data.buffers[1].map((n) => (n / 256) * vpp + vmin),
       data.buffers[2].map((n) => n * (vpp / 6) + vmin + 0.2 * vpp),
@@ -224,19 +234,14 @@ export const allDataState = selector<number[]>({
       // todo use isRunning state in board for this
       get(isRunningState) && buffers.some((buffer) => buffer.length > 0)
     if (shouldUpdate) {
-      if (get(isOversamplingState)) {
-        const smoothingFactor = 0.9
-        const oldData = get(dataState)
-        const avrData = buffers.map((b, i) =>
-          b.map(
-            (n, j) =>
-              (oldData[i][j] || 0) * smoothingFactor + n * (1 - smoothingFactor)
-          )
-        )
-        set(dataState, [...avrData, getFFT(avrData[0])])
-      } else {
-        set(dataState, [...buffers, getFFT(buffers[0])])
-      }
+      const oversamplingFactor = get(oversamplingFactorState)
+      const oldData = get(dataState)
+      buffers = buffers.map((b, i) =>
+        oversample(oversamplingFactor, buffers[i], oldData[i])
+      )
+
+      set(dataState, [...buffers, getFFT(buffers[0])])
+
       if (get(useTriggerMode.send) === TriggerMode.SINGLE) {
         set(isRunningState, false)
       }

@@ -79,11 +79,6 @@ inline void stopADC() { ADCSRA = 0; }
 void setupADC() {
   // analogReference(INTERNAL1V024);  // 4v
   bitSet(DIDR0, ADC0D);  // disable digital input (reduce noise)
-  // disable all timer interrupts (millis() gone)
-  bitWrite(TIMSK0, TOIE0, 0);
-  bitWrite(TIMSK1, TOIE1, 0);
-  bitWrite(TIMSK2, TOIE2, 0);
-  bitWrite(TIMSK3, TOIE3, 0);
 
   noInterrupts();
 

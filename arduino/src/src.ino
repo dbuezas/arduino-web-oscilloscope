@@ -15,7 +15,12 @@
 void setup() {
   pinMode(D13, OUTPUT);
   Serial.begin(115200 * 1);
-  Serial.setTimeout(100);  // TODO: remove?
+  // disable all timer interrupts (millis() gone)
+  bitWrite(TIMSK0, TOIE0, 0);
+  bitWrite(TIMSK1, TOIE1, 0);
+  bitWrite(TIMSK2, TOIE2, 0);
+  bitWrite(TIMSK3, TOIE3, 0);
+
   setupADC();
   setupDAC();
 }
@@ -25,9 +30,9 @@ volatile bool canStop;
 void loop() {
   state.freeMemory = freeMemory();
   state.forceUIUpdate = true;
-  sendData();
+  sendData(false);
   state.forceUIUpdate = true;
-  sendData();
+  sendData(false);
   for (;;) {
     bool isJump = setjmp(env);
     if (isJump) offAutoInterrupt();

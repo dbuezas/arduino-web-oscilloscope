@@ -15,7 +15,7 @@ export function memoSelector<T>(theAtom: RecoilState<T>) {
   })
 }
 type GetRecoilValue = <T>(recoilVal: RecoilValue<T>) => T
-export function createHook<T>({
+export function makeIntercom<T>({
   key,
   ui2mcu,
   mcu2ui,
