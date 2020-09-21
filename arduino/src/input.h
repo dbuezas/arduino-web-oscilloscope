@@ -14,7 +14,7 @@ void saveInput(char option, int16_t val) {
       state.amplifier = constrain(val, 0, 11);
       break;
     case 'P':
-      state.triggerPos = constrain(val, 0, state.samplesPerBuffer);
+      state.triggerPos = constrain(val, 0, state.samplesPerBuffer - 1);
       break;
     case 'S':
       state.samplesPerBuffer = constrain(val, 1, MAX_SAMPLES);
@@ -27,8 +27,8 @@ void saveInput(char option, int16_t val) {
       state.isChannelOn = val;
       break;
     case 'M':
-      state.triggerMode = constrain(val, 0, 2);
-      // AUTO, TRIGGER, SLOW
+      state.triggerMode = constrain(val, 0, 3);
+      // AUTO, NORMAL, SINGLE, SLOW
       break;
     case 'T':
       state.triggerChannel = constrain(val, 0, 5);

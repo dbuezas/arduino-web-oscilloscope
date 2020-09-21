@@ -5,9 +5,6 @@ function pull(buffer: number[], count: number) {
   }
   return result
 }
-function align(buffer: number[], offset: number) {
-  return [...buffer.slice(offset), ...buffer.slice(0, offset)]
-}
 
 function get_uint8_t(buffer: number[]) {
   return buffer.shift()!
@@ -48,24 +45,15 @@ export default function parseSerial(data: number[]) {
   const freeMemory = get_uint16_t(myData)
   const trashedSamples = get_uint16_t(myData)
   const samplesPerBuffer = get_uint16_t(myData)
-  let analog1 =
-    isChannelOn & 0b1
-      ? align(pull(myData, samplesPerBuffer), bufferStartPtr)
-      : []
-  let analog2 =
-    isChannelOn & 0b10
-      ? align(pull(myData, samplesPerBuffer), bufferStartPtr)
-      : []
-  let digital =
+  const analog1 =
+    isChannelOn & 0b1 ? pull(myData, samplesPerBuffer - trashedSamples) : []
+  const analog2 =
+    isChannelOn & 0b10 ? pull(myData, samplesPerBuffer - trashedSamples) : []
+  const digital =
     isChannelOn & 0b11111100
-      ? align(pull(myData, samplesPerBuffer), bufferStartPtr)
+      ? pull(myData, samplesPerBuffer - trashedSamples)
       : []
 
-  if (trashedSamples > 0) {
-    analog1 = analog1.slice(0, -trashedSamples)
-    analog2 = analog2.slice(0, -trashedSamples)
-    digital = digital.slice(0, -trashedSamples)
-  }
   const buffers = [
     isChannelOn & 0b1 ? analog1.map((n) => n) : [],
     isChannelOn & 0b10 ? analog2.map((n) => n) : [],

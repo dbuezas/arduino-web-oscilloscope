@@ -77,7 +77,8 @@ export const useSamplesPerBuffer = makeIntercom<number>({
 export enum TriggerMode {
   AUTO = 'Auto',
   NORMAL = 'Normal',
-  SINGLE = 'Single'
+  SINGLE = 'Single',
+  SLOW = 'Slow'
 }
 
 export const useTriggerMode = makeIntercom<TriggerMode>({
@@ -211,6 +212,7 @@ export const allDataState = selector<number[]>({
   key: 'all-data',
   get: () => [], // this is a write only selector
   set: ({ set, get }, newData) => {
+    win.$recoilDebugStates = [] // TODO: fix memory leak in recoiljs beta
     win.setTicks = (n: number) => set(useTicksPerAdcRead.send, n)
     if (newData instanceof DefaultValue) return
     if (newData.length === 0) return
@@ -235,13 +237,22 @@ export const allDataState = selector<number[]>({
       get(isRunningState) && buffers.some((buffer) => buffer.length > 0)
     if (shouldUpdate) {
       const oversamplingFactor = get(oversamplingFactorState)
-      const oldData = get(dataState)
+      const oldBuffers = get(dataState)
       buffers = buffers.map((b, i) =>
-        oversample(oversamplingFactor, buffers[i], oldData[i])
+        oversample(oversamplingFactor, buffers[i], oldBuffers[i])
       )
 
+      if (get(useTriggerMode.send) === TriggerMode.SLOW) {
+        // buffers = buffers.map((b, i) => [...oldBuffers[i], ...b].slice(-512))
+        const wasLength = Math.max(...oldBuffers.map((b) => b.length))
+        buffers = buffers.map((b, i) => [...oldBuffers[i], ...b])
+        const isLength = Math.max(...buffers.map((b) => b.length))
+        if (isLength > 512) {
+          if (wasLength < 512) buffers = buffers.map((b) => b.slice(0, 512))
+          else buffers = buffers.map(() => [])
+        }
+      }
       set(dataState, [...buffers, getFFT(buffers[0])])
-
       if (get(useTriggerMode.send) === TriggerMode.SINGLE) {
         set(isRunningState, false)
       }

@@ -3,7 +3,7 @@
 
 #define MAX_SAMPLES 512
 
-enum TriggerMode { autom, normal, single };
+enum TriggerMode { autom, normal, single, slow };
 enum TriggerDir { rising, falling };
 
 uint8_t endOfMessage[4] = {0, 1, 255, 253};

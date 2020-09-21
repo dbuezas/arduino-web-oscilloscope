@@ -5,12 +5,12 @@ uint16_t prescaledTicksPerADCRead;
 uint16_t prescaledTicksPerADCReadTuned;
 
 #define prescaledTicksCount TCNT3
-void startCPUCounter() {
+void startCPUCounter(uint16_t ticksPerAdcRead) {
   // counter for adcREad
   TCCR3A = 0;
   TCCR3B = 0;
   TCCR3B = 1 << CS30;
-  prescaledTicksPerADCRead = state.ticksPerAdcRead;
+  prescaledTicksPerADCRead = ticksPerAdcRead;
   /* There are 10 cycles between putting the (16 bit) current counter in 2
    * registers, subtracting a (16 bit) number and storing them back. These 10
    * "lost" cycles are added back by the "tuned" prescaler.
@@ -39,7 +39,7 @@ void startCPUCounter() {
   // con 16 bits and correction, 61 minimum for triggering
 }
 
-__attribute__((always_inline)) byte storeOne(byte channel) {
+__attribute__((always_inline)) byte storeOne(byte returnChannel) {
   while (prescaledTicksCount < prescaledTicksPerADCRead) {
   }
   prescaledTicksCount -= prescaledTicksPerADCReadTuned;
@@ -50,20 +50,21 @@ __attribute__((always_inline)) byte storeOne(byte channel) {
   buffer1[state.bufferStartPtr] = val1;
   buffer2[state.bufferStartPtr] = val2;
   state.bufferStartPtr = (state.bufferStartPtr + 1) & 0b111111111;
-  if (channel == 0) return val0;
-  if (channel == 1) return val1;
-  if (channel > 1) return bitRead(val2, channel);
+  if (returnChannel == 0) return val0;
+  if (returnChannel == 1) return val1;
+  if (returnChannel > 1) return bitRead(val2, returnChannel);
 }
 
-__attribute__((always_inline)) void fillBufferAnalog(uint8_t channel,
-                                                     TriggerDir dir) {
+__attribute__((always_inline)) void fillBufferAnalogTrigger(uint8_t channel,
+                                                            TriggerDir dir) {
   uint8_t triggerPoint = state.triggerVoltage;
   byte triggerVoltageMinus = max(0, (int)triggerPoint - 2);
   byte triggerVoltagePlus = min(255, (int)triggerPoint + 2);
   uint16_t headSamples = state.triggerPos;
-  uint16_t tailSamples = state.samplesPerBuffer - state.triggerPos;
+  uint16_t tailSamples = state.samplesPerBuffer - state.triggerPos - 1;
   startADC(2, state.amplifier);
-  startCPUCounter();
+  startCPUCounter(state.ticksPerAdcRead);
+  prescaledTicksCount = 0;
   while (headSamples--) {
     storeOne(channel);
   }
@@ -84,12 +85,13 @@ __attribute__((always_inline)) void fillBufferAnalog(uint8_t channel,
   stopADC();
 }
 
-__attribute__((always_inline)) inline void fillBufferDigital(uint8_t channel,
-                                                             TriggerDir dir) {
+__attribute__((always_inline)) inline void fillBufferDigitalTrigger(
+    uint8_t channel, TriggerDir dir) {
   uint16_t headSamples = state.triggerPos;
   uint16_t tailSamples = state.samplesPerBuffer - state.triggerPos;
   startADC(2, state.amplifier);
-  startCPUCounter();
+  startCPUCounter(state.ticksPerAdcRead);
+  prescaledTicksCount = 0;
   while (headSamples--) {
     storeOne(channel);
   }
@@ -112,7 +114,7 @@ __attribute__((always_inline)) inline void fillBufferDigital(uint8_t channel,
 
 void fillBufferFast() {
   // test code, ugly and misses trigger on channel 1
-  startCPUCounter();
+  startCPUCounter(0);
   bool done;
   do {
     prescaledTicksCount = 0;
@@ -203,6 +205,34 @@ void setupAutoInterrupt() {
 }
 jmp_buf envAutoTimeout;
 void fillBuffer() {
+  static uint8_t lastTriggerMode;
+  if (state.triggerMode == TriggerMode::slow) {
+    static uint16_t lastTicksPerAdcRead;
+    if (lastTriggerMode != state.triggerMode ||
+        lastTicksPerAdcRead != state.ticksPerAdcRead) {
+      startADC(2, state.amplifier);
+      startCPUCounter(state.ticksPerAdcRead);
+      TCCR3B = 5 << CS30;  // slow down factor of 1024
+
+      // with this prescaler, the tunning is
+      prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead;
+      // removed
+      prescaledTicksCount = 0;
+      lastTriggerMode = state.triggerMode;
+      lastTicksPerAdcRead = state.ticksPerAdcRead;
+    }
+    // note prescaledTicksCount = 0 happens only once. This accounts for serial
+    // overhead
+    uint16_t bufferStart = state.bufferStartPtr;
+    // 2ms/div = 1250 ticks = 20 segundos, y 512/20 = 25.5fps
+    uint16_t samplesToSend = max(1, 1250 / state.ticksPerAdcRead);
+    for (uint16_t i = 0; i < samplesToSend; i++)
+      storeOne(0);  // todo, the tuned
+    state.bufferStartPtr = bufferStart;
+    state.trashedSamples = state.samplesPerBuffer - samplesToSend;
+    return;
+  }
+  lastTriggerMode = state.triggerMode;
   if (state.triggerMode == TriggerMode::autom) {
     bool didTimeout = setjmp(envAutoTimeout);
     if (didTimeout) {
@@ -220,9 +250,9 @@ void fillBuffer() {
     state.trashedSamples = 0;
 
     if (state.triggerChannel < 2)
-      fillBufferAnalog(state.triggerChannel, state.triggerDir);
+      fillBufferAnalogTrigger(state.triggerChannel, state.triggerDir);
     else
-      fillBufferDigital(state.triggerChannel, state.triggerDir);
+      fillBufferDigitalTrigger(state.triggerChannel, state.triggerDir);
     state.didTrigger = true;
   }
   offAutoInterrupt();

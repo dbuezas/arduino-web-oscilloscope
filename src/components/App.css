@@ -33,7 +33,6 @@ header {
 .rs-sidebar {
   overflow: scroll;
   padding: 10px;
-  width: 200px;
 }
 .rs-sidebar .rs-panel {
   margin-bottom: 10px;

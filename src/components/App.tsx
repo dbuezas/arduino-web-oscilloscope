@@ -17,7 +17,7 @@ function App() {
             <Plot />
           </Panel>
         </Content>
-        <Sidebar>
+        <Sidebar width={261}>
           <Controls />
           <About />
         </Sidebar>

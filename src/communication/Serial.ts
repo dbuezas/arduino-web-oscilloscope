@@ -22,18 +22,32 @@ declare global {
 const END_SEQUENCE = [0, 1, 255, 253]
 const indexesOfSequence = (needle: number[], haystack: number[]) => {
   const result = []
-  for (let i = haystack.length - 1, j = needle.length - 1; i >= 0; i--) {
+  for (let i = 0, j = 0; i < haystack.length; i++) {
     if (haystack[i] === needle[j]) {
-      j--
-      if (j === -1) {
-        result.push(i)
+      j++
+      if (j === needle.length) {
+        result.unshift(i)
         if (result.length === 2) return result
-        j = needle.length - 1
+        j = 0
       }
-    } else j = needle.length - 1
+    } else j = 0
   }
   return [-1, -1]
 }
+// const indexesOfSequence = (needle: number[], haystack: number[]) => {
+//   const result = []
+//   for (let i = haystack.length - 1, j = needle.length - 1; i >= 0; i--) {
+//     if (haystack[i] === needle[j]) {
+//       j--
+//       if (j === -1) {
+//         result.push(i)
+//         if (result.length === 2) return result
+//         j = needle.length - 1
+//       }
+//     } else j = needle.length - 1
+//   }
+//   return [-1, -1]
+// }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 type SerialOptions = {
@@ -114,13 +128,14 @@ export class Serial {
     const produce = async () => {
       while (1) {
         if (!this.reader) await sleep(100)
-        await sleep(16)
+        // await sleep(16)
         if ((window as any).stopIt) continue
         const data = this.reader && (await this.reader.read())
         if (data && data.value !== undefined) {
           if (data.value.length > 10000 || this.readbuffer.length > 10000) {
             this.readbuffer = [] // cap the size of the buffer
             data.value = []
+            console.log('discarding')
           }
           this.readbuffer.push(...data.value)
         }
@@ -128,17 +143,16 @@ export class Serial {
     }
     const consume = async () => {
       while (1) {
-        // React would do this anyway to skip paints, but only after computing the svg
         const [end, start] = indexesOfSequence(END_SEQUENCE, this.readbuffer)
-        // console.log(idxs.length)
         if (start > -1 && end > -1) {
           // await new Promise((r) => requestAnimationFrame(r))
-          await sleep(16)
+          // await sleep(16)
           const dataFrame = this.readbuffer.slice(
-            start + END_SEQUENCE.length,
-            end
+            start + 1,
+            end - END_SEQUENCE.length + 1
           )
-          this.readbuffer = this.readbuffer.slice(end)
+          // debugger
+          this.readbuffer = this.readbuffer.slice(end - END_SEQUENCE.length + 1)
           callback(dataFrame)
           ;(window as any).discarded = (window as any).discarded || 0
           ;(window as any).discarded += start

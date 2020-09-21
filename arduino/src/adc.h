@@ -6,14 +6,14 @@
 #define DIFFS 1
 
 /*
-    0 -> 2   -> 727.28 kHz
-    1 -> 2   -> 727.28 kHz // adc can't read over 2.5v here
-    2 -> 4   -> 363.64 kHz
-    3 -> 8   -> 181.82 kHz
-    4 -> 16  -> 90.91  kHz
-    5 -> 32  -> 45.455 KHz
-    6 -> 64  -> 22.727 kHz
-    7 -> 128 -> 11,363 kHz
+    0 -> 2   -> 727.28 kSamples
+    1 -> 2   -> 727.28 kSamples // adc can't read over 2.5v here
+    2 -> 4   -> 363.64 kSamples
+    3 -> 8   -> 181.82 kSamples
+    4 -> 16  -> 90.91  kSamples
+    5 -> 32  -> 45.455 KSamples
+    6 -> 64  -> 22.727 kSamples
+    7 -> 128 -> 11,363 kSamples
 */
 #define ADC_PRESCALER_conf 2  // 1 to 7
 // #define ADC_PRESCALER (1 << ADC_PRESCALER_conf)
@@ -63,6 +63,7 @@ inline void startADC(uint8_t prescaler, uint8_t amplifier) {
   ADCSRB = 0 << ADTS0;  // Continuous conversion
 
   ADCSRC = 1 << DIFFS |  // 1 = from diff amplifier, 0=multiplexer
+           0 << SPN |    // ADC conversion input polarity control
            0 << SPD;     // 1: high speed conversion (can't hear a difference)
   ADCSRD = 0 << REFS2 |  // part of ADC reference voltage [see ADMUX:REFS0]
            0b00 << IVSEL0 |  // 2v DAC output
@@ -79,6 +80,10 @@ inline void stopADC() { ADCSRA = 0; }
 void setupADC() {
   // analogReference(INTERNAL1V024);  // 4v
   bitSet(DIDR0, ADC0D);  // disable digital input (reduce noise)
+#define XSTR(x) STR(x)
+#define STR(x) #x
+#pragma message "ADC0D: " XSTR(ADC0D)
+#pragma message "DIDR0: " XSTR(DIDR0)
 
   noInterrupts();
 

@@ -29,9 +29,7 @@ jmp_buf env;
 volatile bool canStop;
 void loop() {
   state.freeMemory = freeMemory();
-  state.forceUIUpdate = true;
   sendData(false);
-  state.forceUIUpdate = true;
   sendData(false);
   for (;;) {
     bool isJump = setjmp(env);

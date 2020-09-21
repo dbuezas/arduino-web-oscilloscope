@@ -8,20 +8,22 @@ done
 * separate controls into many files
 * put isOversamplingState handling inside a function
 * make smoothing factor a slider
+* Do the buffer alignment in the board
+* add measure ∂t and ∂v
 
 todo
-* Find another way to synchronise packages (e.g. better than end of message or prelude)
-* Do the buffer alignment in the board
-* use time window per frame instead of adc clock ticks per sample
+* Find another way to synchronise packets (e.g. better than end of message or prelude)
+* get rid of "trashed samples"
+* use delta T per sample instead of adc clock ticks per sample
 * make axis in react without plot.d3.ts
     - <g ref={node=>select(node).call(axisLeft(y).ticks(10,'%'))}/>
     - or just really make it manually with d3.ticks
 * separate analog and digital inputs in different pannels
 * add slow mode by frame 1 reading at a time and accumulating in client
 * add zoom
+* add x y mode
 * drag the zero for each plot
 * 1 add "zero" function
-* add measure ∂t and ∂v
 * store configs and send on start
 * final clean up
 * publish

@@ -63,8 +63,6 @@ export default function Trigger() {
       {useMemo(
         () => (
           <ButtonToolbar style={ButtonToolbarStyle}>
-            <div>Mode:</div>
-
             <ButtonGroup>
               {Object.values(TriggerMode).map((mode) => (
                 <Button
