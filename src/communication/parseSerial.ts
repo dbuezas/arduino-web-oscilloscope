@@ -1,32 +1,41 @@
-function pull(buffer: number[], count: number) {
-  const result = []
-  while (count-- && buffer.length) {
-    result.push(buffer.shift()!)
-  }
-  return result
+type Data = {
+  data: number[]
+  i: number
 }
 
-function get_uint8_t(buffer: number[]) {
-  return buffer.shift()!
+function pull(data: Data, count: number) {
+  const result = data.data.slice(data.i, data.i + count)
+  data.i += count
+  return Array.from(result)
 }
-function get_bool(buffer: number[]) {
-  return buffer.shift()!
+
+function get_uint8_t(data: Data) {
+  const res = data.data[data.i]
+  data.i++
+  return res
 }
-function get_uint16_t(buffer: number[]) {
-  const l = buffer.shift()!
-  const h = buffer.shift()!
+const get_bool = get_uint8_t
+
+function get_uint16_t(data: Data) {
+  const l = data.data[data.i]
+  data.i++
+  const h = data.data[data.i]
+  data.i++
   return (h << 8) | l
 }
-function get_int16_t(buffer: number[]) {
-  const raw = get_uint16_t(buffer)
-  if (raw & (1 << 15)) {
-    // negative
-    return -(~raw + (1 << 16) + 1)
-  }
-  return raw
-}
+// function get_int16_t(buffer: number[]) {
+//   const raw = get_uint16_t(buffer)
+//   if (raw & (1 << 15)) {
+//     // negative
+//     return -(~raw + (1 << 16) + 1)
+//   }
+//   return raw
+// }
 export default function parseSerial(data: number[]) {
-  const myData = data.slice()
+  const myData: Data = {
+    data,
+    i: 0
+  }
   // input
   const triggerVoltage = get_uint8_t(myData)
   const triggerDir = get_uint8_t(myData)

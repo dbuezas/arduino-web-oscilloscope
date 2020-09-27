@@ -18,7 +18,7 @@ export const useTriggerVoltage = makeIntercom<number>({
 export const useTriggerPos = makeIntercom<number>({
   key: 'P',
   ui2mcu: (v) => Math.ceil(v),
-  mcu2ui: (v) => v,
+  mcu2ui: (v) => v - 1,
   default: 512 * 0.5 // TODO: use percentage in ui
 })
 export const useTicksPerAdcRead = makeIntercom<number>({
@@ -33,7 +33,7 @@ export enum TriggerDirection {
 }
 export const useTriggerDirection = makeIntercom<TriggerDirection>({
   key: 'D',
-  ui2mcu: (v) => (v == TriggerDirection.RISING ? 0 : 1),
+  ui2mcu: (v) => (v === TriggerDirection.RISING ? 0 : 1),
   mcu2ui: (v) => (v ? TriggerDirection.FALLING : TriggerDirection.RISING),
   default: TriggerDirection.FALLING
 })

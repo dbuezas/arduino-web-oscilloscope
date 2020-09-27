@@ -87,7 +87,7 @@ export default function Trigger() {
               <IconButton
                 size="sm"
                 appearance={
-                  triggerDirection == TriggerDirection.FALLING
+                  triggerDirection === TriggerDirection.FALLING
                     ? 'primary'
                     : 'default'
                 }
@@ -97,7 +97,7 @@ export default function Trigger() {
               <IconButton
                 size="sm"
                 appearance={
-                  triggerDirection == TriggerDirection.RISING
+                  triggerDirection === TriggerDirection.RISING
                     ? 'primary'
                     : 'default'
                 }

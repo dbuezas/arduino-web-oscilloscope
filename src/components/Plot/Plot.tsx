@@ -67,10 +67,7 @@ export default function Plot() {
     [samples, xDomain, xScale, yScale]
   )
 
-  const ds = data.map((data) =>
-    // eslint-disable-next-line react-hooks/rules-of-hooks,react-hooks/exhaustive-deps
-    useMemo(() => line(data) || undefined, [line, data])
-  )
+  const ds = data.map((data) => line(data) || undefined)
 
   return (
     <div className="plotContainer" ref={containerRef}>

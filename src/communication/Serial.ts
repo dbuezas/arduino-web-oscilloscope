@@ -50,6 +50,7 @@ const indexesOfSequence = (needle: number[], haystack: number[]) => {
 // }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+const rAF = () => new Promise((r) => requestAnimationFrame(r))
 type SerialOptions = {
   baudrate?: number
   databits?: number
@@ -128,15 +129,9 @@ export class Serial {
     const produce = async () => {
       while (1) {
         if (!this.reader) await sleep(100)
-        // await sleep(16)
-        if ((window as any).stopIt) continue
+        await sleep(16)
         const data = this.reader && (await this.reader.read())
         if (data && data.value !== undefined) {
-          if (data.value.length > 10000 || this.readbuffer.length > 10000) {
-            this.readbuffer = [] // cap the size of the buffer
-            data.value = []
-            console.log('discarding')
-          }
           this.readbuffer.push(...data.value)
         }
       }
@@ -145,19 +140,14 @@ export class Serial {
       while (1) {
         const [end, start] = indexesOfSequence(END_SEQUENCE, this.readbuffer)
         if (start > -1 && end > -1) {
-          // await new Promise((r) => requestAnimationFrame(r))
-          // await sleep(16)
           const dataFrame = this.readbuffer.slice(
             start + 1,
             end - END_SEQUENCE.length + 1
           )
-          // debugger
           this.readbuffer = this.readbuffer.slice(end - END_SEQUENCE.length + 1)
           callback(dataFrame)
-          ;(window as any).discarded = (window as any).discarded || 0
-          ;(window as any).discarded += start
         } else {
-          await sleep(1)
+          await sleep(16)
         }
       }
     }
