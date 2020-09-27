@@ -1,16 +1,41 @@
 #define TCNT3 _SFR_MEM16(0x94)
-
 #include "data-struct.h"
+#include "limits.h"
 uint16_t prescaledTicksPerADCRead;
 uint16_t prescaledTicksPerADCReadTuned;
 
 #define prescaledTicksCount TCNT3
-void startCPUCounter(uint16_t ticksPerAdcRead) {
+void startCPUCounter() {
   // counter for adcREad
   TCCR3A = 0;
   TCCR3B = 0;
-  TCCR3B = 1 << CS30;
-  prescaledTicksPerADCRead = ticksPerAdcRead;
+  uint32_t ticksPerSample = state.secPerSample * F_CPU;
+  if (ticksPerSample < UINT_MAX) {
+    // fits in 16 bits
+    TCCR3B = 1 << CS30;
+    prescaledTicksPerADCRead = ticksPerSample;
+    prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead - 10;
+  } else if (ticksPerSample / 8 < UINT_MAX) {
+    // fits prescaled by 8
+    TCCR3B = 2 << CS30;
+    prescaledTicksPerADCRead = ticksPerSample / 8;
+    prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead - 10 / 8;
+  } else if (ticksPerSample / 64 < UINT_MAX) {
+    // fits prescaled by 64
+    TCCR3B = 3 << CS30;
+    prescaledTicksPerADCRead = ticksPerSample / 64;
+    prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead - 10 / 64;
+  } else if (ticksPerSample / 256 < UINT_MAX) {
+    // fits prescaled by 256
+    TCCR3B = 4 << CS30;
+    prescaledTicksPerADCRead = ticksPerSample / 256;
+    prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead - 10 / 256;
+  } else if (ticksPerSample / 1024 < UINT_MAX) {
+    // fits prescaled by 1024
+    TCCR3B = 5 << CS30;
+    prescaledTicksPerADCRead = ticksPerSample / 1024;
+    prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead - 10 / 1024;
+  }
   /* There are 10 cycles between putting the (16 bit) current counter in 2
    * registers, subtracting a (16 bit) number and storing them back. These 10
    * "lost" cycles are added back by the "tuned" prescaler.
@@ -29,7 +54,7 @@ void startCPUCounter(uint16_t ticksPerAdcRead) {
    *
    * This would take it from ~63 cycles to ~54 cycles digital sample. Who cares!
    */
-  prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead - 10;
+
   // counter is TCNT1 and it counts cpu clocks
   prescaledTicksCount = 0;
   // con 16 bits: 51 for triggering and 47 after -> cae en 74% y deberia ser 79%
@@ -63,7 +88,7 @@ __attribute__((always_inline)) void fillBufferAnalogTrigger(uint8_t channel,
   uint16_t headSamples = state.triggerPos;
   uint16_t tailSamples = state.samplesPerBuffer - state.triggerPos - 1;
   startADC(2, state.amplifier);
-  startCPUCounter(state.ticksPerAdcRead);
+  startCPUCounter();
   prescaledTicksCount = 0;
   while (headSamples--) {
     storeOne(channel);
@@ -90,7 +115,7 @@ __attribute__((always_inline)) inline void fillBufferDigitalTrigger(
   uint16_t headSamples = state.triggerPos;
   uint16_t tailSamples = state.samplesPerBuffer - state.triggerPos;
   startADC(2, state.amplifier);
-  startCPUCounter(state.ticksPerAdcRead);
+  startCPUCounter();
   prescaledTicksCount = 0;
   while (headSamples--) {
     storeOne(channel);
@@ -114,7 +139,7 @@ __attribute__((always_inline)) inline void fillBufferDigitalTrigger(
 
 void fillBufferFast() {
   // test code, ugly and misses trigger on channel 1
-  startCPUCounter(0);
+  startCPUCounter();
   bool done;
   do {
     prescaledTicksCount = 0;
@@ -127,7 +152,7 @@ void fillBufferFast() {
       buffer1[i] = val1;
       buffer2[i] = val2;
     }
-    state.ticksPerAdcRead = prescaledTicksCount / 512;
+    state.secPerSample = prescaledTicksCount * 2.0f / F_CPU / MAX_SAMPLES;
     state.forceUIUpdate = true;
     stopADC();
 
@@ -192,12 +217,12 @@ void setupAutoInterrupt() {
   TCCR1B = 5 << CS10;      // 1024 prescaler
   TCCR1B |= (1 << WGM12);  // turn on CTC mode
   int prescaler = 1024;
-  unsigned long ticksPerFrame = (unsigned long)state.ticksPerAdcRead *
-                                state.samplesPerBuffer /
-                                prescaler;  //  max is 4,294,967,295 (2^32 - 1).
-  uint16_t overhead = 100;                  // 100*1024/32000000=3.2ms
+  float ticksPerFrame =
+      state.secPerSample * F_CPU * state.samplesPerBuffer / prescaler;
+  uint16_t overhead = 100;  // 100*1024/32000000=3.2ms
   uint16_t timeoutTicks =
-      min((unsigned long)ticksPerFrame * 2 + overhead, (unsigned long)65025);
+      min((unsigned long)ticksPerFrame * 2 + overhead, (unsigned long)65535);
+  // max is 65535*1024/32000000 = 2,09712 seconds
   OCR1A = timeoutTicks;  // will interrupt when this value is reached
   TCNT1 = 0;             // counter reset
 
@@ -207,27 +232,26 @@ jmp_buf envAutoTimeout;
 void fillBuffer() {
   static uint8_t lastTriggerMode;
   if (state.triggerMode == TriggerMode::slow) {
-    static uint16_t lastTicksPerAdcRead;
-    if (lastTriggerMode != state.triggerMode ||
-        lastTicksPerAdcRead != state.ticksPerAdcRead) {
-      startADC(2, state.amplifier);
-      startCPUCounter(state.ticksPerAdcRead);
-      TCCR3B = 5 << CS30;  // slow down factor of 1024
+    static float lastSecPerSample;
+    static uint16_t samplesToSend;
 
-      // with this prescaler, the tunning is
-      prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead;
-      // removed
-      prescaledTicksCount = 0;
+    if (lastTriggerMode != state.triggerMode ||
+        lastSecPerSample != state.secPerSample) {
+      startADC(2, state.amplifier);
+      startCPUCounter();
       lastTriggerMode = state.triggerMode;
-      lastTicksPerAdcRead = state.ticksPerAdcRead;
+      lastSecPerSample = state.secPerSample;
+      // note prescaledTicksCount = 0 happens only once. This accounts for
+      // serial overhead
+      const int FPS = 60;  // try to achive 25 frames per second
+      samplesToSend = 1 / (state.secPerSample * FPS);
+      if (samplesToSend < 1) samplesToSend = 1;
+      if (samplesToSend > state.samplesPerBuffer - 1)
+        samplesToSend = state.samplesPerBuffer - 1;
     }
-    // note prescaledTicksCount = 0 happens only once. This accounts for serial
-    // overhead
     uint16_t bufferStart = state.bufferStartPtr;
-    // 2ms/div = 1250 ticks = 20 segundos, y 512/20 = 25.5fps
-    uint16_t samplesToSend = max(1, 1250 / state.ticksPerAdcRead);
-    for (uint16_t i = 0; i < samplesToSend; i++)
-      storeOne(0);  // todo, the tuned
+
+    for (uint16_t i = 0; i < samplesToSend; i++) storeOne(0);
     state.bufferStartPtr = bufferStart;
     state.trashedSamples = state.samplesPerBuffer - samplesToSend;
     return;
@@ -243,7 +267,7 @@ void fillBuffer() {
       setupAutoInterrupt();
     }
   }
-  if (state.ticksPerAdcRead < 61) {
+  if (state.secPerSample < 0.000001906) {
     // not enough time for triggering
     fillBufferFast();
   } else {

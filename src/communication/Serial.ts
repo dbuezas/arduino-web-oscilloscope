@@ -112,6 +112,7 @@ export class Serial {
     if (this.port) await this.close()
     this.port = port
     await this.port.open(options)
+    this.readbuffer = []
     this.reader = this.port.readable.getReader()
     // this.writer = this.port.writable.getWriter() // binary
     const encoder = new TextEncoderStream()

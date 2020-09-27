@@ -21,11 +21,11 @@ export const useTriggerPos = makeIntercom<number>({
   mcu2ui: (v) => v - 1,
   default: 512 * 0.5 // TODO: use percentage in ui
 })
-export const useTicksPerAdcRead = makeIntercom<number>({
+export const useSecPerSample = makeIntercom<number>({
   key: 'C',
-  ui2mcu: (v) => Math.ceil(v),
+  ui2mcu: (v) => v,
   mcu2ui: (v) => v,
-  default: 88 // TODO: use frame total time or per division
+  default: 141 / 1000000 // TODO: use frame total time or per division
 })
 export enum TriggerDirection {
   FALLING = 'Falling',
@@ -120,8 +120,7 @@ export const freeMemoryState = memoSelector(
 export const frequencyState = selector({
   key: 'frequency',
   get: ({ get }) => {
-    const secs =
-      (get(useTicksPerAdcRead.send) / 32000000) * get(useSamplesPerBuffer.send)
+    const secs = get(useSecPerSample.send) * get(useSamplesPerBuffer.send)
     return getFrequencyCount(get(dataState)[0], secs)
   }
 })
@@ -176,7 +175,7 @@ const sendFullState = selector<null>({
   get: () => null,
   set: ({ get, set }) => {
     set(useTriggerPos.send, get(useTriggerPos.send))
-    set(useTicksPerAdcRead.send, get(useTicksPerAdcRead.send))
+    set(useSecPerSample.send, get(useSecPerSample.send))
     set(useSamplesPerBuffer.send, get(useSamplesPerBuffer.send))
     set(useAmplifier.send, get(useAmplifier.send))
     set(useTriggerVoltage.send, get(useTriggerVoltage.send))
@@ -196,7 +195,7 @@ const receiveFullState = selector<Data>({
   set: ({ set }, data) => {
     if (data instanceof DefaultValue) return
     set(useTriggerPos.receive, data.triggerPos)
-    set(useTicksPerAdcRead.receive, data.ticksPerAdcRead)
+    set(useSecPerSample.receive, data.secPerSample)
     set(useSamplesPerBuffer.receive, data.samplesPerBuffer)
     set(useAmplifier.receive, data.amplifier)
     set(useTriggerVoltage.receive, data.triggerVoltage)
@@ -213,7 +212,7 @@ export const allDataState = selector<number[]>({
   get: () => [], // this is a write only selector
   set: ({ set, get }, newData) => {
     win.$recoilDebugStates = [] // TODO: fix memory leak in recoiljs beta
-    win.setTicks = (n: number) => set(useTicksPerAdcRead.send, n)
+    win.setTicks = (n: number) => set(useSecPerSample.send, n)
     if (newData instanceof DefaultValue) return
     if (newData.length === 0) return
     const data = parseSerial(newData)

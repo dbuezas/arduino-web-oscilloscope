@@ -1,40 +1,22 @@
 import MouseTrap from 'mousetrap'
-import React, { useMemo, useState, useCallback, useEffect } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import {
-  useTicksPerAdcRead,
+  useSecPerSample,
   useSamplesPerBuffer
 } from '../../communication/bindings'
 import { formatTime } from '../formatters'
 import { SelectPicker } from 'rsuite'
 import { useRecoilState, useRecoilValue } from 'recoil'
-
-const ticksPerMs = 32000000 / 1000
-const msPerTick = 1000 / 32000000
-const divisionsPerFrame = 10
+import win from '../../win'
+const us = (n: number) => n / 1000000
+const ms = (n: number) => n / 1000
 
 export default function TimeScales() {
-  const [ticksPerAdcRead, setTicksPerAdcRead] = useRecoilState(
-    useTicksPerAdcRead.send
-  )
+  const [secPerSample, setSecPerSample] = useRecoilState(useSecPerSample.send)
+  win.secPerSample = secPerSample
+  win.setSecPerSample = setSecPerSample
   const samples = useRecoilValue(useSamplesPerBuffer.send)
-  const ticksPerSampleToMSPerDivision = useCallback(
-    (ticksPerSample: number) => {
-      const msPerSample = msPerTick * ticksPerSample
-      const msPerFrame = msPerSample * samples
-      const msPerDivision = msPerFrame / divisionsPerFrame
-      return msPerDivision
-    },
-    [samples]
-  )
-  const millisPerDivisionToTicksPerSample = useCallback(
-    (msPerDivision: number) => {
-      const msPerFrame = msPerDivision * divisionsPerFrame
-      const msPerSample = msPerFrame / samples
-      const ticksPerSample = ticksPerMs * msPerSample
-      return ticksPerSample
-    },
-    [samples]
-  )
+
   const [timeDivisions, setTimeDivisions] = useState<
     {
       label: string
@@ -44,51 +26,56 @@ export default function TimeScales() {
   useEffect(() => {
     setTimeDivisions(
       [
+        us(110),
+        us(140.8),
+        us(200),
+        us(500),
+        us(1000),
+        ms(2),
+        ms(5),
+        ms(10),
+        ms(20),
+        ms(50),
         0.1,
-        ticksPerSampleToMSPerDivision(88),
         0.2,
         0.5,
         1,
         2,
         5,
-        10,
-        20,
-        50,
-        50.055,
-        100
-      ].map((msPerDivision) => {
-        const ticks = millisPerDivisionToTicksPerSample(msPerDivision)
+        10
+      ].map((secPerDivision) => {
+        const secPerSample = (secPerDivision * 10) / samples
         return {
-          label: formatTime(msPerDivision / 1000),
-          value: Math.round(ticks)
+          label: formatTime(secPerDivision),
+          value: secPerSample
         }
       })
     )
-  }, [ticksPerSampleToMSPerDivision, millisPerDivisionToTicksPerSample])
+  }, [samples])
 
   useEffect(() => {
-    MouseTrap.bind('right', () => setTicksPerAdcRead((ticksPerAdcRead * 3) / 2))
-    MouseTrap.bind('left', () => setTicksPerAdcRead((ticksPerAdcRead * 2) / 3))
+    MouseTrap.bind('right', () => setSecPerSample((secPerSample * 3) / 2))
+    MouseTrap.bind('left', () => setSecPerSample((secPerSample * 2) / 3))
     return () => {
       MouseTrap.unbind('right')
       MouseTrap.unbind('left')
     }
-  }, [setTicksPerAdcRead, ticksPerAdcRead])
+  }, [setSecPerSample, secPerSample])
 
   return useMemo(
     () => (
       <SelectPicker
         searchable={true}
-        value={ticksPerAdcRead}
+        value={secPerSample}
         cleanable={false}
         onChange={(n: number) => {
-          setTicksPerAdcRead(n)
+          setSecPerSample(n)
           console.log(n)
         }}
         data={timeDivisions}
         style={{ width: 224, marginBottom: 10 }}
       />
     ),
-    [ticksPerAdcRead, timeDivisions, setTicksPerAdcRead]
+    [secPerSample, timeDivisions, setSecPerSample]
   )
 }

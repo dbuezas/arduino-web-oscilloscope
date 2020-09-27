@@ -23,6 +23,24 @@ function get_uint16_t(data: Data) {
   data.i++
   return (h << 8) | l
 }
+function get_float32_t(data: Data) {
+  // IEEE 754
+  // https://gist.github.com/Jozo132/2c0fae763f5dc6635a6714bb741d152f#file-float32encoding-js-L32-L43
+  const arr = data.data.slice(data.i, data.i + 4)
+  data.i += 4
+
+  const int = arr.reverse().reduce((acc, curr) => (acc << 8) + curr)
+  if (int === 0) return 0
+  const sign = int >>> 31 ? -1 : 1
+  let exp = ((int >>> 23) & 0xff) - 127
+  const mantissa = ((int & 0x7fffff) + 0x800000).toString(2)
+  let float32 = 0
+  for (let i = 0; i < mantissa.length; i += 1) {
+    float32 += parseInt(mantissa[i]) ? Math.pow(2, exp) : 0
+    exp--
+  }
+  return float32 * sign
+}
 // function get_int16_t(buffer: number[]) {
 //   const raw = get_uint16_t(buffer)
 //   if (raw & (1 << 15)) {
@@ -39,7 +57,7 @@ export default function parseSerial(data: number[]) {
   // input
   const triggerVoltage = get_uint8_t(myData)
   const triggerDir = get_uint8_t(myData)
-  const ticksPerAdcRead = get_uint16_t(myData)
+  const secPerSample = get_float32_t(myData)
   const triggerPos = get_uint16_t(myData)
   const amplifier = get_uint8_t(myData)
   const triggerMode = get_uint8_t(myData)
@@ -75,7 +93,7 @@ export default function parseSerial(data: number[]) {
     //input
     triggerVoltage,
     triggerDir,
-    ticksPerAdcRead,
+    secPerSample,
     triggerPos,
     amplifier,
     triggerMode,

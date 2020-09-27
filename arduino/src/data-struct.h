@@ -11,7 +11,7 @@ typedef struct {
   // input
   uint8_t triggerVoltage;
   uint8_t triggerDir;
-  uint16_t ticksPerAdcRead;
+  float secPerSample;
   uint16_t triggerPos;
   uint8_t amplifier;
   uint8_t triggerMode;
@@ -32,7 +32,7 @@ State state = {
     // input
     128,                  // uint8_t triggerVoltage;
     TriggerDir::falling,  // uint8_t triggerDir;
-    79,                   // uint16_t ticksPerAdcRead;
+    0.00000275,           // float secPerSample;
     MAX_SAMPLES * 0 / 3,  // uint16_t triggerPos;
     2,                    // uint8_t amplifier;
     TriggerMode::autom,   // uint8_t triggerMode

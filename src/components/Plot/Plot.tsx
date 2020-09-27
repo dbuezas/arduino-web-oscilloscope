@@ -7,7 +7,7 @@ import { Datum, renderXAxis, renderYAxis } from './plot.d3'
 import {
   useTriggerVoltage,
   useTriggerPos,
-  useTicksPerAdcRead,
+  useSecPerSample,
   dataState,
   useSamplesPerBuffer,
   voltageRangeState
@@ -24,7 +24,7 @@ export default function Plot() {
   const [width, height] = useSize(containerRef)
 
   const samples = useRecoilValue(useSamplesPerBuffer.send)
-  const ticksPerAdcRead = useRecoilValue(useTicksPerAdcRead.send)
+  const secPerSample = useRecoilValue(useSecPerSample.send)
   const [triggerVoltage, setTriggerVoltage] = useRecoilState(
     useTriggerVoltage.send
   )
@@ -33,8 +33,8 @@ export default function Plot() {
   const [draggingTV, setDraggingTV] = useState(false)
   const yDomain = useRecoilValue(voltageRangeState)
   const xDomain = useMemo(() => {
-    return [0, (ticksPerAdcRead / 32000000) * samples] as [number, number]
-  }, [ticksPerAdcRead, samples])
+    return [0, secPerSample * samples] as [number, number]
+  }, [secPerSample, samples])
   const triggerPos = (triggerPosInt / samples) * xDomain[1]
   const xScale = useMemo(() => {
     return d3

@@ -1,11 +1,11 @@
 #include "MemoryFree.h"
 #include "data-struct.h"
 
-void saveInput(char option, int16_t val) {
+void saveInput(char option, float val) {
   state.needData = false;
   switch (option) {
     case 'C':
-      state.ticksPerAdcRead = val;
+      state.secPerSample = val;
       break;
     case 'V':
       state.triggerVoltage = constrain(val, 0, 255);
@@ -36,20 +36,29 @@ void saveInput(char option, int16_t val) {
   }
 }
 
-String inputBuffer = String("");
+char inputBuffer[35];
+byte ptr = 0;
 bool handleInput() {
   bool change = false;
   while (Serial.available()) {
     int s = Serial.read();
     if (s == '>') {
-      char option = inputBuffer.charAt(0);
-      int16_t val = inputBuffer.substring(1).toInt();
+      char option = inputBuffer[0];
+      float val = strtod(inputBuffer + 1, nullptr);
       state.freeMemory = freeMemory();
-      inputBuffer = String("");
+      ptr = 0;
+      inputBuffer[ptr] = 0;
+
       saveInput(option, val);
       change = true;
     } else {
-      inputBuffer += (char)s;
+      if (ptr > 33) {
+        // don't write outside the array
+        ptr = 0;
+      }
+      inputBuffer[ptr] = (char)s;
+      ptr++;
+      inputBuffer[ptr] = 0;
     }
   }
   return change;
