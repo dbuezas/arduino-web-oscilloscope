@@ -12,14 +12,15 @@ done
 * add measure ∂t and ∂v
 * use delta T per sample instead of adc clock ticks per sample
 * add slow mode by frame 1 reading at a time and accumulating in client
+* make axis in react without plot.d3.ts
+    - <g ref={node=>select(node).call(axisLeft(y).ticks(10,'%'))}/>
+    - or just really make it manually with d3.ticks
+* optimize plot component
 
 todo
 * Find another way to synchronise packets (e.g. better than end of message or prelude)
 * change dropdowns via btns
 * get rid of "trashed samples"
-* make axis in react without plot.d3.ts
-    - <g ref={node=>select(node).call(axisLeft(y).ticks(10,'%'))}/>
-    - or just really make it manually with d3.ticks
 * separate analog and digital inputs in different pannels
 * add x y mode
 * store configs and send on start

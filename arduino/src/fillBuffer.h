@@ -243,7 +243,7 @@ void fillBuffer() {
       lastSecPerSample = state.secPerSample;
       // note prescaledTicksCount = 0 happens only once. This accounts for
       // serial overhead
-      const int FPS = 60;  // try to achive 25 frames per second
+      const int FPS = 25;  // try to achive 25 frames per second
       samplesToSend = 1 / (state.secPerSample * FPS);
       if (samplesToSend < 1) samplesToSend = 1;
       if (samplesToSend > state.samplesPerBuffer - 1)

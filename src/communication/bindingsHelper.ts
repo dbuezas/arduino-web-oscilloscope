@@ -34,10 +34,11 @@ export function makeIntercom<T>({
   )
 
   // throttle to avoid filling the MCU serial buffer
-  const serial_write = throttle(serial.write, 50, {
-    leading: false,
-    trailing: true
-  })
+  const serial_write = serial.write
+  // const serial_write = throttle(serial.write, 40, {
+  //   leading: false,
+  //   trailing: true
+  // })
   const send = selector<T>({
     key: key + '-selector',
     get: ({ get }) => mcu2ui(get(remoteState), get),

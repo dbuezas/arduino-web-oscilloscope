@@ -125,10 +125,10 @@ export class Serial {
     if (!this.writer) return
     await this.writer.write(text)
   }
-  async onData(callback: (data: number[]) => unknown) {
-    // callback(dataMock)
+  onData(callback: (data: number[]) => unknown) {
+    let running = true
     const produce = async () => {
-      while (1) {
+      while (running) {
         if (!this.reader) await sleep(100)
         await sleep(16)
         const data = this.reader && (await this.reader.read())
@@ -138,7 +138,7 @@ export class Serial {
       }
     }
     const consume = async () => {
-      while (1) {
+      while (running) {
         const [end, start] = indexesOfSequence(END_SEQUENCE, this.readbuffer)
         if (start > -1 && end > -1) {
           const dataFrame = this.readbuffer.slice(
@@ -154,6 +154,9 @@ export class Serial {
     }
     produce()
     consume()
+    return () => {
+      running = false
+    }
   }
 }
 const serial = new Serial()

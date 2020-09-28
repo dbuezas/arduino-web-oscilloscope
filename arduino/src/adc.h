@@ -78,15 +78,7 @@ inline void startADC(uint8_t prescaler, uint8_t amplifier) {
 inline void stopADC() { ADCSRA = 0; }
 
 void setupADC() {
-  // analogReference(INTERNAL1V024);  // 4v
   bitSet(DIDR0, ADC0D);  // disable digital input (reduce noise)
-#define XSTR(x) STR(x)
-#define STR(x) #x
-#pragma message "ADC0D: " XSTR(ADC0D)
-#pragma message "DIDR0: " XSTR(DIDR0)
-
-  noInterrupts();
-
   pinMode(A0, INPUT);
 
   // PB0::4 // part 2 of external ADC
@@ -95,7 +87,7 @@ void setupADC() {
   pinMode(D10, INPUT);
   pinMode(D11, INPUT);
   pinMode(D12, INPUT);
-  // PD5::7 // part 2 of external ADC
+  // PD5::7 // part 1 of external ADC
   pinMode(D5, INPUT);
   pinMode(D6, INPUT);
   pinMode(D7, INPUT);
@@ -104,6 +96,4 @@ void setupADC() {
   pinMode(A3, INPUT);
   pinMode(A4, INPUT);
   pinMode(A5, INPUT);
-
-  interrupts();
 }

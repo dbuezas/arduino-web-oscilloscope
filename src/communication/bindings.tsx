@@ -13,19 +13,31 @@ export const useTriggerVoltage = makeIntercom<number>({
     const [vmin, , vpp] = get ? get(voltageRangeState) : [0, 5, 5]
     return (n / 255) * vpp + vmin
   },
-  default: 2.5
+  default: 1
 })
 export const useTriggerPos = makeIntercom<number>({
   key: 'P',
-  ui2mcu: (v) => Math.ceil(v),
-  mcu2ui: (v) => v - 1,
-  default: 512 * 0.5 // TODO: use percentage in ui
+  ui2mcu: (v, get) => {
+    const samples = get ? get(useSamplesPerBuffer.send) : 512
+    const result = v * samples
+    if (result < 0) return 0
+    if (result > samples - 1) return samples - 1
+    return result
+  },
+  mcu2ui: (v, get) => {
+    const samples = get ? get(useSamplesPerBuffer.send) : 512
+    return v / samples
+  },
+  default: 0.5
 })
 export const useSecPerSample = makeIntercom<number>({
   key: 'C',
-  ui2mcu: (v) => v,
+  ui2mcu: (v) => {
+    console.log(v)
+    return v
+  },
   mcu2ui: (v) => v,
-  default: 141 / 1000000 // TODO: use frame total time or per division
+  default: 0.00000275
 })
 export enum TriggerDirection {
   FALLING = 'Falling',
@@ -150,7 +162,7 @@ export const voltageRangeState = selector({
   get: ({ get }) => {
     //https://docs.google.com/spreadsheets/d/1urWB28qDmB_LL_khdBBfB-djku5h4lSx-Cw9l7Rz1u8/edit?usp=sharing
     // TODO: do this in another way
-    // account for the last fifth of the ADC, which is not usable
+    // TODO: account for the last fifth of the ADC, which is not usable
     const vmax = [
       25,
       6.25,
@@ -248,7 +260,7 @@ export const allDataState = selector<number[]>({
         const isLength = Math.max(...buffers.map((b) => b.length))
         if (isLength > 512) {
           if (wasLength < 512) buffers = buffers.map((b) => b.slice(0, 512))
-          else buffers = buffers.map(() => [])
+          else buffers = buffers.map((b) => b.slice(512, b.length - 512))
         }
       }
       set(dataState, [...buffers, getFFT(buffers[0])])

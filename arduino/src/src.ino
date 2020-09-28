@@ -34,17 +34,15 @@ void loop() {
   for (;;) {
     bool isJump = setjmp(env);
     if (isJump) offAutoInterrupt();
-    canStop = false;
+
     bool change = handleInput();
     if (change) {
       // sendData(false);
     }
     canStop = true;
     fillBuffer();
-    digitalWrite(D13, 1);
     canStop = false;
     sendData();
-    digitalWrite(D13, 0);
   }
 }
 
@@ -52,6 +50,7 @@ volatile byte receives;
 ISR(USART_RX_vect) {
   Serial._rx_complete_irq();
   if (canStop) {
+    canStop = false;
     longjmp(env, 1);
   }
 }

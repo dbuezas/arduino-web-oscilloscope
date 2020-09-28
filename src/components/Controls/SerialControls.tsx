@@ -26,7 +26,7 @@ function SerialControls() {
   const [serialState, setSerialState] = useState<ConnectedState>('Disconnected')
   const setAllData = useSetRecoilState(allDataState)
   useEffect(() => {
-    serial.onData((data) => {
+    return serial.onData((data) => {
       setAllData(data)
     })
   }, [setAllData])

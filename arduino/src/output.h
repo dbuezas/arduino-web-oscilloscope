@@ -11,6 +11,7 @@ void sendBuffer(uint8_t buffer[]) {
 }
 
 void sendData(bool withBuffers = true) {
+  digitalWrite(D13, 1);
   Serial.write((byte*)&state, sizeof(state));
   if (withBuffers) {
     if (state.isChannelOn & 0b1) sendBuffer(buffer0);
@@ -19,6 +20,7 @@ void sendData(bool withBuffers = true) {
   }
 
   Serial.write((byte*)&endOfMessage, sizeof(endOfMessage));
-  Serial.flush();  // send all now to avoid interrupts while sampling
   state.forceUIUpdate = false;
+  Serial.flush();  // send all now to avoid interrupts while sampling
+  digitalWrite(D13, 0);
 }

@@ -1,153 +1,58 @@
-import * as d3 from 'd3'
-import React, { useRef, useLayoutEffect, useState, useMemo } from 'react'
+import React, { useRef, useState } from 'react'
 import useSize from '@react-hook/size'
 
 import './Plot.css'
-import { Datum, renderXAxis, renderYAxis } from './plot.d3'
-import {
-  useTriggerVoltage,
-  useTriggerPos,
-  useSecPerSample,
-  dataState,
-  useSamplesPerBuffer,
-  voltageRangeState
-} from '../../communication/bindings'
-import { useRecoilValue, useRecoilState } from 'recoil'
-const margin = { top: 20, right: 50, bottom: 30, left: 50 }
-const constrain = (n: number, min: number, max: number) =>
-  n > max ? max : n < min ? min : n
+import { dataState } from '../../communication/bindings'
+import { useRecoilValue, useSetRecoilState } from 'recoil'
+import TriggerVoltageHandle, { TriggerVoltageRef } from './TriggerVoltageHandle'
+import TriggerPosHandle, { TriggerPosRef } from './TriggerPosHandle'
+import { lineSelector, plotHeightSelector, plotWidthSelector } from './hooks'
+import XAxis from './XAxis'
+import YAxis from './YAxis'
+
+function Curves() {
+  const line = useRecoilValue(lineSelector)
+  const data = useRecoilValue(dataState)
+  const ds = data.map((data) => line(data) || undefined)
+  return (
+    <>
+      {ds.map((d, i) => (
+        <path key={i} className={`plot-area-d${i}`} d={d}></path>
+      ))}
+    </>
+  )
+}
 
 export default function Plot() {
-  const data = useRecoilValue(dataState)
   const nodeRef = useRef<SVGSVGElement>(null)
+  const triggerPosRef = useRef<TriggerPosRef>(null)
+  const triggerVoltageRef = useRef<TriggerVoltageRef>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [width, height] = useSize(containerRef)
-
-  const samples = useRecoilValue(useSamplesPerBuffer.send)
-  const secPerSample = useRecoilValue(useSecPerSample.send)
-  const [triggerVoltage, setTriggerVoltage] = useRecoilState(
-    useTriggerVoltage.send
-  )
-  const [triggerPosInt, setTriggerPosInt] = useRecoilState(useTriggerPos.send)
-  const [draggingTP, setDraggingTP] = useState(false)
-  const [draggingTV, setDraggingTV] = useState(false)
-  const yDomain = useRecoilValue(voltageRangeState)
-  const xDomain = useMemo(() => {
-    return [0, secPerSample * samples] as [number, number]
-  }, [secPerSample, samples])
-  const triggerPos = (triggerPosInt / samples) * xDomain[1]
-  const xScale = useMemo(() => {
-    return d3
-      .scaleLinear()
-      .domain(xDomain)
-      .range([margin.left, width - margin.right])
-  }, [xDomain, width])
-  const yScale = useMemo(() => {
-    return d3
-      .scaleLinear()
-      .domain(yDomain)
-      .rangeRound([height - margin.bottom, margin.top])
-  }, [height, yDomain])
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const svg = useMemo(() => d3.select(nodeRef.current!), [nodeRef.current])
-
-  useLayoutEffect(() => {
-    renderYAxis(svg, yScale, width)
-  }, [svg, yScale, width])
-  useLayoutEffect(() => {
-    renderXAxis(svg, xScale, height)
-  }, [svg, xScale, height])
-  const line = useMemo(
-    () =>
-      d3
-        .line<Datum>()
-        .x((d, i) => xScale(((i + 0.5) / samples) * xDomain[1]))
-        .y((d) => yScale(d)),
-    [samples, xDomain, xScale, yScale]
-  )
-
-  const ds = data.map((data) => line(data) || undefined)
-
+  const setPlotHeight = useSetRecoilState(plotHeightSelector)
+  setPlotHeight(height)
+  const setPlotWidth = useSetRecoilState(plotWidthSelector)
+  setPlotWidth(width)
   return (
     <div className="plotContainer" ref={containerRef}>
       <svg
         className="plot"
         ref={nodeRef}
         onMouseMove={(e) => {
-          if (draggingTP) {
-            const offsetLeft = nodeRef.current!.getBoundingClientRect().left
-            let scaled =
-              (xScale.invert(e.clientX - offsetLeft) / xDomain[1]) * samples
-            scaled = constrain(scaled, 0, samples)
-            setTriggerPosInt(scaled)
-          }
-          if (draggingTV) {
-            const offsetTop = nodeRef.current!.getBoundingClientRect().top
-            setTriggerVoltage(yScale.invert(e.clientY - offsetTop))
-          }
+          triggerPosRef.current?.onMouseMove(e)
+          triggerVoltageRef.current?.onMouseMove(e)
         }}
-        onMouseUp={() => {
-          setDraggingTP(false)
-          setDraggingTV(false)
+        onMouseUp={(e) => {
+          triggerPosRef.current?.onMouseUp(e)
+          triggerVoltageRef.current?.onMouseUp(e)
         }}
       >
-        <g className="x axis"></g>
-        <g className="y axis"></g>
-        {ds.map((d, i) => (
-          <path key={i} className={`plot-area-d${i}`} d={d}></path>
-        ))}
-        <line
-          className="triggerVoltage"
-          x1={margin.left}
-          x2={width - margin.right}
-          y1={yScale(triggerVoltage)}
-          y2={yScale(triggerVoltage)}
-        ></line>
-        <line
-          className="triggerVoltageHandle"
-          onMouseDown={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            setDraggingTV(true)
-          }}
-          x1={margin.left}
-          x2={width - margin.right}
-          y1={yScale(triggerVoltage)}
-          y2={yScale(triggerVoltage)}
-        ></line>
-        <text
-          fill="currentColor"
-          y={yScale(triggerVoltage)}
-          x={width - margin.right}
-          dy=".32em"
-          dx="10"
-        >
-          {triggerVoltage.toFixed(2)}v
-        </text>
-        <line
-          className="triggerPos"
-          x1={xScale(triggerPos)}
-          x2={xScale(triggerPos)}
-          y1={height - margin.bottom}
-          y2={margin.top}
-        ></line>
-        <line
-          className="triggerPosHandle"
-          onMouseDown={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
+        <XAxis />
+        <YAxis />
+        <Curves />
 
-            setDraggingTP(true)
-          }}
-          x1={xScale(triggerPos)}
-          x2={xScale(triggerPos)}
-          y1={height - margin.bottom}
-          y2={margin.top}
-        ></line>
-        <text fill="currentColor" x={xScale(triggerPos)} dx="-1em" dy="1em">
-          {Math.round((triggerPos / xDomain[1]) * 100)}%
-        </text>
+        <TriggerVoltageHandle ref={triggerVoltageRef} />
+        <TriggerPosHandle ref={triggerPosRef} />
       </svg>
     </div>
   )
