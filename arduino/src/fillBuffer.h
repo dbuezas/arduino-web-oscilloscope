@@ -1,36 +1,36 @@
 #define TCNT3 _SFR_MEM16(0x94)
 #include "data-struct.h"
-#include "limits.h"
 uint16_t prescaledTicksPerADCRead;
 uint16_t prescaledTicksPerADCReadTuned;
 
+#define UINT16_MAX 65535
 #define prescaledTicksCount TCNT3
 void startCPUCounter() {
   // counter for adcREad
   TCCR3A = 0;
   TCCR3B = 0;
   uint32_t ticksPerSample = state.secPerSample * F_CPU;
-  if (ticksPerSample < UINT_MAX) {
+  if (ticksPerSample < UINT16_MAX) {
     // fits in 16 bits
     TCCR3B = 1 << CS30;
     prescaledTicksPerADCRead = ticksPerSample;
     prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead - 10;
-  } else if (ticksPerSample / 8 < UINT_MAX) {
+  } else if (ticksPerSample / 8 < UINT16_MAX) {
     // fits prescaled by 8
     TCCR3B = 2 << CS30;
     prescaledTicksPerADCRead = ticksPerSample / 8;
     prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead - 10 / 8;
-  } else if (ticksPerSample / 64 < UINT_MAX) {
+  } else if (ticksPerSample / 64 < UINT16_MAX) {
     // fits prescaled by 64
     TCCR3B = 3 << CS30;
     prescaledTicksPerADCRead = ticksPerSample / 64;
     prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead - 10 / 64;
-  } else if (ticksPerSample / 256 < UINT_MAX) {
+  } else if (ticksPerSample / 256 < UINT16_MAX) {
     // fits prescaled by 256
     TCCR3B = 4 << CS30;
     prescaledTicksPerADCRead = ticksPerSample / 256;
     prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead - 10 / 256;
-  } else if (ticksPerSample / 1024 < UINT_MAX) {
+  } else if (ticksPerSample / 1024 < UINT16_MAX) {
     // fits prescaled by 1024
     TCCR3B = 5 << CS30;
     prescaledTicksPerADCRead = ticksPerSample / 1024;
@@ -211,6 +211,8 @@ void offAutoInterrupt() {
   TCCR1A = 0;
   TCCR1B = 0;
 }
+
+uint16_t autoInterruptOverflows;
 void setupAutoInterrupt() {
   TIMSK1 = 0;
   TCCR1A = 0;
@@ -220,11 +222,13 @@ void setupAutoInterrupt() {
   float ticksPerFrame =
       state.secPerSample * F_CPU * state.samplesPerBuffer / prescaler;
   uint16_t overhead = 100;  // 100*1024/32000000=3.2ms
-  uint16_t timeoutTicks =
-      min((unsigned long)ticksPerFrame * 2 + overhead, (unsigned long)65535);
+  uint32_t timeoutTicks = (unsigned long)ticksPerFrame * 2 + overhead;
   // max is 65535*1024/32000000 = 2,09712 seconds
-  OCR1A = timeoutTicks;  // will interrupt when this value is reached
-  TCNT1 = 0;             // counter reset
+
+  autoInterruptOverflows = timeoutTicks / 65536;
+  uint16_t timeoutTicksCycle = timeoutTicks % 65536;
+  OCR1A = timeoutTicksCycle;  // will interrupt when this value is reached
+  TCNT1 = 0;                  // counter reset
 
   TIMSK1 |= (1 << OCIE1A);  // enable ISR
 }
@@ -243,8 +247,9 @@ void fillBuffer() {
       lastSecPerSample = state.secPerSample;
       // note prescaledTicksCount = 0 happens only once. This accounts for
       // serial overhead
-      const int FPS = 25;  // try to achive 25 frames per second
-      samplesToSend = 1 / (state.secPerSample * FPS);
+      const int FPS = 60;  // try to achive 25 frames per second
+      float samplesPerSecond = 1 / state.secPerSample;
+      samplesToSend = samplesPerSecond / FPS;
       if (samplesToSend < 1) samplesToSend = 1;
       if (samplesToSend > state.samplesPerBuffer - 1)
         samplesToSend = state.samplesPerBuffer - 1;
@@ -282,4 +287,8 @@ void fillBuffer() {
   offAutoInterrupt();
 }
 
-ISR(TIMER1_COMPA_vect) { longjmp(envAutoTimeout, 1); }
+ISR(TIMER1_COMPA_vect) {
+  // TODO: add counter
+  if (autoInterruptOverflows == 0) longjmp(envAutoTimeout, 1);
+  autoInterruptOverflows--;
+}
