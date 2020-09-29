@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 import useSize from '@react-hook/size'
 
 import './Plot.css'
@@ -30,9 +30,11 @@ export default function Plot() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [width, height] = useSize(containerRef)
   const setPlotHeight = useSetRecoilState(plotHeightSelector)
-  setPlotHeight(height)
   const setPlotWidth = useSetRecoilState(plotWidthSelector)
-  setPlotWidth(width)
+  useEffect(() => {
+    setPlotHeight(height)
+    setPlotWidth(width)
+  }, [height, setPlotHeight, setPlotWidth, width])
   return (
     <div className="plotContainer" ref={containerRef}>
       <svg

@@ -62,14 +62,14 @@ line.triggerPos,
 line.triggerVoltage {
   fill: none;
   stroke-dasharray: 10;
-  stroke-width: 1;
+  stroke-width: 2;
   opacity: 0.7;
 }
 line.triggerPos {
   stroke: black;
 }
 line.triggerVoltage {
-  stroke: yellow;
+  stroke: black;
 }
 line.triggerPos.active,
 line.triggerVoltage.active {

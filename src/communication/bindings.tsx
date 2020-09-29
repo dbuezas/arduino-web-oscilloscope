@@ -2,6 +2,7 @@ import { atom, selector, DefaultValue } from 'recoil'
 import parseSerial from './parseSerial'
 import { makeIntercom, memoSelector } from './bindingsHelper'
 import { getFFT, getFrequencyCount, oversample } from '../dsp/spectrum'
+import win from '../win'
 
 export const useTriggerVoltage = makeIntercom<number>({
   key: 'V',
@@ -32,10 +33,7 @@ export const useTriggerPos = makeIntercom<number>({
 })
 export const useSecPerSample = makeIntercom<number>({
   key: 'C',
-  ui2mcu: (v) => {
-    console.log(v)
-    return v
-  },
+  ui2mcu: (v) => v,
   mcu2ui: (v) => v,
   default: 0.00000275
 })
@@ -61,22 +59,36 @@ export const useIsChannelOn = makeIntercom<boolean[]>({
     const result = v
       .map((b) => (b ? 1 : 0) as number)
       .reduce((acc, n, i) => acc + (n << i), 0)
-    console.log('ui2mcu', v, result)
     return result
   },
   mcu2ui: (v) => {
     const result = Array(8)
       .fill(0)
       .map((_, i) => Boolean(v & (1 << i)))
-    console.log('mcu2ui', v, result)
     return result
   },
   default: [true, false, false, false, false, false]
 })
 
+export const constrain = (v: number, min: number, max: number) =>
+  v < min ? min : v > max ? max : v
+export const voltageRanges = [
+  25,
+  6.25,
+  5,
+  3.125,
+  1.5625,
+  0.78125,
+  0.78125,
+  0.625,
+  0.390625,
+  0.3125,
+  0.1953125,
+  0.15625
+]
 export const useAmplifier = makeIntercom<number>({
   key: 'A',
-  ui2mcu: (v) => Math.floor(v),
+  ui2mcu: (v) => constrain(v, 0, voltageRanges.length - 1),
   mcu2ui: (v) => v,
   default: 1 //TODO: use volt range or per division
 })
@@ -163,20 +175,7 @@ export const voltageRangeState = selector({
     //https://docs.google.com/spreadsheets/d/1urWB28qDmB_LL_khdBBfB-djku5h4lSx-Cw9l7Rz1u8/edit?usp=sharing
     // TODO: do this in another way
     // TODO: account for the last fifth of the ADC, which is not usable
-    const vmax = [
-      25,
-      6.25,
-      5,
-      3.125,
-      1.5625,
-      0.78125,
-      0.78125,
-      0.625,
-      0.390625,
-      0.3125,
-      0.1953125,
-      0.15625
-    ][get(useAmplifier.send)]
+    const vmax = voltageRanges[get(useAmplifier.send)]
     const vmin = 0
     return [vmin, vmax, vmax - vmin]
   }
@@ -218,13 +217,11 @@ const receiveFullState = selector<Data>({
   }
 })
 
-const win = window as any
 export const allDataState = selector<number[]>({
   key: 'all-data',
   get: () => [], // this is a write only selector
   set: ({ set, get }, newData) => {
     win.$recoilDebugStates = [] // TODO: fix memory leak in recoiljs beta
-    win.setTicks = (n: number) => set(useSecPerSample.send, n)
     if (newData instanceof DefaultValue) return
     if (newData.length === 0) return
     const data = parseSerial(newData)
@@ -242,7 +239,7 @@ export const allDataState = selector<number[]>({
     ]
 
     set(freeMemoryState, data.freeMemory)
-    set(didTriggerState, data.didTrigger)
+    set(didTriggerState, !!data.didTrigger)
     const shouldUpdate =
       // todo use isRunning state in board for this
       get(isRunningState) && buffers.some((buffer) => buffer.length > 0)

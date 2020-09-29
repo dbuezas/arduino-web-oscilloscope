@@ -1,5 +1,5 @@
 import MouseTrap from 'mousetrap'
-import React, { useMemo, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { isRunningState } from '../../communication/bindings'
 import { Panel, Button } from 'rsuite'
 import { useRecoilState } from 'recoil'
@@ -18,23 +18,18 @@ export default function Scales() {
 
   return (
     <Panel header="Scales" shaded collapsible defaultExpanded>
-      {useMemo(
-        () => (
-          <Button
-            style={{
-              color: 'white',
-              backgroundColor: isRunning ? 'green' : 'red',
-              width: '100%',
-              marginBottom: '10px'
-            }}
-            size="sm"
-            onClick={() => setIsRunning(!isRunning)}
-          >
-            {isRunning ? 'Run' : 'Hold'}
-          </Button>
-        ),
-        [isRunning, setIsRunning]
-      )}
+      <Button
+        style={{
+          color: 'white',
+          backgroundColor: isRunning ? 'green' : 'red',
+          width: '100%',
+          marginBottom: '10px'
+        }}
+        size="sm"
+        onClick={() => setIsRunning(!isRunning)}
+      >
+        {isRunning ? 'Run' : 'Hold'}
+      </Button>
       <TimeScales />
       <Amplifier />
     </Panel>

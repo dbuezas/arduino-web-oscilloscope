@@ -137,75 +137,6 @@ __attribute__((always_inline)) inline void fillBufferDigitalTrigger(
   stopADC();
 }
 
-void fillBufferFast() {
-  // test code, ugly and misses trigger on channel 1
-  startCPUCounter();
-  bool done;
-  do {
-    prescaledTicksCount = 0;
-    startADC(1, state.amplifier);
-    for (uint16_t i = 0; i < MAX_SAMPLES; i++) {
-      uint8_t val0 = ADCH;
-      uint8_t val1 = (PINB & 0b00011111) | (PIND & 0b11100000);
-      uint8_t val2 = PINC & 0b00111100;
-      buffer0[i] = val0;
-      buffer1[i] = val1;
-      buffer2[i] = val2;
-    }
-    state.secPerSample = prescaledTicksCount * 2.0f / F_CPU / MAX_SAMPLES;
-    state.forceUIUpdate = true;
-    stopADC();
-
-    // start looking after the trigger pos to minimize waste
-    uint16_t i = state.triggerPos;
-    if (state.triggerChannel < 2) {
-      uint8_t triggerPoint = state.triggerVoltage;
-      byte triggerVoltageMinus = max(0, (int)triggerPoint - 10);
-      byte triggerVoltagePlus = min(255, (int)triggerPoint + 10);
-      if (state.triggerDir == TriggerDir::rising) {
-        while (buffer0[i] > triggerVoltageMinus && i < MAX_SAMPLES) {
-          i++;
-        }
-        while (buffer0[i] < triggerPoint && i < MAX_SAMPLES) {
-          i++;
-        }
-      } else {
-        while (buffer0[i] < triggerVoltagePlus && i < MAX_SAMPLES) {
-          i++;
-        }
-        while (buffer0[i] > triggerPoint && i < MAX_SAMPLES) {
-          i++;
-        }
-      }
-    } else {
-      if (state.triggerDir == TriggerDir::rising) {
-        while (bitRead(buffer2[i], state.triggerChannel) == 1 &&
-               i < MAX_SAMPLES) {
-          i++;
-        }
-        while (bitRead(buffer2[i], state.triggerChannel) == 0 &&
-               i < MAX_SAMPLES) {
-          i++;
-        }
-      } else {
-        while (bitRead(buffer2[i], state.triggerChannel) == 0 &&
-               i < MAX_SAMPLES) {
-          i++;
-        }
-        while (bitRead(buffer2[i], state.triggerChannel) == 1 &&
-               i < MAX_SAMPLES) {
-          i++;
-        }
-      }
-    }
-    done = i < MAX_SAMPLES;
-    if (done) {
-      state.bufferStartPtr = (MAX_SAMPLES + i - state.triggerPos) % MAX_SAMPLES;
-    }
-    state.trashedSamples = i - state.triggerPos;
-  } while (!done);
-}
-
 void offAutoInterrupt() {
   TIMSK1 = 0;
   TCCR1A = 0;
@@ -221,9 +152,8 @@ void setupAutoInterrupt() {
   int prescaler = 1024;
   float ticksPerFrame =
       state.secPerSample * F_CPU * state.samplesPerBuffer / prescaler;
-  uint16_t overhead = 100;  // 100*1024/32000000=3.2ms
-  uint32_t timeoutTicks = (unsigned long)ticksPerFrame * 2 + overhead;
-  // max is 65535*1024/32000000 = 2,09712 seconds
+  uint16_t serialOverhead = 100;  // 100*1024/32000000=3.2ms
+  uint32_t timeoutTicks = (unsigned long)ticksPerFrame * 2 + serialOverhead;
 
   autoInterruptOverflows = timeoutTicks / 65536;
   uint16_t timeoutTicksCycle = timeoutTicks % 65536;
@@ -241,12 +171,12 @@ void fillBuffer() {
 
     if (lastTriggerMode != state.triggerMode ||
         lastSecPerSample != state.secPerSample) {
+      // TODO: set the adc when settings change
+      // TODO: startCPUCounter when trigger mode is set to slow directly
       startADC(2, state.amplifier);
       startCPUCounter();
       lastTriggerMode = state.triggerMode;
       lastSecPerSample = state.secPerSample;
-      // note prescaledTicksCount = 0 happens only once. This accounts for
-      // serial overhead
       const int FPS = 60;  // try to achive 25 frames per second
       float samplesPerSecond = 1 / state.secPerSample;
       samplesToSend = samplesPerSecond / FPS;
@@ -272,23 +202,19 @@ void fillBuffer() {
       setupAutoInterrupt();
     }
   }
-  if (state.secPerSample < 0.000001906) {
-    // not enough time for triggering
-    fillBufferFast();
-  } else {
-    state.trashedSamples = 0;
 
-    if (state.triggerChannel < 2)
-      fillBufferAnalogTrigger(state.triggerChannel, state.triggerDir);
-    else
-      fillBufferDigitalTrigger(state.triggerChannel, state.triggerDir);
-    state.didTrigger = true;
-  }
+  state.trashedSamples = 0;
+
+  if (state.triggerChannel < 2)
+    fillBufferAnalogTrigger(state.triggerChannel, state.triggerDir);
+  else
+    fillBufferDigitalTrigger(state.triggerChannel, state.triggerDir);
+  state.didTrigger = true;
+
   offAutoInterrupt();
 }
 
 ISR(TIMER1_COMPA_vect) {
-  // TODO: add counter
   if (autoInterruptOverflows == 0) longjmp(envAutoTimeout, 1);
   autoInterruptOverflows--;
 }

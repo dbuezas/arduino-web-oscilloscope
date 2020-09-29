@@ -67,7 +67,7 @@ export default function parseSerial(data: number[]) {
   // output
   const needData = get_bool(myData)
   const forceUIUpdate = get_bool(myData)
-  const bufferStartPtr = get_uint16_t(myData)
+  get_uint16_t(myData) //const bufferStartPtr =
   const didTrigger = get_bool(myData)
   const freeMemory = get_uint16_t(myData)
   const trashedSamples = get_uint16_t(myData)

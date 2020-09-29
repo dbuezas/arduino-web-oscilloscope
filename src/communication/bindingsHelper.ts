@@ -1,6 +1,5 @@
 import { atom, selector, DefaultValue, RecoilState, RecoilValue } from 'recoil'
 import serial from './Serial'
-import { throttle } from 'lodash'
 
 export function memoSelector<T>(theAtom: RecoilState<T>) {
   return selector<T>({

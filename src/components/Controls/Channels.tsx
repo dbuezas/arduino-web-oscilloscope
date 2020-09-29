@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 import {
   useIsChannelOn,
   oversamplingFactorState
@@ -21,47 +21,35 @@ export default function Channels() {
 
   return (
     <Panel header="Channels" shaded collapsible defaultExpanded>
-      {useMemo(
-        () => (
-          <>
-            <ButtonToolbar style={ButtonToolbarStyle}>
-              <ButtonGroup>
-                {['A0', 'AS', 'A2', 'A3', 'A4', 'A5'].map((name, i) => (
-                  <Button
-                    key={i}
-                    appearance={isChannelOn[i] ? 'primary' : 'default'}
-                    size="sm"
-                    onClick={() => {
-                      const buffer = isChannelOn.slice()
-                      buffer[i] = !buffer[i]
-                      setIsChannelOn(buffer)
-                    }}
-                  >
-                    {name}
-                  </Button>
-                ))}
-              </ButtonGroup>
-            </ButtonToolbar>
-          </>
-        ),
-        [isChannelOn, setIsChannelOn]
-      )}
-      {useMemo(
-        () => (
-          <div style={ButtonToolbarStyle}>
-            Oversample
-            <Slider
-              style={{ width: '50%' }}
-              value={oversamplingFactor}
-              onChange={setOversamplingFactor}
-              max={0.99}
-              min={0}
-              step={0.01}
-            />
-          </div>
-        ),
-        [oversamplingFactor, setOversamplingFactor]
-      )}
+      <ButtonToolbar style={ButtonToolbarStyle}>
+        <ButtonGroup>
+          {['A0', 'AS', 'A2', 'A3', 'A4', 'A5'].map((name, i) => (
+            <Button
+              key={i}
+              appearance={isChannelOn[i] ? 'primary' : 'default'}
+              size="sm"
+              onClick={() => {
+                const buffer = isChannelOn.slice()
+                buffer[i] = !buffer[i]
+                setIsChannelOn(buffer)
+              }}
+            >
+              {name}
+            </Button>
+          ))}
+        </ButtonGroup>
+      </ButtonToolbar>
+      <div style={ButtonToolbarStyle}>
+        Oversample
+        <Slider
+          style={{ width: '50%' }}
+          value={oversamplingFactor}
+          onChange={setOversamplingFactor}
+          max={0.99}
+          min={0}
+          step={0.01}
+        />
+      </div>
     </Panel>
   )
 }

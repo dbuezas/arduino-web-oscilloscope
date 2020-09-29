@@ -15,7 +15,6 @@ export const xDomainSelector = selector({
   key: 'xDomain',
   get: ({ get }) => {
     const xMax = get(useSecPerSample.send) * get(useSamplesPerBuffer.send)
-    console.log('xMax', xMax)
     return [0, xMax] as [number, number]
   }
 })

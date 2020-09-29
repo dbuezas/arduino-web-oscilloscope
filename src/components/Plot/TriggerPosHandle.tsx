@@ -1,18 +1,12 @@
 import React, {
-  EventHandler,
   forwardRef,
   MouseEventHandler,
-  ReactEventHandler,
-  SyntheticEvent,
   useImperativeHandle,
   useState
 } from 'react'
 
 import { useRecoilState, useRecoilValue } from 'recoil'
-import {
-  useSamplesPerBuffer,
-  useTriggerPos
-} from '../../communication/bindings'
+import { useTriggerPos } from '../../communication/bindings'
 import {
   margin,
   plotHeightSelector,

@@ -4,7 +4,7 @@ import Trigger from './Trigger'
 import Channels from './Channels'
 import Scales from './Scales'
 import SerialControls from './SerialControls'
-import Voltages from './Voltages'
+import Stats from './Stats'
 
 function Controls() {
   return (
@@ -13,7 +13,7 @@ function Controls() {
       <Scales />
       <Channels />
       <Trigger />
-      <Voltages />
+      <Stats />
     </>
   )
 }

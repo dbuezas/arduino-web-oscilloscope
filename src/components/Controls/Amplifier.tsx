@@ -1,6 +1,6 @@
 import MouseTrap from 'mousetrap'
-import React, { useMemo, useEffect } from 'react'
-import { useAmplifier } from '../../communication/bindings'
+import React, { useEffect } from 'react'
+import { useAmplifier, voltageRanges } from '../../communication/bindings'
 import { formatVoltage } from '../formatters'
 import { SelectPicker } from 'rsuite'
 import { useRecoilState } from 'recoil'
@@ -17,36 +17,20 @@ function Amplifier() {
     }
   }, [amplifier, setAmplifier])
 
-  return useMemo(
-    () => (
-      <SelectPicker
-        searchable={false}
-        value={amplifier}
-        cleanable={false}
-        onChange={setAmplifier}
-        data={[
-          2.5,
-          0.625,
-          0.5,
-          0.3125,
-          0.15625,
-          0.078125,
-          0.078125,
-          0.0625,
-          0.0390625,
-          0.03125,
-          0.01953125,
-          0.015625
-        ].map((perDiv, i) => {
-          return {
-            label: formatVoltage(perDiv),
-            value: i
-          }
-        })}
-        style={{ width: 224 }}
-      />
-    ),
-    [amplifier, setAmplifier]
+  return (
+    <SelectPicker
+      searchable={false}
+      value={amplifier}
+      cleanable={false}
+      onChange={setAmplifier}
+      data={voltageRanges.map((v, i) => {
+        return {
+          label: formatVoltage(v / 10),
+          value: i
+        }
+      })}
+      style={{ width: 224 }}
+    />
   )
 }
 

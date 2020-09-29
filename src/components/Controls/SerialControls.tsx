@@ -6,7 +6,7 @@ import {
   ButtonGroup,
   Panel
 } from 'rsuite'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { allDataState } from '../../communication/bindings'
 import serial from '../../communication/Serial'
 import { useSetRecoilState } from 'recoil'
@@ -81,24 +81,19 @@ function SerialControls() {
         />
       </ButtonGroup>
 
-      {useMemo(
-        () => (
-          <ButtonToolbar style={ButtonToolbarStyle}>
-            State:&nbsp;
-            {(() => {
-              const color = {
-                Connected: 'green',
-                'Connecting...': 'yellow',
-                Error: 'red',
-                Disconnected: 'grey'
-              }[serialState]
+      <ButtonToolbar style={ButtonToolbarStyle}>
+        State:&nbsp;
+        {(() => {
+          const color = {
+            Connected: 'green',
+            'Connecting...': 'yellow',
+            Error: 'red',
+            Disconnected: undefined
+          }[serialState]
 
-              return <Tag color={color}>{serialState}</Tag>
-            })()}
-          </ButtonToolbar>
-        ),
-        [serialState]
-      )}
+          return <Tag color={color}>{serialState}</Tag>
+        })()}
+      </ButtonToolbar>
     </Panel>
   )
 }
