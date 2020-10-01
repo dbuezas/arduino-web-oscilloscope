@@ -28,7 +28,10 @@
   stroke: darkmagenta;
 }
 .plotContainer path.plot-area-d6 {
-  stroke: deeppink;
+  stroke: steelblue;
+}
+.plotContainer path.plot-area-d7 {
+  stroke: crimson;
 }
 
 .plotContainer .axis .domain {

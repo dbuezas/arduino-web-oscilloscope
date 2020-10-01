@@ -1,9 +1,14 @@
 #include "MemoryFree.h"
 #include "data-struct.h"
+#include "output.h"
 
 void saveInput(char option, float val) {
   state.needData = false;
   switch (option) {
+    case 'R':
+      // request data
+      sendData();
+      break;
     case 'C':
       state.secPerSample = val;
       break;
@@ -45,7 +50,7 @@ void saveInput(char option, float val) {
 char inputBuffer[INPUT_BUFFER_SIZE];
 byte ptr = 0;
 bool handleInput() {
-  bool change = false;
+  bool wait = false;
   while (Serial.available()) {
     int s = Serial.read();
     if (s == '>') {
@@ -56,7 +61,7 @@ bool handleInput() {
       inputBuffer[ptr] = 0;
 
       saveInput(option, val);
-      change = true;
+      wait = false;
     } else {
       if (ptr >= INPUT_BUFFER_SIZE - 1) {
         // don't write outside the array
@@ -66,7 +71,12 @@ bool handleInput() {
       inputBuffer[ptr] = (char)s;
       ptr++;
       inputBuffer[ptr] = 0;
+      // delayMicroseconds(100);
+      // give time to receive the rest of the message before filling the buffer
+      // with trash. Not using normal delay because it uses micros() and that
+      // timer is off
+      wait = true;
     }
   }
-  return change;
+  return wait;
 }

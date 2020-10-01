@@ -6,7 +6,8 @@ import {
   TriggerMode,
   didTriggerState,
   useTriggerChannel,
-  TriggerDirection
+  TriggerDirection,
+  requestData
 } from '../../communication/bindings'
 import {
   Icon,
@@ -17,7 +18,8 @@ import {
   Button,
   IconButton
 } from 'rsuite'
-import { useRecoilState, useRecoilValue } from 'recoil'
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
+import win from '../../win'
 
 const ButtonToolbarStyle = {
   marginTop: 10,
@@ -28,6 +30,7 @@ const ButtonToolbarStyle = {
 
 export default function Trigger() {
   const isRunning = useRecoilValue(isRunningState)
+  win.requestData = useSetRecoilState(requestData.send)
   const [triggerMode, setTriggerMode] = useRecoilState(useTriggerMode.send)
   const [triggerChannel, setTriggerChannel] = useRecoilState(
     useTriggerChannel.send

@@ -37,6 +37,12 @@ export const useSecPerSample = makeIntercom<number>({
   mcu2ui: (v) => v,
   default: 0.00000275
 })
+export const requestData = makeIntercom<number>({
+  key: 'R',
+  ui2mcu: (v) => v,
+  mcu2ui: (v) => v,
+  default: 0
+})
 export enum TriggerDirection {
   FALLING = 'Falling',
   RISING = 'Rising'
@@ -114,7 +120,7 @@ export const useTriggerMode = makeIntercom<TriggerMode>({
 
 export const dataState = atom({
   key: 'data',
-  default: [[0], [0], [0], [0], [0], [0], [0]]
+  default: [[0], [0], [0], [0], [0], [0], [0], [0]]
 })
 
 export const isRunningState = memoSelector(
@@ -129,6 +135,15 @@ export const oversamplingFactorState = memoSelector(
     default: 0
   })
 )
+export const fftState0 = atom({
+  key: 'fft0',
+  default: true
+})
+export const fftState1 = atom({
+  key: 'fft1',
+  default: true
+})
+
 export const didTriggerState = memoSelector(
   atom({
     key: 'did-trigger',
@@ -218,7 +233,7 @@ const receiveFullState = selector<Data>({
 })
 
 export const allDataState = selector<number[]>({
-  key: 'all-data',
+  key: 'all-data-this shouldnt be a selector',
   get: () => [], // this is a write only selector
   set: ({ set, get }, newData) => {
     win.$recoilDebugStates = [] // TODO: fix memory leak in recoiljs beta
@@ -260,7 +275,13 @@ export const allDataState = selector<number[]>({
           else buffers = buffers.map((b) => b.slice(512, b.length - 512))
         }
       }
-      set(dataState, [...buffers, getFFT(buffers[0])])
+      const withFFT = [
+        ...buffers,
+        get(fftState0) ? getFFT(buffers[0]) : [],
+        get(fftState1) ? getFFT(buffers[1]) : []
+      ]
+
+      set(dataState, withFFT)
       if (get(useTriggerMode.send) === TriggerMode.SINGLE) {
         set(isRunningState, false)
       }

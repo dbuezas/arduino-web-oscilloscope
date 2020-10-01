@@ -35,11 +35,13 @@ void loop() {
     bool isJump = setjmp(env);
     if (isJump) offAutoInterrupt();
 
-    bool change = handleInput();
-    if (change) {
-      // sendData(false);
-    }
+    bool wait = handleInput();
     canStop = true;
+    if (wait) {
+      // one could wait for the missing bytes
+      // while (1) {
+      // }
+    }
     fillBuffer();
     canStop = false;
     sendData();

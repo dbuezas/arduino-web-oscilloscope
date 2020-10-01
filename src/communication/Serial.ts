@@ -21,33 +21,12 @@ declare global {
 }
 const END_SEQUENCE = [0, 1, 255, 253]
 const indexesOfSequence = (needle: number[], haystack: number[]) => {
-  const result = []
-  for (let i = 0, j = 0; i < haystack.length; i++) {
-    if (haystack[i] === needle[j]) {
-      j++
-      if (j === needle.length) {
-        result.unshift(i)
-        if (result.length === 2) return result
-        j = 0
-      }
-    } else j = 0
-  }
-  return [-1, -1]
+  const strNeedle = needle.map((c) => String.fromCharCode(c)).join('')
+  const strHaystack = haystack.map((c) => String.fromCharCode(c)).join('')
+  const start = strHaystack.indexOf(strNeedle)
+  const end = strHaystack.indexOf(strNeedle, start + strNeedle.length)
+  return [start, end]
 }
-// const indexesOfSequence = (needle: number[], haystack: number[]) => {
-//   const result = []
-//   for (let i = haystack.length - 1, j = needle.length - 1; i >= 0; i--) {
-//     if (haystack[i] === needle[j]) {
-//       j--
-//       if (j === -1) {
-//         result.push(i)
-//         if (result.length === 2) return result
-//         j = needle.length - 1
-//       }
-//     } else j = needle.length - 1
-//   }
-//   return [-1, -1]
-// }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 type SerialOptions = {
@@ -128,14 +107,22 @@ export class Serial {
     const consume = () => {
       let busy = true
       while (busy) {
-        const [end, start] = indexesOfSequence(END_SEQUENCE, this.readbuffer)
+        const [start, end] = indexesOfSequence(END_SEQUENCE, this.readbuffer)
         if (start > -1 && end > -1) {
           const dataFrame = this.readbuffer.slice(
-            start + 1,
-            end - END_SEQUENCE.length + 1
+            start + END_SEQUENCE.length,
+            end
           )
-          this.readbuffer = this.readbuffer.slice(end - END_SEQUENCE.length + 1)
-          callback(dataFrame)
+          this.readbuffer = this.readbuffer.slice(end)
+          const checksumShould = (dataFrame.pop()! << 8) + dataFrame.pop()!
+          const checksumIs =
+            dataFrame.reduce((prev, curr) => prev + curr, 0) % Math.pow(2, 16)
+          if (checksumShould === checksumIs) {
+            callback(dataFrame)
+          } else {
+            console.error(`Checksum error: ${checksumIs}≠${checksumShould}`)
+            // callback(dataFrame)
+          }
         } else {
           busy = false
         }
