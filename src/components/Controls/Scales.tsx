@@ -28,7 +28,7 @@ export default function Scales() {
         size="sm"
         onClick={() => setIsRunning(!isRunning)}
       >
-        {isRunning ? 'Run' : 'Hold'}
+        {(isRunning ? 'Run' : 'Hold') + ' [space]'}
       </Button>
       <TimeScales />
       <Amplifier />

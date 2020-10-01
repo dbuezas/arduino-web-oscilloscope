@@ -6,8 +6,10 @@ import {
   constrain
 } from '../../communication/bindings'
 import { formatTime } from '../formatters'
-import { SelectPicker } from 'rsuite'
+import { Icon, IconButton, SelectPicker } from 'rsuite'
 import { useRecoilState, useRecoilValue } from 'recoil'
+import win from '../../win'
+import { margin } from '../Plot/hooks'
 const us = (n: number) => n / 1000000
 const ms = (n: number) => n / 1000
 const s = (n: number) => n
@@ -44,7 +46,7 @@ export default function TimeScales() {
   ].map((secPerDivision) => {
     const secPerSample = (secPerDivision * 10) / samples
     return {
-      label: formatTime(secPerDivision) + ' / divison',
+      label: formatTime(secPerDivision) + ' / div',
       value: secPerSample
     }
   })
@@ -60,18 +62,37 @@ export default function TimeScales() {
       MouseTrap.unbind('left')
     }
   }, [setSecPerSample, secPerSample, perSample])
+  win.setSecPerSample = setSecPerSample
 
   return (
-    <SelectPicker
-      searchable={true}
-      value={secPerSample}
-      cleanable={false}
-      onChange={(n: number) => {
-        setSecPerSample(n)
-        console.log(n)
+    <div
+      style={{
+        width: ' 100%',
+        display: ' flex',
+        justifyContent: ' space-between',
+        marginBottom: 5
       }}
-      data={perSample}
-      style={{ width: 224, marginBottom: 10 }}
-    />
+    >
+      <IconButton
+        size="md"
+        icon={<Icon icon="left" />}
+        onClick={() => setSecPerSample(offset(perSample, secPerSample, -1))}
+      />
+      <SelectPicker
+        searchable={true}
+        value={secPerSample}
+        cleanable={false}
+        onChange={(n: number) => {
+          setSecPerSample(n)
+        }}
+        data={perSample}
+        style={{ flex: 1, marginLeft: 5, marginRight: 5 }}
+      />
+      <IconButton
+        size="md"
+        icon={<Icon icon="right" />}
+        onClick={() => setSecPerSample(offset(perSample, secPerSample, 1))}
+      />
+    </div>
   )
 }

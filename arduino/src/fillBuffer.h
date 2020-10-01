@@ -153,7 +153,7 @@ void setupAutoInterrupt() {
   float ticksPerFrame =
       state.secPerSample * F_CPU * state.samplesPerBuffer / prescaler;
   uint16_t serialOverhead = 100;  // 100*1024/32000000=3.2ms
-  uint32_t timeoutTicks = (unsigned long)ticksPerFrame * 2 + serialOverhead;
+  uint32_t timeoutTicks = (unsigned long)ticksPerFrame * 2;  //+ serialOverhead;
 
   autoInterruptOverflows = timeoutTicks / 65536;
   uint16_t timeoutTicksCycle = timeoutTicks % 65536;

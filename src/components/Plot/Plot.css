@@ -1,77 +1,77 @@
-svg.plot,
+.plotContainer svg.plot,
 .plotContainer {
   width: 100%;
   height: 100%;
 }
-path {
+.plotContainer path {
   stroke-width: 1;
   fill: none;
 }
-path.plot-area-d0 {
+.plotContainer path.plot-area-d0 {
   stroke: steelblue;
   stroke-width: 3;
 }
-path.plot-area-d1 {
+.plotContainer path.plot-area-d1 {
   stroke: crimson;
   stroke-width: 3;
 }
-path.plot-area-d2 {
+.plotContainer path.plot-area-d2 {
   stroke: lightcoral;
 }
-path.plot-area-d3 {
+.plotContainer path.plot-area-d3 {
   stroke: chartreuse;
 }
-path.plot-area-d4 {
+.plotContainer path.plot-area-d4 {
   stroke: cornsilk;
 }
-path.plot-area-d5 {
+.plotContainer path.plot-area-d5 {
   stroke: darkmagenta;
 }
-path.plot-area-d6 {
+.plotContainer path.plot-area-d6 {
   stroke: deeppink;
 }
 
-.axis .domain {
+.plotContainer .axis .domain {
   fill: rgba(0, 0, 0, 0.2);
   stroke: grey;
   stroke-width: 2;
 }
-.axis.y text {
+.plotContainer .axis.y text {
   font-size: 14px;
 }
-.axis line {
+.plotContainer .axis line {
   fill: none;
   stroke: grey;
   stroke-width: 1;
   opacity: 0.3;
   stroke-dasharray: 5;
 }
-line.triggerPosHandle {
+.plotContainer line.triggerPosHandle {
   cursor: col-resize;
 }
-line.triggerVoltageHandle {
+.plotContainer line.triggerVoltageHandle {
   cursor: row-resize;
 }
-line.triggerPosHandle,
-line.triggerVoltageHandle {
+.plotContainer line.triggerPosHandle,
+.plotContainer line.triggerVoltageHandle {
   stroke-width: 40;
   stroke: white;
   opacity: 0.03;
 }
-line.triggerPos,
-line.triggerVoltage {
+.plotContainer line.triggerPos,
+.plotContainer line.triggerVoltage {
   fill: none;
   stroke-dasharray: 10;
   stroke-width: 2;
   opacity: 0.7;
 }
-line.triggerPos {
+.plotContainer line.triggerPos {
   stroke: black;
 }
-line.triggerVoltage {
+.plotContainer line.triggerVoltage {
   stroke: black;
 }
-line.triggerPos.active,
-line.triggerVoltage.active {
+.plotContainer line.triggerPos.active,
+.plotContainer line.triggerVoltage.active {
   stroke-width: 1;
 }

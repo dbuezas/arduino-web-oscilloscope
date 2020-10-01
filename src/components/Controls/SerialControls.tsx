@@ -22,6 +22,7 @@ const ButtonToolbarStyle = {
   alignItems: 'center'
 }
 type ConnectedState = 'Connected' | 'Disconnected' | 'Connecting...' | 'Error'
+
 function SerialControls() {
   const [serialState, setSerialState] = useState<ConnectedState>('Disconnected')
   const setAllData = useSetRecoilState(allDataState)
@@ -39,21 +40,23 @@ function SerialControls() {
   }, [])
   return (
     <Panel shaded header="Serial">
-      <ButtonGroup>
+      <ButtonGroup style={ButtonToolbarStyle}>
         <IconButton
+          style={{ flex: 1 }}
           appearance={serialState === 'Connected' ? 'primary' : undefined}
-          size="lg"
+          size="md"
           onClick={async () => {
             serial
               .connect(serialOptions)
               .then(() => setSerialState('Connected'))
               .catch(() => setSerialState('Error'))
           }}
-          icon={<Icon icon="arrow-right" />}
+          icon={<Icon icon="arrow-right" style={{ width: ' 100%' }} />}
           placement="right"
         />
         <IconButton
-          size="lg"
+          style={{ flex: 1 }}
+          size="md"
           appearance={serialState !== 'Connected' ? 'primary' : undefined}
           onClick={async () => {
             serial
@@ -61,12 +64,13 @@ function SerialControls() {
               .then(() => setSerialState('Disconnected'))
               .catch(() => setSerialState('Error'))
           }}
-          icon={<Icon icon="stop" />}
+          icon={<Icon icon="stop" style={{ width: ' 100%' }} />}
           placement="right"
         />
 
         <IconButton
-          size="lg"
+          style={{ flex: 1 }}
+          size="md"
           onClick={async () => {
             setSerialState('Connecting...')
 
@@ -76,7 +80,7 @@ function SerialControls() {
               .then(() => setSerialState('Connected'))
               .catch(() => setSerialState('Error'))
           }}
-          icon={<Icon icon="recycle" />}
+          icon={<Icon icon="recycle" style={{ width: ' 100%' }} />}
           placement="right"
         />
       </ButtonGroup>

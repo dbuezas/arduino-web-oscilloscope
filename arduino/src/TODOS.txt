@@ -28,3 +28,5 @@ todo
 * final clean up
 * publish
 * add stm32 support 
+* Add hotkey indications
+* Add explanation tooltips

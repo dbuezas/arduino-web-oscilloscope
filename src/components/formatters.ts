@@ -3,12 +3,16 @@ const toFixed = (float: number, digits = 0) => {
   return (Math.round(float * padding) / padding).toFixed(digits)
 }
 export function formatTime(s: any) {
+  const m = s / 60
+  const h = s / 60 / 60
   const ms = s * 1000
   const us = ms * 1000
   if (us < 1000) return toFixed(us, 0) + 'μs'
   if (ms < 10) return toFixed(ms, 2) + 'ms'
   if (ms < 1000) return toFixed(ms) + 'ms'
   if (s < 10) return toFixed(s, 1) + 's'
+  // if (h > 1) return toFixed(h, 0) + 'h' + toFixed(m % 60, 1) + 'm'
+  // if (m > 1) return toFixed(m, 0) + 'm' + toFixed(s % 60, 1) + 's'
   return toFixed(s, 0) + 's'
 }
 
