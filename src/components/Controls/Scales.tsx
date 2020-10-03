@@ -9,22 +9,23 @@ import { useActiveBtns } from './hooks'
 
 export default function Scales() {
   const [isRunning, setIsRunning] = useRecoilState(isRunningState)
-  const [activeBtns, activateBtn] = useActiveBtns({ space: false })
+  const [isSpaceActive, tapSpace] = useActiveBtns()
 
   useEffect(() => {
     MouseTrap.bind('space', (e) => {
       e.preventDefault()
+      tapSpace()
       setIsRunning((isRunning) => !isRunning)
     })
     return () => {
       MouseTrap.unbind('space')
     }
-  }, [setIsRunning])
+  }, [setIsRunning, tapSpace])
 
   return (
     <Panel header="Scales" shaded collapsible defaultExpanded>
       <Button
-        active={activeBtns['space']}
+        active={isSpaceActive}
         style={{
           color: 'white',
           backgroundColor: isRunning ? 'green' : 'red',
@@ -34,7 +35,6 @@ export default function Scales() {
         size="sm"
         onClick={() => {
           setIsRunning(!isRunning)
-          activateBtn('space')
         }}
       >
         {(isRunning ? 'Run' : 'Hold') + ' [space]'}

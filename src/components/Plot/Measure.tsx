@@ -73,15 +73,15 @@ const Measure = forwardRef<MeasureRef>((_props, ref) => {
         className="measureX"
         x1={xScale(startPos.x)}
         x2={xScale(endPos.x)}
-        y1={yScale(endPos.y)}
-        y2={yScale(endPos.y)}
+        y1={yScale(startPos.y)}
+        y2={yScale(startPos.y)}
       ></line>
       <text
         fill="currentColor"
         x={xScale((startPos.x + endPos.x) / 2)}
-        y={yScale(endPos.y)}
+        y={yScale(startPos.y)}
         dx="-1em"
-        dy="1em"
+        dy="1.5em"
       >
         {formatTime(endPos.x - startPos.x)}
       </text>
@@ -101,18 +101,17 @@ const Measure = forwardRef<MeasureRef>((_props, ref) => {
       ></line>
       <line
         className="measureY"
-        x1={xScale(startPos.x)}
-        x2={xScale(startPos.x)}
+        x1={xScale(endPos.x)}
+        x2={xScale(endPos.x)}
         y1={yScale(startPos.y)}
         y2={yScale(endPos.y)}
       ></line>
       <text
         fill="currentColor"
-        x={xScale(startPos.x)}
+        x={xScale(endPos.x)}
         y={yScale((startPos.y + endPos.y) / 2)}
-        dx="-1em"
+        dx="1em"
         dy="0"
-        textAnchor="end"
       >
         {formatVoltage(endPos.y - startPos.y)}
       </text>

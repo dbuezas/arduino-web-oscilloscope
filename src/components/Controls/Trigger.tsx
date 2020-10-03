@@ -7,7 +7,8 @@ import {
   didTriggerState,
   useTriggerChannel,
   TriggerDirection,
-  requestData
+  requestData,
+  useSecPerSample
 } from '../../communication/bindings'
 import {
   Icon,
@@ -39,7 +40,8 @@ export default function Trigger() {
   const [triggerDirection, setTriggerDirection] = useRecoilState(
     useTriggerDirection.send
   )
-
+  const secPerSample = useRecoilValue(useSecPerSample.send)
+  const tooFastForSlowMode = secPerSample < 0.0046875
   return (
     <Panel header="Trigger" shaded collapsible defaultExpanded>
       <ButtonToolbar style={ButtonToolbarStyle}>
@@ -62,6 +64,11 @@ export default function Trigger() {
             <Button
               key={mode}
               appearance={triggerMode === mode ? 'primary' : 'default'}
+              color={
+                mode === TriggerMode.SLOW && tooFastForSlowMode
+                  ? 'red'
+                  : undefined
+              }
               size="sm"
               onClick={() => setTriggerMode(mode)}
             >

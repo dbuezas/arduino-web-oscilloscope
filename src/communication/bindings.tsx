@@ -118,9 +118,10 @@ export const useTriggerMode = makeIntercom<TriggerMode>({
   default: TriggerMode.AUTO
 })
 
+export type PlotDatum = { t: number; v: number }
 export const dataState = atom({
   key: 'data',
-  default: [[0], [0], [0], [0], [0], [0], [0], [0]]
+  default: [...new Array(8)].map(() => [] as PlotDatum[])
 })
 
 export const isRunningState = memoSelector(
@@ -173,7 +174,7 @@ const sum = (signal: number[]) =>
 export const voltagesState = selector({
   key: 'voltages',
   get: ({ get }) => {
-    const signal = get(dataState)[0]
+    const signal = get(dataState)[0].map(({ v }) => v)
     const vmax = Math.max(...signal)
     const vmin = Math.min(...signal)
     const vpp = vmax - vmin
@@ -247,15 +248,7 @@ export const allDataState = selector<number[]>({
     if (data.needData) set(sendFullState, null)
     if (data.forceUIUpdate) set(receiveFullState, data)
 
-    const [vmin, , vpp] = get(voltageRangeState)
-    let buffers = [
-      data.buffers[0].map((n) => (n / 256) * vpp + vmin),
-      data.buffers[1].map((n) => (n / 256) * vpp + vmin),
-      data.buffers[2].map((n) => n * (vpp / 6) + vmin + 0.2 * vpp),
-      data.buffers[3].map((n) => n * (vpp / 6) + vmin + 0.4 * vpp),
-      data.buffers[4].map((n) => n * (vpp / 6) + vmin + 0.6 * vpp),
-      data.buffers[5].map((n) => n * (vpp / 6) + vmin + 0.8 * vpp)
-    ]
+    let buffers = data.buffers
 
     set(freeMemoryState, data.freeMemory)
     set(didTriggerState, !!data.didTrigger)
@@ -270,13 +263,26 @@ export const allDataState = selector<number[]>({
       )
 
       if (get(useTriggerMode.send) === TriggerMode.SLOW) {
-        // buffers = buffers.map((b, i) => [...oldBuffers[i], ...b].slice(-512))
-        const wasLength = Math.max(...oldBuffers.map((b) => b.length))
-        buffers = buffers.map((b, i) => [...oldBuffers[i], ...b])
-        const isLength = Math.max(...buffers.map((b) => b.length))
-        if (isLength > 512) {
-          if (wasLength < 512) buffers = buffers.map((b) => b.slice(0, 512))
-          else buffers = buffers.map((b) => b.slice(512, b.length - 512))
+        let oldMax = 0
+        if (oldBuffers[0][0] && oldBuffers[0][1]) {
+          const l = oldBuffers[0].length
+          const oldDt = get(useSecPerSample.send)
+          oldMax = oldBuffers[0][l - 1].t + oldDt
+        }
+        buffers = buffers.map((b, i) => [
+          ...oldBuffers[i],
+          ...b.map(({ v, t }) => ({ v, t: t + oldMax }))
+        ])
+        const totalSecs =
+          get(useSecPerSample.send) * get(useSamplesPerBuffer.send)
+        const l = buffers[0].length
+        const lastT = buffers[0][l - 1].t
+        if (lastT > totalSecs) {
+          buffers = buffers.map((buffer) =>
+            buffer
+              .filter(({ t }) => t > totalSecs)
+              .map(({ t, v }) => ({ t: t - totalSecs, v }))
+          )
         }
       }
       const withFFT = [

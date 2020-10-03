@@ -58,13 +58,11 @@ export const lineSelector = selector({
   get: ({ get }) => {
     const xScale = get(xScaleSelector)
     const yScale = get(yScaleSelector)
-    const samples = get(useSamplesPerBuffer.send)
-    const xDomain = get(xDomainSelector)
 
     return d3
-      .line<number>()
-      .x((d, i) => xScale(((i + 0.5) / samples) * xDomain[1]))
-      .y((d) => yScale(d))
+      .line<{ v: number; t: number }>()
+      .x(({ t }) => xScale(t))
+      .y(({ v }) => yScale(v))
   }
 })
 export const XYLineSelector = selector({

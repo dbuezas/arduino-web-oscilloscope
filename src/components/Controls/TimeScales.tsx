@@ -9,7 +9,6 @@ import { formatTime } from '../formatters'
 import { Icon, IconButton, SelectPicker } from 'rsuite'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import win from '../../win'
-import { margin } from '../Plot/hooks'
 import { useActiveBtns } from './hooks'
 const us = (n: number) => n / 1000000
 const ms = (n: number) => n / 1000
@@ -22,7 +21,8 @@ const offset = (list: { value: number }[], current: number, offset: number) => {
 export default function TimeScales() {
   const [secPerSample, setSecPerSample] = useRecoilState(useSecPerSample.send)
   const samples = useRecoilValue(useSamplesPerBuffer.send)
-  const [activeBtns, activateBtn] = useActiveBtns({ left: false, right: false })
+  const [isLeftActive, tapLeft] = useActiveBtns()
+  const [isRightActive, tapRight] = useActiveBtns()
 
   const perSample = [
     us(100),
@@ -56,19 +56,19 @@ export default function TimeScales() {
   useEffect(() => {
     MouseTrap.bind('right', (e) => {
       e.preventDefault()
-      activateBtn('right')
+      tapRight()
       setSecPerSample(offset(perSample, secPerSample, 1))
     })
     MouseTrap.bind('left', (e) => {
       e.preventDefault()
-      activateBtn('left')
+      tapLeft()
       setSecPerSample(offset(perSample, secPerSample, -1))
     })
     return () => {
       MouseTrap.unbind('right')
       MouseTrap.unbind('left')
     }
-  }, [setSecPerSample, secPerSample, perSample, activateBtn])
+  }, [setSecPerSample, secPerSample, perSample, tapRight, tapLeft])
   win.setSecPerSample = setSecPerSample
 
   return (
@@ -81,7 +81,7 @@ export default function TimeScales() {
       }}
     >
       <IconButton
-        active={activeBtns['left']}
+        active={isLeftActive}
         size="md"
         icon={<Icon icon="left" />}
         onClick={() => setSecPerSample(offset(perSample, secPerSample, -1))}
@@ -97,7 +97,7 @@ export default function TimeScales() {
         style={{ flex: 1, marginLeft: 5, marginRight: 5 }}
       />
       <IconButton
-        active={activeBtns['right']}
+        active={isRightActive}
         size="md"
         icon={<Icon icon="right" />}
         onClick={() => setSecPerSample(offset(perSample, secPerSample, 1))}

@@ -7,7 +7,7 @@ import {
   XYModeState
 } from '../../communication/bindings'
 import { Panel, ButtonToolbar, ButtonGroup, Button, Slider } from 'rsuite'
-import { useRecoilState, useRecoilValue } from 'recoil'
+import { useRecoilState } from 'recoil'
 
 const ButtonToolbarStyle = {
   marginTop: 10,

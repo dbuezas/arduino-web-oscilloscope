@@ -1,8 +1,10 @@
 import ft from 'fourier-transform'
+import { PlotDatum } from '../communication/bindings'
 
 const average = (arr: number[]) =>
   arr.reduce((acc, n) => acc + n, 0) / arr.length
-export function getFFT(signal: number[]) {
+export function getFFT(data: PlotDatum[]) {
+  let signal = data.map(({ v }) => v)
   if (signal.length === 0) return []
   if (signal.length < 2) {
     console.log('fix me')
@@ -22,7 +24,7 @@ export function getFFT(signal: number[]) {
   // https://www.dsprelated.com/showthread/comp.dsp/87526-1.php
   const normalized = fft.map((v) => (512 * v) / signal.length)
   // const normalized = fft.map((v) => v * 2)
-  return normalized
+  return normalized.map((v, i) => ({ v, t: data[i].t }))
 }
 
 export function rollingAverage(signal: number[]) {
@@ -33,8 +35,8 @@ export function rollingAverage(signal: number[]) {
     return last
   })
 }
-export function getFrequencyCount(signal: number[], windowTimeWidth: number) {
-  signal = rollingAverage(signal)
+export function getFrequencyCount(data: PlotDatum[], windowTimeWidth: number) {
+  const signal = rollingAverage(data.map(({ v }) => v))
   const max = Math.max(...signal)
   const min = Math.min(...signal)
   const mid = (max + min) / 2
@@ -58,10 +60,11 @@ export function getFrequencyCount(signal: number[], windowTimeWidth: number) {
 
 export function oversample(
   factor: number,
-  newBuffer: number[],
-  oldBuffer: number[]
+  newBuffer: PlotDatum[],
+  oldBuffer: PlotDatum[]
 ) {
-  return newBuffer.map(
-    (n, j) => (oldBuffer[j] || 0) * factor + n * (1 - factor)
-  )
+  return newBuffer.map(({ v, t }, j) => ({
+    t,
+    v: (oldBuffer[j]?.v || 0) * factor + v * (1 - factor)
+  }))
 }

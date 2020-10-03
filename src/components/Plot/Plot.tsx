@@ -26,7 +26,7 @@ function XYCurve() {
 
   const xyLine = useRecoilValue(XYLineSelector)
   const data = useRecoilValue(dataState)
-  const d = data[0].map((d, i) => [d, data[1][i]] as [number, number])
+  const d = data[0].map((d, i) => [d.v, data[1][i]?.v || 0] as [number, number])
   if (!xyMode || !isChannelOn[0] || !isChannelOn[1]) return <></>
   return (
     <>

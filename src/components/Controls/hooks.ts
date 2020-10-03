@@ -1,18 +1,14 @@
-import mapValues from 'lodash/mapValues'
 import { useState } from 'react'
 
-export function useActiveBtns<T extends string>(btns: Record<T, boolean>) {
-  const [state, setState] = useState(btns)
+export function useActiveBtns() {
+  const [state, setState] = useState(false)
 
-  const [timeouts, setTimeouts] = useState(() => mapValues(btns, () => -1))
-  const activateBtn = (btn: T) => {
-    setState({ ...state, [btn]: true })
-    clearTimeout(timeouts[btn])
-    const timeout = setTimeout(
-      () => setState((timeouts) => ({ ...timeouts, [btn]: false })),
-      200
-    )
-    setTimeouts({ ...timeouts, [btn]: timeout })
+  const [timeout, setTimeout] = useState(-1)
+  const activateBtn = () => {
+    setState(true)
+    clearTimeout(timeout)
+    const timeoutId = window.setTimeout(() => setState(false), 200)
+    setTimeout(timeoutId)
   }
   return [state, activateBtn] as [typeof state, typeof activateBtn]
 }

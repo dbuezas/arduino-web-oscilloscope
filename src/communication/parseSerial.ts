@@ -1,3 +1,5 @@
+import { voltageRanges } from './bindings'
+
 type Data = {
   data: number[]
   i: number
@@ -81,14 +83,25 @@ export default function parseSerial(data: number[]) {
       ? pull(myData, samplesPerBuffer - trashedSamples)
       : []
 
+  const vMax = voltageRanges[amplifier]
+  const vPart = vMax / 6
   const buffers = [
-    isChannelOn & 0b1 ? analog1.map((n) => n) : [],
-    isChannelOn & 0b10 ? analog2.map((n) => n) : [],
-    isChannelOn & 0b100 ? digital.map((n) => n & 0b000100 && 1) : [],
-    isChannelOn & 0b1000 ? digital.map((n) => n & 0b001000 && 1) : [],
-    isChannelOn & 0b10000 ? digital.map((n) => n & 0b010000 && 1) : [],
-    isChannelOn & 0b100000 ? digital.map((n) => n & 0b100000 && 1) : []
-  ]
+    isChannelOn & 0b000001 ? analog1.map((n) => (n / 256) * vMax) : [],
+    isChannelOn & 0b000010 ? analog2.map((n) => (n / 256) * vMax) : [],
+    isChannelOn & 0b000100
+      ? digital.map((n) => ((n + 0.2) * vPart) & 0b000100 && 1)
+      : [],
+    isChannelOn & 0b001000
+      ? digital.map((n) => ((n + 0.4) * vPart) & 0b001000 && 1)
+      : [],
+    isChannelOn & 0b010000
+      ? digital.map((n) => ((n + 0.6) * vPart) & 0b010000 && 1)
+      : [],
+    isChannelOn & 0b100000
+      ? digital.map((n) => ((n + 0.8) * vPart) & 0b100000 && 1)
+      : []
+  ].map((channel) => channel.map((v, i) => ({ v, t: (i + 1) * secPerSample })))
+
   return {
     //input
     triggerVoltage,
