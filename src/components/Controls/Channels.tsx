@@ -51,9 +51,9 @@ export default function Channels() {
           style={{ width: '50%' }}
           value={oversamplingFactor}
           onChange={setOversamplingFactor}
-          max={0.99}
+          max={30}
           min={0}
-          step={0.01}
+          step={0.1}
         />
       </div>
 

@@ -163,10 +163,7 @@ export const freeMemoryState = memoSelector(
 )
 export const frequencyState = selector({
   key: 'frequency',
-  get: ({ get }) => {
-    const secs = get(useSecPerSample.send) * get(useSamplesPerBuffer.send)
-    return getFrequencyCount(get(dataState)[0], secs)
-  }
+  get: ({ get }) => getFrequencyCount(get(dataState)[0])
 })
 
 const sum = (signal: number[]) =>
@@ -256,11 +253,15 @@ export const allDataState = selector<number[]>({
       // todo use isRunning state in board for this
       get(isRunningState) && buffers.some((buffer) => buffer.length > 0)
     if (shouldUpdate) {
-      const oversamplingFactor = get(oversamplingFactorState)
       const oldBuffers = get(dataState)
-      buffers = buffers.map((b, i) =>
-        oversample(oversamplingFactor, buffers[i], oldBuffers[i])
-      )
+
+      const oversamplingFactor = get(oversamplingFactorState)
+      if (oversamplingFactor > 0) {
+        const factor = 1 - 2 / (oversamplingFactor + 1)
+        buffers = buffers.map((b, i) =>
+          oversample(factor, buffers[i], oldBuffers[i])
+        )
+      }
 
       if (get(useTriggerMode.send) === TriggerMode.SLOW) {
         let oldMax = 0
@@ -278,11 +279,12 @@ export const allDataState = selector<number[]>({
         const l = buffers[0].length
         const lastT = buffers[0][l - 1].t
         if (lastT > totalSecs) {
-          buffers = buffers.map((buffer) =>
-            buffer
-              .filter(({ t }) => t > totalSecs)
-              .map(({ t, v }) => ({ t: t - totalSecs, v }))
-          )
+          buffers = buffers.map(() => [])
+          // buffers = buffers.map((buffer) =>
+          //   buffer
+          //     .filter(({ t }) => t > totalSecs)
+          //     .map(({ t, v }) => ({ t: t - totalSecs, v }))
+          // )
         }
       }
       const withFFT = [

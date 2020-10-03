@@ -3,34 +3,34 @@
 uint16_t prescaledTicksPerADCRead;
 uint16_t prescaledTicksPerADCReadTuned;
 
-#define UINT16_MAX 65535
+#define UINT16_MAX_ 65535
 #define prescaledTicksCount TCNT3
 void startCPUCounter() {
   // counter for adcREad
   TCCR3A = 0;
   TCCR3B = 0;
   uint32_t ticksPerSample = state.secPerSample * F_CPU;
-  if (ticksPerSample < UINT16_MAX) {
+  if (ticksPerSample < UINT16_MAX_) {
     // fits in 16 bits
     TCCR3B = 1 << CS30;
     prescaledTicksPerADCRead = ticksPerSample;
     prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead - 10;
-  } else if (ticksPerSample / 8 < UINT16_MAX) {
+  } else if (ticksPerSample / 8 < UINT16_MAX_) {
     // fits prescaled by 8
     TCCR3B = 2 << CS30;
     prescaledTicksPerADCRead = ticksPerSample / 8;
     prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead - 10 / 8;
-  } else if (ticksPerSample / 64 < UINT16_MAX) {
+  } else if (ticksPerSample / 64 < UINT16_MAX_) {
     // fits prescaled by 64
     TCCR3B = 3 << CS30;
     prescaledTicksPerADCRead = ticksPerSample / 64;
     prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead - 10 / 64;
-  } else if (ticksPerSample / 256 < UINT16_MAX) {
+  } else if (ticksPerSample / 256 < UINT16_MAX_) {
     // fits prescaled by 256
     TCCR3B = 4 << CS30;
     prescaledTicksPerADCRead = ticksPerSample / 256;
     prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead - 10 / 256;
-  } else if (ticksPerSample / 1024 < UINT16_MAX) {
+  } else if (ticksPerSample / 1024 < UINT16_MAX_) {
     // fits prescaled by 1024
     TCCR3B = 5 << CS30;
     prescaledTicksPerADCRead = ticksPerSample / 1024;
@@ -71,10 +71,11 @@ __attribute__((always_inline)) byte storeOne(byte returnChannel) {
   uint8_t val0 = ADCH;
   uint8_t val1 = (PINB & 0b00011111) | (PIND & 0b11100000);
   uint8_t val2 = PINC & 0b00111100;
-  buffer0[state.bufferStartPtr] = val0;
-  buffer1[state.bufferStartPtr] = val1;
-  buffer2[state.bufferStartPtr] = val2;
-  state.bufferStartPtr = (state.bufferStartPtr + 1) & 0b111111111;
+  buffer0[internalState.bufferStartPtr] = val0;
+  buffer1[internalState.bufferStartPtr] = val1;
+  buffer2[internalState.bufferStartPtr] = val2;
+  internalState.bufferStartPtr =
+      (internalState.bufferStartPtr + 1) & 0b111111111;
   if (returnChannel == 0) return val0;
   if (returnChannel == 1) return val1;
   if (returnChannel > 1) return bitRead(val2, returnChannel);
@@ -152,8 +153,7 @@ void setupAutoInterrupt() {
   int prescaler = 1024;
   float ticksPerFrame =
       state.secPerSample * F_CPU * state.samplesPerBuffer / prescaler;
-  uint16_t serialOverhead = 100;  // 100*1024/32000000=3.2ms
-  uint32_t timeoutTicks = (unsigned long)ticksPerFrame * 2;  //+ serialOverhead;
+  uint32_t timeoutTicks = (unsigned long)ticksPerFrame * 2;
 
   autoInterruptOverflows = timeoutTicks / 65536;
   uint16_t timeoutTicksCycle = timeoutTicks % 65536;
@@ -164,19 +164,12 @@ void setupAutoInterrupt() {
 }
 jmp_buf envAutoTimeout;
 void fillBuffer() {
-  static uint8_t lastTriggerMode;
   if (state.triggerMode == TriggerMode::slow) {
-    static float lastSecPerSample;
     static uint16_t samplesToSend;
 
-    if (lastTriggerMode != state.triggerMode ||
-        lastSecPerSample != state.secPerSample) {
-      // TODO: set the adc when settings change
-      // TODO: startCPUCounter when trigger mode is set to slow directly
+    if (internalState.inputChanged) {
       startADC(2, state.amplifier);
       startCPUCounter();
-      lastTriggerMode = state.triggerMode;
-      lastSecPerSample = state.secPerSample;
       const int FPS = 60;  // try to achive 25 frames per second
       float samplesPerSecond = 1 / state.secPerSample;
       samplesToSend = samplesPerSecond / FPS;
@@ -184,14 +177,13 @@ void fillBuffer() {
       if (samplesToSend > state.samplesPerBuffer - 1)
         samplesToSend = state.samplesPerBuffer - 1;
     }
-    uint16_t bufferStart = state.bufferStartPtr;
+    uint16_t bufferStart = internalState.bufferStartPtr;
 
     for (uint16_t i = 0; i < samplesToSend; i++) storeOne(0);
-    state.bufferStartPtr = bufferStart;
+    internalState.bufferStartPtr = bufferStart;
     state.trashedSamples = state.samplesPerBuffer - samplesToSend;
     return;
   }
-  lastTriggerMode = state.triggerMode;
   if (state.triggerMode == TriggerMode::autom) {
     bool didTimeout = setjmp(envAutoTimeout);
     if (didTimeout) {

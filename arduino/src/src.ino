@@ -34,7 +34,7 @@ void loop() {
   for (;;) {
     bool isJump = setjmp(env);
     if (isJump) offAutoInterrupt();
-
+    internalState.inputChanged = false;
     bool wait = handleInput();
     canStop = true;
     if (wait) {

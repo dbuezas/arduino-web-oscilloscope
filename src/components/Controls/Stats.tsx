@@ -4,7 +4,7 @@ import {
   frequencyState,
   voltagesState
 } from '../../communication/bindings'
-import { formatFreq, formatVoltage } from '../formatters'
+import { formatFreq, formatTime, formatVoltage } from '../formatters'
 import { Panel, Tag } from 'rsuite'
 import { useRecoilValue } from 'recoil'
 
@@ -16,6 +16,10 @@ function FreeMemory() {
 function Frequency() {
   const frequency = useRecoilValue(frequencyState)
   return <Tag>Freq: {formatFreq(frequency)}</Tag>
+}
+function Wavelength() {
+  const frequency = useRecoilValue(frequencyState)
+  return <Tag>Wavelength: {formatTime(1 / frequency)}</Tag>
 }
 
 const style = {
@@ -46,6 +50,7 @@ export default function Stats() {
         <div style={style}>
           <FreeMemory />
           <Frequency />
+          <Wavelength />
         </div>
       </Panel>
     </div>

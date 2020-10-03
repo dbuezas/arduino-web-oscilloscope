@@ -17,7 +17,7 @@ size_t write(const uint8_t* c, size_t length) {
 }
 void sendBuffer(uint8_t buffer[]) {
   uint16_t count = state.samplesPerBuffer - state.trashedSamples;
-  uint16_t i = state.bufferStartPtr;
+  uint16_t i = internalState.bufferStartPtr;
   while (count) {
     write(buffer[i]);
     i = (i + 1) & 0b111111111;

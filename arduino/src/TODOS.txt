@@ -21,13 +21,15 @@ done
 * change dropdowns via btns
 * Add hotkey indications
 * add measure ruler
+* fix time precision
+* fix slow mode not resetting adc amplification
+* add x y mode
 
 todo
-* fix time precision
+* cleanup warnings
 * Find another way to synchronise packets (e.g. better than end of message or prelude)
 * get rid of "trashed samples"
 * separate analog and digital inputs in different pannels
-* add x y mode
 * store configs and send on start
 * final clean up
 * publish

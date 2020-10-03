@@ -10,6 +10,8 @@ export function getFFT(data: PlotDatum[]) {
     console.log('fix me')
     return []
   }
+  const length = data.length
+  const dt = data[length - 1].t - data[length - 2].t
 
   const mid = average(signal)
   signal = signal.map((v) => v - mid)
@@ -20,11 +22,14 @@ export function getFFT(data: PlotDatum[]) {
   if (padding > 0) {
     paddedSignal = [...signal, ...Array(padding).fill(0)]
   }
+  if (padding < 0) {
+    paddedSignal = signal.slice(0, 512)
+  }
   const fft = ft(paddedSignal)
   // https://www.dsprelated.com/showthread/comp.dsp/87526-1.php
   const normalized = fft.map((v) => (512 * v) / signal.length)
   // const normalized = fft.map((v) => v * 2)
-  return normalized.map((v, i) => ({ v, t: data[i].t }))
+  return normalized.map((v, i) => ({ v, t: dt * i }))
 }
 
 export function rollingAverage(signal: number[]) {
@@ -35,7 +40,8 @@ export function rollingAverage(signal: number[]) {
     return last
   })
 }
-export function getFrequencyCount(data: PlotDatum[], windowTimeWidth: number) {
+export function getFrequencyCount(data: PlotDatum[]) {
+  if (data.length < 2) return 0
   const signal = rollingAverage(data.map(({ v }) => v))
   const max = Math.max(...signal)
   const min = Math.min(...signal)
@@ -51,7 +57,7 @@ export function getFrequencyCount(data: PlotDatum[], windowTimeWidth: number) {
       lastCross = i
     }
   }
-
+  const windowTimeWidth = data[data.length - 1].t - data[0].t
   const sFirstToLast =
     ((lastCross - firstCross) / signal.length) * windowTimeWidth
   const dominantFreq = (count - 1) / sFirstToLast

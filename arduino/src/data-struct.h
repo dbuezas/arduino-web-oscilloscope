@@ -6,6 +6,15 @@
 enum TriggerMode { autom, normal, single, slow };
 enum TriggerDir { rising, falling };
 
+typedef struct {
+  bool inputChanged;
+  uint16_t bufferStartPtr;
+} InternalState;
+InternalState internalState = {
+    false,  // bool inputChanged;
+    0       // uint16_t bufferStartPtr;
+};
+
 uint8_t endOfMessage[4] = {0, 1, 255, 253};
 typedef struct {
   // input
@@ -21,7 +30,6 @@ typedef struct {
   // output
   bool needData;
   bool forceUIUpdate;
-  uint16_t bufferStartPtr;
   bool didTrigger;
   uint16_t freeMemory;
   uint16_t trashedSamples;
@@ -42,7 +50,6 @@ State state = {
     // output
     1,            // bool needData;
     0,            // bool forceUIUpdate;
-    0,            // uint16_t bufferStartPtr;
     false,        // bool didTrigger;
     100,          // uint16_t freeMemory;
     MAX_SAMPLES,  // uint16_t trashedSamples;

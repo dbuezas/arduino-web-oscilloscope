@@ -62,6 +62,7 @@ bool handleInput() {
 
       saveInput(option, val);
       wait = false;
+      internalState.inputChanged = true;
     } else {
       if (ptr >= INPUT_BUFFER_SIZE - 1) {
         // don't write outside the array
