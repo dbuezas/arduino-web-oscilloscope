@@ -135,13 +135,17 @@ export const oversamplingFactorState = memoSelector(
     default: 0
   })
 )
+export const XYModeState = atom({
+  key: 'xy-mode',
+  default: false
+})
 export const fftState0 = atom({
   key: 'fft0',
-  default: true
+  default: false
 })
 export const fftState1 = atom({
   key: 'fft1',
-  default: true
+  default: false
 })
 
 export const didTriggerState = memoSelector(

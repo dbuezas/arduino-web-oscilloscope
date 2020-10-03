@@ -3,7 +3,8 @@ import {
   useIsChannelOn,
   oversamplingFactorState,
   fftState0,
-  fftState1
+  fftState1,
+  XYModeState
 } from '../../communication/bindings'
 import { Panel, ButtonToolbar, ButtonGroup, Button, Slider } from 'rsuite'
 import { useRecoilState, useRecoilValue } from 'recoil'
@@ -19,6 +20,7 @@ export default function Channels() {
   const [oversamplingFactor, setOversamplingFactor] = useRecoilState(
     oversamplingFactorState
   )
+  const [xyMode, setXYMode] = useRecoilState(XYModeState)
   const [fft0, setFFT0] = useRecoilState(fftState0)
   const [fft1, setFFT1] = useRecoilState(fftState1)
   const [isChannelOn, setIsChannelOn] = useRecoilState(useIsChannelOn.send)
@@ -75,6 +77,16 @@ export default function Channels() {
           }}
         >
           FFT AS
+        </Button>
+        <Button
+          appearance={xyMode ? 'primary' : 'default'}
+          disabled={!(isChannelOn[1] && isChannelOn[0])}
+          size="sm"
+          onClick={() => {
+            setXYMode(!xyMode)
+          }}
+        >
+          XY
         </Button>
       </ButtonGroup>
     </Panel>

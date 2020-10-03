@@ -1,3 +1,12 @@
+text {
+  font-size: 14px;
+  paint-order: stroke;
+  stroke: #ffffff;
+  stroke-width: 2px;
+  stroke-linecap: butt;
+  stroke-linejoin: miter;
+  /* font-weight: 800; */
+}
 .plotContainer svg.plot,
 .plotContainer {
   width: 100%;
@@ -32,6 +41,19 @@
 }
 .plotContainer path.plot-area-d7 {
   stroke: crimson;
+}
+.plotContainer path.plot-area-xy {
+  stroke: rgb(3, 102, 53);
+}
+.plotContainer line.measureX,
+.plotContainer line.measureY {
+  stroke: black;
+  stroke-dasharray: 5;
+  stroke-width: 1;
+}
+.plotContainer line.measureCap {
+  stroke: black;
+  stroke-width: 1;
 }
 
 .plotContainer .axis .domain {

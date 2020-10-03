@@ -67,6 +67,17 @@ export const lineSelector = selector({
       .y((d) => yScale(d))
   }
 })
+export const XYLineSelector = selector({
+  key: 'xy-line',
+  get: ({ get }) => {
+    const yScale = get(yScaleSelector)
+
+    return d3
+      .line<[number, number]>()
+      .x((d) => yScale(d[0]))
+      .y((d) => yScale(d[1]))
+  }
+})
 export const plotDataSelector = selector({
   key: 'plot-data',
   get: ({ get }) => {

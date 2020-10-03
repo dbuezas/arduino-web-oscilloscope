@@ -2,14 +2,38 @@ import React, { useEffect, useRef } from 'react'
 import useSize from '@react-hook/size'
 
 import './Plot.css'
-import { dataState } from '../../communication/bindings'
+import {
+  dataState,
+  useIsChannelOn,
+  XYModeState
+} from '../../communication/bindings'
 import { useRecoilValue, useSetRecoilState } from 'recoil'
 import TriggerVoltageHandle, { TriggerVoltageRef } from './TriggerVoltageHandle'
 import TriggerPosHandle, { TriggerPosRef } from './TriggerPosHandle'
-import { lineSelector, plotHeightSelector, plotWidthSelector } from './hooks'
+import {
+  lineSelector,
+  plotHeightSelector,
+  plotWidthSelector,
+  XYLineSelector
+} from './hooks'
 import XAxis from './XAxis'
 import YAxis from './YAxis'
+import Measure, { MeasureRef } from './Measure'
 
+function XYCurve() {
+  const xyMode = useRecoilValue(XYModeState)
+  const isChannelOn = useRecoilValue(useIsChannelOn.send)
+
+  const xyLine = useRecoilValue(XYLineSelector)
+  const data = useRecoilValue(dataState)
+  const d = data[0].map((d, i) => [d, data[1][i]] as [number, number])
+  if (!xyMode || !isChannelOn[0] || !isChannelOn[1]) return <></>
+  return (
+    <>
+      <path className={`plot-area-xy`} d={xyLine(d) || undefined}></path>
+    </>
+  )
+}
 function Curves() {
   const line = useRecoilValue(lineSelector)
   const data = useRecoilValue(dataState)
@@ -27,6 +51,7 @@ export default function Plot() {
   const nodeRef = useRef<SVGSVGElement>(null)
   const triggerPosRef = useRef<TriggerPosRef>(null)
   const triggerVoltageRef = useRef<TriggerVoltageRef>(null)
+  const measureRef = useRef<MeasureRef>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [width, height] = useSize(containerRef)
   const setPlotHeight = useSetRecoilState(plotHeightSelector)
@@ -43,16 +68,25 @@ export default function Plot() {
         onMouseMove={(e) => {
           triggerPosRef.current?.onMouseMove(e)
           triggerVoltageRef.current?.onMouseMove(e)
+          measureRef.current?.onMouseMove(e)
+          e.preventDefault()
         }}
         onMouseUp={(e) => {
           triggerPosRef.current?.onMouseUp(e)
           triggerVoltageRef.current?.onMouseUp(e)
+          measureRef.current?.onMouseUp(e)
+          e.preventDefault()
+        }}
+        onMouseDown={(e) => {
+          measureRef.current?.onMouseDown(e)
+          e.preventDefault()
         }}
       >
         <XAxis />
         <YAxis />
         <Curves />
-
+        <XYCurve />
+        <Measure ref={measureRef} />
         <TriggerVoltageHandle ref={triggerVoltageRef} />
         <TriggerPosHandle ref={triggerPosRef} />
       </svg>

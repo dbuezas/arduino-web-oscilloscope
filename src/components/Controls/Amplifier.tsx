@@ -4,18 +4,27 @@ import { useAmplifier, voltageRanges } from '../../communication/bindings'
 import { formatVoltage } from '../formatters'
 import { Icon, IconButton, SelectPicker } from 'rsuite'
 import { useRecoilState } from 'recoil'
+import { useActiveBtns } from './hooks'
 
 function Amplifier() {
   const [amplifier, setAmplifier] = useRecoilState(useAmplifier.send)
-
+  const [activeBtns, activateBtn] = useActiveBtns({ up: false, down: false })
   useEffect(() => {
-    MouseTrap.bind('up', () => setAmplifier(amplifier - 1))
-    MouseTrap.bind('down', () => setAmplifier(amplifier + 1))
+    MouseTrap.bind('up', (e) => {
+      e.preventDefault()
+      activateBtn('up')
+      setAmplifier(amplifier - 1)
+    })
+    MouseTrap.bind('down', (e) => {
+      e.preventDefault()
+      activateBtn('down')
+      setAmplifier(amplifier + 1)
+    })
     return () => {
       MouseTrap.unbind('up')
       MouseTrap.unbind('down')
     }
-  }, [amplifier, setAmplifier])
+  }, [activateBtn, amplifier, setAmplifier])
 
   return (
     <div
@@ -27,6 +36,7 @@ function Amplifier() {
       }}
     >
       <IconButton
+        active={activeBtns['down']}
         size="md"
         icon={<Icon icon="down" />}
         onClick={() => setAmplifier(amplifier + 1)}
@@ -45,6 +55,7 @@ function Amplifier() {
         style={{ flex: 1, marginLeft: 5, marginRight: 5 }}
       />
       <IconButton
+        active={activeBtns['up']}
         size="md"
         icon={<Icon icon="up" />}
         onClick={() => setAmplifier(amplifier - 1)}

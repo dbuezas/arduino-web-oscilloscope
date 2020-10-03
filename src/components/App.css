@@ -45,7 +45,7 @@ footer {
 }
 .rs-panel-body {
   padding: 10px;
-  /* padding-top: 0; */
+  padding-top: 0 !important;
 }
 
 .rs-panel-collapsible > .rs-panel-heading::before {
