@@ -16,30 +16,30 @@ text {
   stroke-width: 1;
   fill: none;
 }
-.plotContainer path.plot-area-d0 {
+.plotContainer path.plot-area-a0 {
   stroke: steelblue;
   stroke-width: 3;
 }
-.plotContainer path.plot-area-d1 {
+.plotContainer path.plot-area-a1 {
   stroke: crimson;
   stroke-width: 3;
 }
-.plotContainer path.plot-area-d2 {
+.plotContainer path.plot-area-d0 {
   stroke: lightcoral;
 }
-.plotContainer path.plot-area-d3 {
+.plotContainer path.plot-area-d1 {
   stroke: chartreuse;
 }
-.plotContainer path.plot-area-d4 {
+.plotContainer path.plot-area-d2 {
   stroke: cornsilk;
 }
-.plotContainer path.plot-area-d5 {
+.plotContainer path.plot-area-d3 {
   stroke: darkmagenta;
 }
-.plotContainer path.plot-area-d6 {
+.plotContainer path.plot-area-fft0 {
   stroke: rgb(4, 65, 116);
 }
-.plotContainer path.plot-area-d7 {
+.plotContainer path.plot-area-fft1 {
   stroke: rgb(160, 4, 35);
 }
 .plotContainer path.plot-area-xy {

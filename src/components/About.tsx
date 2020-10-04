@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Panel, Tag } from 'rsuite'
+import { Panel } from 'rsuite'
 
 export default function About() {
   return (

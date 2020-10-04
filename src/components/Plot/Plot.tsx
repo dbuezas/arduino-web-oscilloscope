@@ -40,10 +40,19 @@ function Curves() {
   const line = useRecoilValue(lineSelector)
   const data = useRecoilValue(dataState)
   const ds = data.map((data) => line(data) || undefined)
+  const analogs = ds.slice(0, 2)
+  const digitals = ds.slice(2, 6)
+  const ffts = ds.slice(6, 8)
   return (
     <>
-      {ds.map((d, i) => (
+      {analogs.map((d, i) => (
+        <path key={i} className={`plot-area-a${i}`} d={d}></path>
+      ))}
+      {digitals.map((d, i) => (
         <path key={i} className={`plot-area-d${i}`} d={d}></path>
+      ))}
+      {ffts.map((d, i) => (
+        <path key={i} className={`plot-area-fft${i}`} d={d}></path>
       ))}
     </>
   )

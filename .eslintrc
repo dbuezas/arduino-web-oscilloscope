@@ -17,8 +17,9 @@
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-empty-function": "off",
     "@typescript-eslint/ban-ts-comment": "warn",
+    "@typescript-eslint/no-use-before-define": "off",
     "react-hooks/rules-of-hooks": "error",
-    "no-mixed-operators": 0,
+    "no-mixed-operators": "off",
     "react-hooks/exhaustive-deps": [
       "warn",
       {

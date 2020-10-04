@@ -34,6 +34,11 @@ export default function Channels() {
               key={i}
               appearance={isChannelOn[i] ? 'primary' : 'default'}
               size="sm"
+              disabled={
+                ['A2', 'A3'].includes(
+                  name
+                ) /* these are connected to the diff amp and generate noise */
+              }
               onClick={() => {
                 const buffer = isChannelOn.slice()
                 buffer[i] = !buffer[i]

@@ -50,6 +50,11 @@ export default function Trigger() {
             <Button
               key={idx}
               appearance={triggerChannel === idx ? 'primary' : 'default'}
+              disabled={
+                ['A2', 'A3'].includes(
+                  name
+                ) /* these are connected to the diff amp and generate noise */
+              }
               size="sm"
               onClick={() => setTriggerChannel(idx)}
             >

@@ -83,7 +83,7 @@ export default function parseSerial(data: number[]) {
       : []
   const digitals = [0b000100, 0b001000, 0b010000, 0b100000].map((mask) => {
     if (isChannelOn & mask) {
-      return digitalBytes.map((byte) => 1 && byte & mask)
+      return digitalBytes.map((byte) => byte & mask && 1)
     }
     return []
   })
@@ -91,7 +91,7 @@ export default function parseSerial(data: number[]) {
   const buffers = [
     ...analogs.map((analog) => analog.map((n) => (n / 256) * vMax)),
     ...digitals.map((digital, i) =>
-      digital.map((bit) => ((((bit + 1) / 2) * i) / digitals.length) * vMax)
+      digital.map((bit) => (bit * vMax) / 8 + ((i + 0.25) * vMax) / 4)
     )
   ].map((channel) => channel.map((v, i) => ({ v, t: (i + 1) * secPerSample })))
 
