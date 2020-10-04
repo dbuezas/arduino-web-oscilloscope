@@ -49,19 +49,15 @@ export function getFrequencyCount(data: PlotDatum[]) {
   let firstCross = -1
   let lastCross = 0
   let count = 0
-  for (let i = 1; i < signal.length; i++) {
-    const risingCross = signal[i - 1] < mid && signal[i] >= mid
+  for (let i = 1; i < data.length; i++) {
+    const risingCross = data[i - 1].v < mid && data[i].v >= mid
     if (risingCross) {
       count++
-      if (firstCross < 0) firstCross = i
-      lastCross = i
+      if (firstCross < 0) firstCross = data[i].t
+      lastCross = data[i].t
     }
   }
-  const windowTimeWidth = data[data.length - 1].t - data[0].t
-  const sFirstToLast =
-    ((lastCross - firstCross) / signal.length) * windowTimeWidth
-  const dominantFreq = (count - 1) / sFirstToLast
-  return dominantFreq
+  return (count - 1) / (lastCross - firstCross)
 }
 
 export function oversample(

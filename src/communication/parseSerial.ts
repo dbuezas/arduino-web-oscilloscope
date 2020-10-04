@@ -73,33 +73,27 @@ export default function parseSerial(data: number[]) {
   const freeMemory = get_uint16_t(myData)
   const trashedSamples = get_uint16_t(myData)
   const samplesPerBuffer = get_uint16_t(myData)
-  const analog1 =
-    isChannelOn & 0b1 ? pull(myData, samplesPerBuffer - trashedSamples) : []
-  const analog2 =
+  const analogs = [
+    isChannelOn & 0b1 ? pull(myData, samplesPerBuffer - trashedSamples) : [],
     isChannelOn & 0b10 ? pull(myData, samplesPerBuffer - trashedSamples) : []
-  const digital =
+  ]
+  const digitalBytes =
     isChannelOn & 0b11111100
       ? pull(myData, samplesPerBuffer - trashedSamples)
       : []
-
+  const digitals = [0b000100, 0b001000, 0b010000, 0b100000].map((mask) => {
+    if (isChannelOn & mask) {
+      return digitalBytes.map((byte) => 1 && byte & mask)
+    }
+    return []
+  })
   const vMax = voltageRanges[amplifier]
-  const vPart = vMax / 6
   const buffers = [
-    isChannelOn & 0b000001 ? analog1.map((n) => (n / 256) * vMax) : [],
-    isChannelOn & 0b000010 ? analog2.map((n) => (n / 256) * vMax) : [],
-    isChannelOn & 0b000100
-      ? digital.map((n) => ((n + 0.2) * vPart) & 0b000100 && 1)
-      : [],
-    isChannelOn & 0b001000
-      ? digital.map((n) => ((n + 0.4) * vPart) & 0b001000 && 1)
-      : [],
-    isChannelOn & 0b010000
-      ? digital.map((n) => ((n + 0.6) * vPart) & 0b010000 && 1)
-      : [],
-    isChannelOn & 0b100000
-      ? digital.map((n) => ((n + 0.8) * vPart) & 0b100000 && 1)
-      : []
-  ].map((channel) => channel.map((v, i) => ({ v, t: i * secPerSample })))
+    ...analogs.map((analog) => analog.map((n) => (n / 256) * vMax)),
+    ...digitals.map((digital, i) =>
+      digital.map((bit) => ((((bit + 1) / 2) * i) / digitals.length) * vMax)
+    )
+  ].map((channel) => channel.map((v, i) => ({ v, t: (i + 1) * secPerSample })))
 
   return {
     //input

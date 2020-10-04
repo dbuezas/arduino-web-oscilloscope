@@ -37,10 +37,10 @@ text {
   stroke: darkmagenta;
 }
 .plotContainer path.plot-area-d6 {
-  stroke: steelblue;
+  stroke: rgb(4, 65, 116);
 }
 .plotContainer path.plot-area-d7 {
-  stroke: crimson;
+  stroke: rgb(160, 4, 35);
 }
 .plotContainer path.plot-area-xy {
   stroke: rgb(3, 102, 53);

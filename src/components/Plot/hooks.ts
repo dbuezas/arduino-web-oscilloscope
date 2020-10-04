@@ -18,6 +18,7 @@ export const xDomainSelector = selector({
     return [0, xMax] as [number, number]
   }
 })
+export const yDomainSelector = voltageRangeState
 
 export const plotWidthSelector = memoSelector(
   atom({
@@ -45,7 +46,7 @@ export const xScaleSelector = selector({
 export const yScaleSelector = selector({
   key: 'yScale',
   get: ({ get }) => {
-    const yDomain = get(voltageRangeState)
+    const yDomain = get(yDomainSelector)
     const height = get(plotHeightSelector)
     return d3
       .scaleLinear()
@@ -69,10 +70,13 @@ export const XYLineSelector = selector({
   key: 'xy-line',
   get: ({ get }) => {
     const yScale = get(yScaleSelector)
+    const xScale = get(xScaleSelector)
+    const [, xMax] = get(xDomainSelector)
+    const [, yMax] = get(yDomainSelector)
 
     return d3
       .line<[number, number]>()
-      .x((d) => yScale(d[0]))
+      .x((d) => xScale((-d[0] / yMax) * xMax))
       .y((d) => yScale(d[1]))
   }
 })

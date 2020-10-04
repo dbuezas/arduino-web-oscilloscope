@@ -264,27 +264,19 @@ export const allDataState = selector<number[]>({
       }
 
       if (get(useTriggerMode.send) === TriggerMode.SLOW) {
-        let oldMax = 0
-        if (oldBuffers[0][0] && oldBuffers[0][1]) {
-          const l = oldBuffers[0].length
-          const oldDt = get(useSecPerSample.send)
-          oldMax = oldBuffers[0][l - 1].t + oldDt
-        }
+        const oldLastT = Math.max(
+          ...oldBuffers.map((b) => b[b.length - 1]?.t || 0)
+        )
+
         buffers = buffers.map((b, i) => [
           ...oldBuffers[i],
-          ...b.map(({ v, t }) => ({ v, t: t + oldMax }))
+          ...b.map(({ v, t }) => ({ v, t: t + oldLastT }))
         ])
         const totalSecs =
           get(useSecPerSample.send) * get(useSamplesPerBuffer.send)
-        const l = buffers[0].length
-        const lastT = buffers[0][l - 1].t
+        const lastT = Math.max(...buffers.map((b) => b[b.length - 1]?.t || 0))
         if (lastT > totalSecs) {
           buffers = buffers.map(() => [])
-          // buffers = buffers.map((buffer) =>
-          //   buffer
-          //     .filter(({ t }) => t > totalSecs)
-          //     .map(({ t, v }) => ({ t: t - totalSecs, v }))
-          // )
         }
       }
       const withFFT = [
