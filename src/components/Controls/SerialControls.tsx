@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react'
 import { allDataState } from '../../communication/bindings'
 import serial from '../../communication/Serial'
 import { useSetRecoilState } from 'recoil'
+import Uploader from './Uploader'
 
 const serialOptions = {
   baudrate: 115200 * 1,
@@ -36,7 +37,7 @@ function SerialControls() {
     serial
       .connectWithPaired(serialOptions)
       .then(() => setSerialState('Connected'))
-      .catch(() => setSerialState('Error'))
+      .catch(() => setSerialState('Disconnected'))
   }, [])
   return (
     <Panel shaded header="Serial">
@@ -98,6 +99,7 @@ function SerialControls() {
           return <Tag color={color}>{serialState}</Tag>
         })()}
       </ButtonToolbar>
+      {serialState == 'Disconnected' && <Uploader />}
     </Panel>
   )
 }

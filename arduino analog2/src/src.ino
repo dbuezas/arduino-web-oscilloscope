@@ -1,23 +1,35 @@
+#pragma push_macro("USART_RX_vect")
+#define USART_RX_vect _VECTOR(0)  // unused vector 0
+#include <HardwareSerial0.cpp>
+#pragma pop_macro("USART_RX_vect")
 
+#include "SoftwareSerial.h"
 #include "adc.h"
+#include "input.h"
 
 // #define DEBUG
 void setup() {
   setupADC();
-  startADC(2, 1);
-  noInterrupts();
+  startADC(2, 4);
+  // noInterrupts();
   DDRB = 0b00011111;
   DDRD = 0b11100000;
+  mySerial.begin(115200);
+  TIMSK0 &= ~_BV(TOIE0);  // disable timer0 overflow interrupt
 }
 
 void loop() {
-  // loop_until_bit_is_set(ADCSRA, ADIF);
-  // bitSet(ADCSRA, ADIF);  // this actually clears the bit
-  uint8_t val = ADCH;
-  // uint8_t valD = val & 0b11100000;
-  // uint8_t valB = val & 0b00011111;
-  // PORTD = valD;
-  // PORTB = valB;
-  PORTD = val;
-  PORTB = val;
+  handleInput();
+  for (int i = 0; i < 1000; i++) {
+    loop_until_bit_is_set(ADCSRA, ADIF);
+    bitSet(ADCSRA, ADIF);  // this actually clears the bit
+
+    uint8_t val = ADCH;
+    // uint8_t valD = val & 0b11100000;
+    // uint8_t valB = val & 0b00011111;
+    // PORTD = valD;
+    // PORTB = valB;
+    PORTD = val;
+    PORTB = val;
+  }
 }

@@ -24,6 +24,7 @@ done
 * fix time precision
 * fix slow mode not resetting adc amplification
 * add x y mode
+* Upload directly from webpage
 
 todo
 * fix xy mode scale
