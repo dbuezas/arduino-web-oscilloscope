@@ -25,9 +25,9 @@ done
 * fix slow mode not resetting adc amplification
 * add x y mode
 * Upload directly from webpage
+* fix xy mode scale
 
 todo
-* fix xy mode scale
 * cleanup warnings
 * Find another way to synchronise packets (e.g. better than end of message or prelude)
 * get rid of "trashed samples"

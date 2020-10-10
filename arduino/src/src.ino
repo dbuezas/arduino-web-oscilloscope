@@ -1,5 +1,6 @@
 #include "MemoryFree.h"
 #pragma push_macro("USART_RX_vect")
+#undef USART_RX_vect
 #define USART_RX_vect _VECTOR(0)  // unused vector 0
 #include <HardwareSerial0.cpp>
 #pragma pop_macro("USART_RX_vect")

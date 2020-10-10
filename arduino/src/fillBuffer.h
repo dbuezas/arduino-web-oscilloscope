@@ -63,8 +63,9 @@ void startCPUCounter() {
   // con prescaledTicksCount = 0, llega hasta 40, pero pierde resolucion
   // con 16 bits and correction, 61 minimum for triggering
 }
+#define FORCE_INLINE __attribute__((always_inline)) inline
 
-__attribute__((always_inline)) byte storeOne(byte returnChannel) {
+FORCE_INLINE byte storeOne(byte returnChannel) {
   while (prescaledTicksCount < prescaledTicksPerADCRead) {
   }
   prescaledTicksCount -= prescaledTicksPerADCReadTuned;
@@ -78,11 +79,11 @@ __attribute__((always_inline)) byte storeOne(byte returnChannel) {
       (internalState.bufferStartPtr + 1) & 0b111111111;
   if (returnChannel == 0) return val0;
   if (returnChannel == 1) return val1;
-  if (returnChannel > 1) return bitRead(val2, returnChannel);
+  // if (returnChannel > 1)
+  return bitRead(val2, returnChannel);
 }
 
-__attribute__((always_inline)) void fillBufferAnalogTrigger(uint8_t channel,
-                                                            TriggerDir dir) {
+FORCE_INLINE void fillBufferAnalogTrigger(uint8_t channel, TriggerDir dir) {
   uint8_t triggerPoint = state.triggerVoltage;
   byte triggerVoltageMinus = max(0, (int)triggerPoint - 2);
   byte triggerVoltagePlus = min(255, (int)triggerPoint + 2);
@@ -111,8 +112,7 @@ __attribute__((always_inline)) void fillBufferAnalogTrigger(uint8_t channel,
   stopADC();
 }
 
-__attribute__((always_inline)) inline void fillBufferDigitalTrigger(
-    uint8_t channel, TriggerDir dir) {
+FORCE_INLINE void fillBufferDigitalTrigger(uint8_t channel, TriggerDir dir) {
   uint16_t headSamples = state.triggerPos;
   uint16_t tailSamples = state.samplesPerBuffer - state.triggerPos;
   startADC(2, state.amplifier);

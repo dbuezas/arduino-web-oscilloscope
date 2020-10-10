@@ -3,8 +3,8 @@
 
 #define MAX_SAMPLES 512
 
-enum TriggerMode { autom, normal, single, slow };
-enum TriggerDir { rising, falling };
+enum TriggerMode { autom = 0, normal = 1, single = 2, slow = 3 };
+enum TriggerDir { rising = 0, falling = 1 };
 
 typedef struct {
   bool inputChanged;

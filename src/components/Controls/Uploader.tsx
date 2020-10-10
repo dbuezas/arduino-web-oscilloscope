@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Button, Progress } from 'rsuite'
+import { Button, Icon, Progress } from 'rsuite'
 import serial2 from '../../communication/Serial2'
 import async from 'async'
 import intel_hex from 'intel-hex'
@@ -47,19 +47,19 @@ const board = {
 function Uploader() {
   const [percent, setPercent] = useState(0)
   const [status, setStatus] = useState<'active' | 'fail' | 'success'>('active')
-  const [isHidden, setIsHidden] = useState(true)
+  const [isProgressHidden, setIsProgressHidden] = useState(true)
   const [message, setMessage] = useState('')
   const onClick = async () => {
     setMessage('Uploading...')
     try {
-      setIsHidden(true)
+      setIsProgressHidden(true)
       const hex = await fetch(process.env.PUBLIC_URL + '/src.ino.hex')
         .then((response) => response.text())
         .then((text) => intel_hex.parse(text).data)
       const serialStream = await serial2.connect(serialOptions)
       setStatus('active')
       setPercent(0)
-      setIsHidden(false)
+      setIsProgressHidden(false)
       await bootload(serialStream, hex, board, setPercent)
       setStatus('success')
       setMessage(`Uploaded ${hex.length} bytes.`)
@@ -71,8 +71,11 @@ function Uploader() {
   }
   return (
     <>
-      <Button onClick={onClick}>Upload</Button>
-      {!isHidden && (
+      <br />
+      <Button color="green" onClick={onClick}>
+        <Icon icon="upload2" /> Upload lgt328p Firmware
+      </Button>
+      {!isProgressHidden && (
         <>
           <Progress.Line percent={percent} status={status} />
           {message}
