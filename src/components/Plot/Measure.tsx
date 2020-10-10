@@ -54,7 +54,7 @@ const Measure = forwardRef<MeasureRef>((_props, ref) => {
   }))
   if (isEqual(startPos, endPos)) return <></>
   return (
-    <>
+    <g className="Measure">
       <line
         className="measureCap"
         x1={xScale(startPos.x) - 5}
@@ -115,7 +115,7 @@ const Measure = forwardRef<MeasureRef>((_props, ref) => {
       >
         {formatVoltage(endPos.y - startPos.y)}
       </text>
-    </>
+    </g>
   )
 })
 

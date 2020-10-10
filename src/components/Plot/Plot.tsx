@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import useSize from '@react-hook/size'
 
-import './Plot.css'
 import {
   dataState,
   useIsChannelOn,
