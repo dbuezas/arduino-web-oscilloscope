@@ -26,10 +26,9 @@ done
 * add x y mode
 * Upload directly from webpage
 * fix xy mode scale
+* cleanup warnings
 
 todo
-* cleanup warnings
-* Find another way to synchronise packets (e.g. better than end of message or prelude)
 * get rid of "trashed samples"
 * separate analog and digital inputs in different pannels
 * store configs and send on start
@@ -37,3 +36,6 @@ todo
 * publish
 * add stm32 support 
 * Add explanation tooltips
+
+wont do
+* Find another way to synchronise packets (e.g. better than end of message or prelude)

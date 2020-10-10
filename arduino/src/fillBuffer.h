@@ -198,9 +198,10 @@ void fillBuffer() {
   state.trashedSamples = 0;
 
   if (state.triggerChannel < 2)
-    fillBufferAnalogTrigger(state.triggerChannel, state.triggerDir);
+    fillBufferAnalogTrigger(state.triggerChannel, (TriggerDir)state.triggerDir);
   else
-    fillBufferDigitalTrigger(state.triggerChannel, state.triggerDir);
+    fillBufferDigitalTrigger(state.triggerChannel,
+                             (TriggerDir)state.triggerDir);
   state.didTrigger = true;
 
   offAutoInterrupt();
