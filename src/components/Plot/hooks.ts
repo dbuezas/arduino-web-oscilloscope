@@ -76,8 +76,8 @@ export const XYLineSelector = selector({
 
     return d3
       .line<[number, number]>()
-      .x((d) => xScale((-d[0] / yMax) * xMax))
-      .y((d) => yScale(d[1]))
+      .x((d) => xScale((d[1] / yMax) * xMax))
+      .y((d) => yScale(-d[0]))
   }
 })
 export const plotDataSelector = selector({
