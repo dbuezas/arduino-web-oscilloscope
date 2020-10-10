@@ -2,6 +2,7 @@
   "name": "arduino-web-oscilloscope",
   "version": "0.1.0",
   "private": true,
+  "homepage": "/arduino-web-oscilloscope",
   "dependencies": {
     "@react-hook/size": "^2.1.0",
     "@types/async": "^3.2.3",

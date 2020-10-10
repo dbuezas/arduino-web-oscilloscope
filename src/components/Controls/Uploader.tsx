@@ -14,7 +14,7 @@ const bootload = async (
 ) => {
   let sent = 0
   stk500.log = (what: string) => {
-    if (what == 'loaded page') {
+    if (what === 'loaded page') {
       sent += 1
       const percent = Math.round((100 * sent) / (hex.length / opt.pageSize))
       progress(percent)

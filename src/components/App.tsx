@@ -17,6 +17,7 @@ function App() {
         paste this url in your browser and
         <br />
         <img
+          alt=""
           src={process.env.PUBLIC_URL + '/ExperimentalWebPlatformFeatures.png'}
         ></img>
         chrome://flags/#enable-experimental-web-platform-features

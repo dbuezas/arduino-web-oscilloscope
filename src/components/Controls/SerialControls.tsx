@@ -99,7 +99,7 @@ function SerialControls() {
           return <Tag color={color}>{serialState}</Tag>
         })()}
       </ButtonToolbar>
-      {serialState == 'Disconnected' && <Uploader />}
+      {serialState === 'Disconnected' && <Uploader />}
     </Panel>
   )
 }
