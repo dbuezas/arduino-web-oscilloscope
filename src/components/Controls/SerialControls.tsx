@@ -13,7 +13,7 @@ import { useSetRecoilState } from 'recoil'
 import Uploader from './Uploader'
 
 const serialOptions = {
-  baudrate: 115200 * 1,
+  baudRate: 115200 * 1,
   buffersize: 20000
 }
 const ButtonToolbarStyle = {

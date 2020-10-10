@@ -9,6 +9,20 @@ import { Panel, Container, Content, Sidebar } from 'rsuite'
 import About from './About'
 
 function App() {
+  if (!navigator.serial) {
+    return (
+      <>
+        Enable experimental web platform features to activate the Web Serial API
+        <br />
+        paste this url in your browser and
+        <br />
+        <img
+          src={process.env.PUBLIC_URL + '/ExperimentalWebPlatformFeatures.png'}
+        ></img>
+        chrome://flags/#enable-experimental-web-platform-features
+      </>
+    )
+  }
   return (
     <div className="App">
       <Container>

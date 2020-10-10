@@ -67,9 +67,10 @@ export class Serial {
     console.log('closed')
   }
   async connectWithPaired(options: SerialOptions) {
-    const [port] = await navigator.serial.getPorts()
-    if (!port) throw new Error('no paired')
-    this._connect(options, port)
+    const ports = await navigator.serial.getPorts()
+    console.log(ports)
+    if (!ports.length) throw new Error('no paired')
+    this._connect(options, ports[0])
   }
   async connect(options: SerialOptions) {
     const port = await navigator.serial.requestPort({})
