@@ -1,3 +1,9 @@
+# arduino-web-oscilloscope
+
+Try it now without having to install anything at [https://dbuezas.github.io/arduino-web-oscilloscope/](https://dbuezas.github.io/arduino-web-oscilloscope/)
+
+Currently only supports lgt328p boards
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
