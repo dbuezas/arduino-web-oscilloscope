@@ -1,25 +1,25 @@
 {
   "files": {
-    "main.css": "/arduino-web-oscilloscope/static/css/main.d70b8e61.chunk.css",
-    "main.js": "/arduino-web-oscilloscope/static/js/main.be748095.chunk.js",
-    "main.js.map": "/arduino-web-oscilloscope/static/js/main.be748095.chunk.js.map",
+    "main.css": "/arduino-web-oscilloscope/static/css/main.8fb67fc1.chunk.css",
+    "main.js": "/arduino-web-oscilloscope/static/js/main.7afce4c3.chunk.js",
+    "main.js.map": "/arduino-web-oscilloscope/static/js/main.7afce4c3.chunk.js.map",
     "runtime-main.js": "/arduino-web-oscilloscope/static/js/runtime-main.3ac2590a.js",
     "runtime-main.js.map": "/arduino-web-oscilloscope/static/js/runtime-main.3ac2590a.js.map",
     "static/css/2.7523cf1c.chunk.css": "/arduino-web-oscilloscope/static/css/2.7523cf1c.chunk.css",
     "static/js/2.084f153d.chunk.js": "/arduino-web-oscilloscope/static/js/2.084f153d.chunk.js",
     "static/js/2.084f153d.chunk.js.map": "/arduino-web-oscilloscope/static/js/2.084f153d.chunk.js.map",
     "index.html": "/arduino-web-oscilloscope/index.html",
-    "precache-manifest.dc28e807ba4ee7b304154eb1f369695f.js": "/arduino-web-oscilloscope/precache-manifest.dc28e807ba4ee7b304154eb1f369695f.js",
+    "precache-manifest.68566c9150c8e83440b1de2ed7e0a896.js": "/arduino-web-oscilloscope/precache-manifest.68566c9150c8e83440b1de2ed7e0a896.js",
     "service-worker.js": "/arduino-web-oscilloscope/service-worker.js",
     "static/css/2.7523cf1c.chunk.css.map": "/arduino-web-oscilloscope/static/css/2.7523cf1c.chunk.css.map",
-    "static/css/main.d70b8e61.chunk.css.map": "/arduino-web-oscilloscope/static/css/main.d70b8e61.chunk.css.map",
+    "static/css/main.8fb67fc1.chunk.css.map": "/arduino-web-oscilloscope/static/css/main.8fb67fc1.chunk.css.map",
     "static/js/2.084f153d.chunk.js.LICENSE.txt": "/arduino-web-oscilloscope/static/js/2.084f153d.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.3ac2590a.js",
     "static/css/2.7523cf1c.chunk.css",
     "static/js/2.084f153d.chunk.js",
-    "static/css/main.d70b8e61.chunk.css",
-    "static/js/main.be748095.chunk.js"
+    "static/css/main.8fb67fc1.chunk.css",
+    "static/js/main.7afce4c3.chunk.js"
   ]
 }
