@@ -82,6 +82,12 @@ export default function Plot() {
           measureRef.current?.onMouseMove(e)
           e.preventDefault()
         }}
+        onMouseLeave={(e) => {
+          triggerPosRef.current?.onMouseUp(e)
+          triggerVoltageRef.current?.onMouseUp(e)
+          measureRef.current?.onMouseUp(e)
+          e.preventDefault()
+        }}
         onMouseUp={(e) => {
           triggerPosRef.current?.onMouseUp(e)
           triggerVoltageRef.current?.onMouseUp(e)
