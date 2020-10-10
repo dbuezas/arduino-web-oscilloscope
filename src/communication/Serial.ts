@@ -1,16 +1,26 @@
 // based in wonky  https://github.com/yaakov-h/uniden-web-controller/blob/master/serial.js
 
-type Port = {
+export type Port = {
   readable: ReadableStream
   writable: WritableStream
   open: (options: SerialOptions) => Promise<void>
   close: () => Promise<void>
 }
-type NavigatorSerial = {
+export type NavigatorSerial = {
   requestPort: (optn: unknown) => Port
   getPorts: () => Promise<Port[]>
 }
-
+export type SerialOptions = {
+  baudRate?: number
+  dataBits?: number
+  stopBits?: number
+  parity?: string
+  bufferSize?: number
+  rtscts?: boolean
+  xon?: boolean
+  xoff?: boolean
+  xany?: boolean
+}
 declare global {
   interface Window {
     serial: Serial
@@ -29,17 +39,7 @@ const indexesOfSequence = (needle: number[], haystack: number[]) => {
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
-type SerialOptions = {
-  baudrate?: number
-  databits?: number
-  stopbits?: number
-  parity?: string
-  buffersize?: number
-  rtscts?: boolean
-  xon?: boolean
-  xoff?: boolean
-  xany?: boolean
-}
+
 export class Serial {
   reader?: ReadableStreamDefaultReader
   writer?: WritableStreamDefaultWriter
@@ -78,11 +78,11 @@ export class Serial {
   }
   async _connect(options: SerialOptions, port: Port) {
     options = {
-      baudrate: 9600,
-      databits: 8,
-      stopbits: 1,
+      baudRate: 9600,
+      dataBits: 8,
+      stopBits: 1,
       parity: 'none',
-      buffersize: 255,
+      bufferSize: 255,
       rtscts: false,
       xon: false,
       xoff: false,

@@ -1,16 +1,6 @@
 // based in wonky  https://github.com/yaakov-h/uniden-web-controller/blob/master/serial.js
 import { ReadableWebToNodeStream } from 'readable-web-to-node-stream'
-
-type Port = {
-  readable: ReadableStream
-  writable: WritableStream
-  open: (options: SerialOptions) => Promise<void>
-  close: () => Promise<void>
-}
-type NavigatorSerial = {
-  requestPort: (optn: unknown) => Port
-  getPorts: () => Promise<Port[]>
-}
+import { NavigatorSerial, Port, SerialOptions } from './Serial'
 
 declare global {
   interface Window {
@@ -21,17 +11,6 @@ declare global {
   }
 }
 
-type SerialOptions = {
-  baudrate?: number
-  databits?: number
-  stopbits?: number
-  parity?: string
-  buffersize?: number
-  rtscts?: boolean
-  xon?: boolean
-  xoff?: boolean
-  xany?: boolean
-}
 export class Serial {
   port?: Port
   reader?: NodeJS.ReadableStream
@@ -66,11 +45,11 @@ export class Serial {
   }
   async _connect(options: SerialOptions, port: Port) {
     options = {
-      baudrate: 9600,
-      databits: 8,
-      stopbits: 1,
+      baudRate: 9600,
+      dataBits: 8,
+      stopBits: 1,
       parity: 'none',
-      buffersize: 255,
+      bufferSize: 255,
       rtscts: false,
       xon: false,
       xoff: false,

@@ -36,8 +36,8 @@ const bootload = async (
 }
 
 const serialOptions = {
-  baudrate: 57600,
-  buffersize: 20000
+  baudRate: 57600,
+  bufferSize: 20000
 }
 const board = {
   signature: Buffer.from([0x1e, 0x95, 0x0f]),
@@ -64,6 +64,7 @@ function Uploader() {
       setStatus('success')
       setMessage(`Uploaded ${hex.length} bytes.`)
     } catch (e) {
+      console.error(e)
       setMessage(e.toString())
       setStatus('fail')
     }

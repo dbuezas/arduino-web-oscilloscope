@@ -14,7 +14,7 @@ import Uploader from './Uploader'
 
 const serialOptions = {
   baudRate: 115200 * 1,
-  buffersize: 20000
+  bufferSize: 20000
 }
 const ButtonToolbarStyle = {
   marginTop: 10,
