@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/arduino-web-oscilloscope/static/css/main.d70b8e61.chunk.css",
-    "main.js": "/arduino-web-oscilloscope/static/js/main.cd90cf46.chunk.js",
-    "main.js.map": "/arduino-web-oscilloscope/static/js/main.cd90cf46.chunk.js.map",
+    "main.js": "/arduino-web-oscilloscope/static/js/main.be748095.chunk.js",
+    "main.js.map": "/arduino-web-oscilloscope/static/js/main.be748095.chunk.js.map",
     "runtime-main.js": "/arduino-web-oscilloscope/static/js/runtime-main.3ac2590a.js",
     "runtime-main.js.map": "/arduino-web-oscilloscope/static/js/runtime-main.3ac2590a.js.map",
     "static/css/2.7523cf1c.chunk.css": "/arduino-web-oscilloscope/static/css/2.7523cf1c.chunk.css",
     "static/js/2.084f153d.chunk.js": "/arduino-web-oscilloscope/static/js/2.084f153d.chunk.js",
     "static/js/2.084f153d.chunk.js.map": "/arduino-web-oscilloscope/static/js/2.084f153d.chunk.js.map",
     "index.html": "/arduino-web-oscilloscope/index.html",
-    "precache-manifest.0758cd5977224585cc3ba92ec4ce18c1.js": "/arduino-web-oscilloscope/precache-manifest.0758cd5977224585cc3ba92ec4ce18c1.js",
+    "precache-manifest.dc28e807ba4ee7b304154eb1f369695f.js": "/arduino-web-oscilloscope/precache-manifest.dc28e807ba4ee7b304154eb1f369695f.js",
     "service-worker.js": "/arduino-web-oscilloscope/service-worker.js",
     "static/css/2.7523cf1c.chunk.css.map": "/arduino-web-oscilloscope/static/css/2.7523cf1c.chunk.css.map",
     "static/css/main.d70b8e61.chunk.css.map": "/arduino-web-oscilloscope/static/css/main.d70b8e61.chunk.css.map",
@@ -20,6 +20,6 @@
     "static/css/2.7523cf1c.chunk.css",
     "static/js/2.084f153d.chunk.js",
     "static/css/main.d70b8e61.chunk.css",
-    "static/js/main.cd90cf46.chunk.js"
+    "static/js/main.be748095.chunk.js"
   ]
 }
