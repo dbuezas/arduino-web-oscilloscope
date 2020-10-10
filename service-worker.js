@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/arduino-web-oscilloscope/precache-manifest.68566c9150c8e83440b1de2ed7e0a896.js"
+  "/arduino-web-oscilloscope/precache-manifest.e33279ecacca3c7f6fdd763b80b96365.js"
 );
 
 self.addEventListener('message', (event) => {
