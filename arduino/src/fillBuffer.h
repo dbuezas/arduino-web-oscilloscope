@@ -3,34 +3,33 @@
 uint16_t prescaledTicksPerADCRead;
 uint16_t prescaledTicksPerADCReadTuned;
 
-#define UINT16_MAX_ 65535
 #define prescaledTicksCount TCNT3
 void startCPUCounter() {
   // counter for adcREad
   TCCR3A = 0;
   TCCR3B = 0;
   uint32_t ticksPerSample = state.secPerSample * F_CPU;
-  if (ticksPerSample < UINT16_MAX_) {
+  if (ticksPerSample < UINT16_MAX) {
     // fits in 16 bits
     TCCR3B = 1 << CS30;
     prescaledTicksPerADCRead = ticksPerSample;
     prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead - 10;
-  } else if (ticksPerSample / 8 < UINT16_MAX_) {
+  } else if (ticksPerSample / 8 < UINT16_MAX) {
     // fits prescaled by 8
     TCCR3B = 2 << CS30;
     prescaledTicksPerADCRead = ticksPerSample / 8;
     prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead - 10 / 8;
-  } else if (ticksPerSample / 64 < UINT16_MAX_) {
+  } else if (ticksPerSample / 64 < UINT16_MAX) {
     // fits prescaled by 64
     TCCR3B = 3 << CS30;
     prescaledTicksPerADCRead = ticksPerSample / 64;
     prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead - 10 / 64;
-  } else if (ticksPerSample / 256 < UINT16_MAX_) {
+  } else if (ticksPerSample / 256 < UINT16_MAX) {
     // fits prescaled by 256
     TCCR3B = 4 << CS30;
     prescaledTicksPerADCRead = ticksPerSample / 256;
     prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead - 10 / 256;
-  } else if (ticksPerSample / 1024 < UINT16_MAX_) {
+  } else if (ticksPerSample / 1024 < UINT16_MAX) {
     // fits prescaled by 1024
     TCCR3B = 5 << CS30;
     prescaledTicksPerADCRead = ticksPerSample / 1024;
