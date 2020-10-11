@@ -1,22 +1,22 @@
 {
   "files": {
-    "main.css": "/arduino-web-oscilloscope/static/css/main.96699fd1.chunk.css",
-    "main.js": "/arduino-web-oscilloscope/static/js/main.29297caa.chunk.js",
-    "main.js.map": "/arduino-web-oscilloscope/static/js/main.29297caa.chunk.js.map",
+    "main.css": "/arduino-web-oscilloscope/static/css/main.66076187.chunk.css",
+    "main.js": "/arduino-web-oscilloscope/static/js/main.033bd1de.chunk.js",
+    "main.js.map": "/arduino-web-oscilloscope/static/js/main.033bd1de.chunk.js.map",
     "runtime-main.js": "/arduino-web-oscilloscope/static/js/runtime-main.3ac2590a.js",
     "runtime-main.js.map": "/arduino-web-oscilloscope/static/js/runtime-main.3ac2590a.js.map",
-    "static/js/2.0e90ef91.chunk.js": "/arduino-web-oscilloscope/static/js/2.0e90ef91.chunk.js",
-    "static/js/2.0e90ef91.chunk.js.map": "/arduino-web-oscilloscope/static/js/2.0e90ef91.chunk.js.map",
+    "static/js/2.1ff69603.chunk.js": "/arduino-web-oscilloscope/static/js/2.1ff69603.chunk.js",
+    "static/js/2.1ff69603.chunk.js.map": "/arduino-web-oscilloscope/static/js/2.1ff69603.chunk.js.map",
     "index.html": "/arduino-web-oscilloscope/index.html",
-    "precache-manifest.ec8b09c883226fb06d6321b32e6861a9.js": "/arduino-web-oscilloscope/precache-manifest.ec8b09c883226fb06d6321b32e6861a9.js",
+    "precache-manifest.03d386f0a5e9b26bac42bae36996cf0f.js": "/arduino-web-oscilloscope/precache-manifest.03d386f0a5e9b26bac42bae36996cf0f.js",
     "service-worker.js": "/arduino-web-oscilloscope/service-worker.js",
-    "static/css/main.96699fd1.chunk.css.map": "/arduino-web-oscilloscope/static/css/main.96699fd1.chunk.css.map",
-    "static/js/2.0e90ef91.chunk.js.LICENSE.txt": "/arduino-web-oscilloscope/static/js/2.0e90ef91.chunk.js.LICENSE.txt"
+    "static/css/main.66076187.chunk.css.map": "/arduino-web-oscilloscope/static/css/main.66076187.chunk.css.map",
+    "static/js/2.1ff69603.chunk.js.LICENSE.txt": "/arduino-web-oscilloscope/static/js/2.1ff69603.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.3ac2590a.js",
-    "static/js/2.0e90ef91.chunk.js",
-    "static/css/main.96699fd1.chunk.css",
-    "static/js/main.29297caa.chunk.js"
+    "static/js/2.1ff69603.chunk.js",
+    "static/css/main.66076187.chunk.css",
+    "static/js/main.033bd1de.chunk.js"
   ]
 }
