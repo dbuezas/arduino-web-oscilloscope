@@ -1,22 +1,22 @@
 {
   "files": {
     "main.css": "/arduino-web-oscilloscope/static/css/main.96699fd1.chunk.css",
-    "main.js": "/arduino-web-oscilloscope/static/js/main.21d76e83.chunk.js",
-    "main.js.map": "/arduino-web-oscilloscope/static/js/main.21d76e83.chunk.js.map",
+    "main.js": "/arduino-web-oscilloscope/static/js/main.ad21af90.chunk.js",
+    "main.js.map": "/arduino-web-oscilloscope/static/js/main.ad21af90.chunk.js.map",
     "runtime-main.js": "/arduino-web-oscilloscope/static/js/runtime-main.3ac2590a.js",
     "runtime-main.js.map": "/arduino-web-oscilloscope/static/js/runtime-main.3ac2590a.js.map",
-    "static/js/2.3b6f1664.chunk.js": "/arduino-web-oscilloscope/static/js/2.3b6f1664.chunk.js",
-    "static/js/2.3b6f1664.chunk.js.map": "/arduino-web-oscilloscope/static/js/2.3b6f1664.chunk.js.map",
+    "static/js/2.0e90ef91.chunk.js": "/arduino-web-oscilloscope/static/js/2.0e90ef91.chunk.js",
+    "static/js/2.0e90ef91.chunk.js.map": "/arduino-web-oscilloscope/static/js/2.0e90ef91.chunk.js.map",
     "index.html": "/arduino-web-oscilloscope/index.html",
-    "precache-manifest.68c2a7a63cb6f3249cd53a7927df0d4f.js": "/arduino-web-oscilloscope/precache-manifest.68c2a7a63cb6f3249cd53a7927df0d4f.js",
+    "precache-manifest.b57d7f1fa26c40b7aab29f93412230a1.js": "/arduino-web-oscilloscope/precache-manifest.b57d7f1fa26c40b7aab29f93412230a1.js",
     "service-worker.js": "/arduino-web-oscilloscope/service-worker.js",
     "static/css/main.96699fd1.chunk.css.map": "/arduino-web-oscilloscope/static/css/main.96699fd1.chunk.css.map",
-    "static/js/2.3b6f1664.chunk.js.LICENSE.txt": "/arduino-web-oscilloscope/static/js/2.3b6f1664.chunk.js.LICENSE.txt"
+    "static/js/2.0e90ef91.chunk.js.LICENSE.txt": "/arduino-web-oscilloscope/static/js/2.0e90ef91.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.3ac2590a.js",
-    "static/js/2.3b6f1664.chunk.js",
+    "static/js/2.0e90ef91.chunk.js",
     "static/css/main.96699fd1.chunk.css",
-    "static/js/main.21d76e83.chunk.js"
+    "static/js/main.ad21af90.chunk.js"
   ]
 }
