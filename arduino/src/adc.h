@@ -31,10 +31,29 @@
 #define GAIN16 0b10
 #define GAIN32 0b11
 const uint8_t gainArray[][2] = {
-    {GAIN1, DIV_1_5},  {GAIN1, DIV_4_5},  {GAIN1, DIV_1},    {GAIN8, DIV_1_5},
-    {GAIN16, DIV_1_5}, {GAIN32, DIV_1_5}, {GAIN8, DIV_4_5},  {GAIN8, DIV_1},
-    {GAIN16, DIV_4_5}, {GAIN16, DIV_1},   {GAIN32, DIV_4_5}, {GAIN32, DIV_1},
+    {GAIN1, DIV_1_5},   // 25 v
+    {GAIN1, DIV_4_5},   // 6.25 v
+    {GAIN1, DIV_1},     // 5 v
+    {GAIN8, DIV_1_5},   // 3.125 v
+    {GAIN16, DIV_1_5},  // 1.5625 v
+    {GAIN32, DIV_1_5},  // 0.78125 v
+    {GAIN8, DIV_4_5},   // 0.78125 v
+    {GAIN8, DIV_1},     // 0.625 v
+    {GAIN16, DIV_4_5},  // 0.390625 v
+    {GAIN16, DIV_1},    // 0.3125 v
+    {GAIN32, DIV_4_5},  // 0.1953125 v
+    {GAIN32, DIV_1},    // 0.15625 v
 };
+enum ReferenceVoltage {
+  // The other 1v, 2v and 4v make the ADC jump a lot
+  AREF = 0b000,
+  AVCC = 0b001,
+  v2_048 = 0b010,
+  v1_024 = 0b011,
+  v4_096 = 0b100,
+};
+
+const uint8_t refVoltage = ReferenceVoltage::AVCC;
 inline void startADC(uint8_t prescaler, uint8_t amplifier) {
   // ADC0 --->
   // -[ADCSRD]-> voltage division ->
@@ -47,8 +66,10 @@ inline void startADC(uint8_t prescaler, uint8_t amplifier) {
   uint8_t gain = gainArray[amplifier][0];
   uint8_t divisor = gainArray[amplifier][1];
 
-  ADMUX = 1 << REFS0 |  // ADC refference is AVCC [seel also: ADCSRD:REFS2]
-          0 << REFS1 |  // ADC refference is AVCC [seel also: ADCSRD:REFS2]
+  ADMUX = bitRead(refVoltage, 0)
+              << REFS0 |  // ADC refference is AVCC [seel also: ADCSRD:REFS2]
+          bitRead(refVoltage, 1) << REFS1 |  // ADC refference is AVCC [seel
+                                             // also: ADCSRD:REFS2]
           1 << ADLAR |  // ADC data register is left adjustment
           divisor << MUX0;
   // 0b0000 << MUX0;  // ADC0
@@ -65,7 +86,8 @@ inline void startADC(uint8_t prescaler, uint8_t amplifier) {
   ADCSRC = 1 << DIFFS |  // 1 = from diff amplifier, 0=multiplexer
            0 << SPN |    // ADC conversion input polarity control
            0 << SPD;     // 1: high speed conversion (can't hear a difference)
-  ADCSRD = 0 << REFS2 |  // part of ADC reference voltage [see ADMUX:REFS0]
+  ADCSRD = bitRead(refVoltage, 2)
+               << REFS2 |    // part of ADC reference voltage [see ADMUX:REFS0]
            0b00 << IVSEL0 |  // 2v DAC output
            0b001 << VDS0;    // ADC0 voltage division
   DAPCR = 0b1 << DAPEN |     // Enable
@@ -78,7 +100,13 @@ inline void startADC(uint8_t prescaler, uint8_t amplifier) {
 inline void stopADC() { ADCSRA = 0; }
 
 void setupADC() {
-  bitSet(DIDR0, ADC0D);  // disable digital input (reduce noise)
+  bitSet(DIDR0, PC0D);  // disable digital input (reduce noise)
+  bitSet(DIDR0, PC1D);  // disable digital input (reduce noise)
+  bitSet(DIDR0, PC2D);  // disable digital input (reduce noise)
+  bitSet(DIDR0, PC3D);  // disable digital input (reduce noise)
+  bitSet(DIDR1, PE6D);  // disable digital input (reduce noise)
+
+  pinMode(A10, INPUT);
   pinMode(A0, INPUT);
 
   // PB0::4 // part 2 of external ADC
