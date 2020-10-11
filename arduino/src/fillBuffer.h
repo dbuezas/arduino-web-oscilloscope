@@ -82,7 +82,6 @@ FORCE_INLINE byte storeOne(byte returnChannel) {
   // if (returnChannel > 1)
   return bitRead(val2, returnChannel);
 }
-
 FORCE_INLINE void fillBufferAnalogTrigger(uint8_t channel, TriggerDir dir) {
   uint8_t triggerPoint = state.triggerVoltage;
   byte triggerVoltageMinus = max(0, (int)triggerPoint - 2);
@@ -132,16 +131,11 @@ FORCE_INLINE void fillBufferDigitalTrigger(uint8_t channel, TriggerDir dir) {
     while (storeOne(channel) == 1) {
     }
   }
+
   while (tailSamples--) {
     storeOne(channel);
   }
   stopADC();
-}
-
-void offAutoInterrupt() {
-  TIMSK1 = 0;
-  TCCR1A = 0;
-  TCCR1B = 0;
 }
 
 uint16_t autoInterruptOverflows;
@@ -151,9 +145,12 @@ void setupAutoInterrupt() {
   TCCR1B = 5 << CS10;      // 1024 prescaler
   TCCR1B |= (1 << WGM12);  // turn on CTC mode
   int prescaler = 1024;
-  float ticksPerFrame =
-      state.secPerSample * F_CPU * state.samplesPerBuffer / prescaler;
-  uint32_t timeoutTicks = (unsigned long)ticksPerFrame * 2;
+
+  float secondsPerFrame = (state.secPerSample * state.samplesPerBuffer) +
+                          10 / 1000.0;  // added 10ms of wait time
+  float ticksPerFrame = secondsPerFrame * F_CPU / prescaler;
+
+  uint32_t timeoutTicks = ceil(ticksPerFrame * 2.5);
 
   autoInterruptOverflows = timeoutTicks / 65536;
   uint16_t timeoutTicksCycle = timeoutTicks % 65536;
@@ -162,6 +159,13 @@ void setupAutoInterrupt() {
 
   TIMSK1 |= (1 << OCIE1A);  // enable ISR
 }
+
+void offAutoInterrupt() {
+  // TIMSK1 = 0;
+  // TCCR1A = 0;
+  TCCR1B = 0;
+}
+
 jmp_buf envAutoTimeout;
 void fillBuffer() {
   if (state.triggerMode == TriggerMode::slow) {
