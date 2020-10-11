@@ -4,23 +4,10 @@ import Plot from './Plot/Plot'
 import Controls from './Controls'
 import { Panel, Container, Content, Sidebar } from 'rsuite'
 import About from './About'
+import EnableSerialInstructions from './EnableSerialInstructions'
 
 function App() {
-  if (!navigator.serial) {
-    return (
-      <>
-        Enable experimental web platform features to activate the Web Serial API
-        <br />
-        paste this url in your browser and
-        <br />
-        <img
-          alt=""
-          src={process.env.PUBLIC_URL + '/ExperimentalWebPlatformFeatures.png'}
-        ></img>
-        chrome://flags/#enable-experimental-web-platform-features
-      </>
-    )
-  }
+  if (!navigator.serial) return <EnableSerialInstructions />
   return (
     <div className="App">
       <Container>

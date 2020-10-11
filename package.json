@@ -4,6 +4,7 @@
   "private": true,
   "homepage": "/arduino-web-oscilloscope",
   "dependencies": {
+    "@react-hook/copy": "^2.0.1",
     "@react-hook/size": "^2.1.0",
     "@types/async": "^3.2.3",
     "@types/mousetrap": "^1.6.3",
