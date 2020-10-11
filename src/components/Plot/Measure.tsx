@@ -57,17 +57,17 @@ const Measure = forwardRef<MeasureRef>((_props, ref) => {
     <g className="Measure">
       <line
         className="measureCap"
-        x1={xScale(startPos.x) - 5}
-        x2={xScale(startPos.x) + 5}
-        y1={yScale(startPos.y) - 5}
-        y2={yScale(startPos.y) + 5}
+        x1={xScale(startPos.x)! - 5}
+        x2={xScale(startPos.x)! + 5}
+        y1={yScale(startPos.y)! - 5}
+        y2={yScale(startPos.y)! + 5}
       ></line>
       <line
         className="measureCap"
-        x1={xScale(startPos.x) - 5}
-        x2={xScale(startPos.x) + 5}
-        y1={yScale(startPos.y) + 5}
-        y2={yScale(startPos.y) - 5}
+        x1={xScale(startPos.x)! - 5}
+        x2={xScale(startPos.x)! + 5}
+        y1={yScale(startPos.y)! + 5}
+        y2={yScale(startPos.y)! - 5}
       ></line>
       <line
         className="measureX"
@@ -87,17 +87,17 @@ const Measure = forwardRef<MeasureRef>((_props, ref) => {
       </text>
       <line
         className="measureCap"
-        x1={xScale(endPos.x) - 5}
-        x2={xScale(endPos.x) + 5}
-        y1={yScale(endPos.y) - 5}
-        y2={yScale(endPos.y) + 5}
+        x1={xScale(endPos.x)! - 5}
+        x2={xScale(endPos.x)! + 5}
+        y1={yScale(endPos.y)! - 5}
+        y2={yScale(endPos.y)! + 5}
       ></line>
       <line
         className="measureCap"
-        x1={xScale(endPos.x) - 5}
-        x2={xScale(endPos.x) + 5}
-        y1={yScale(endPos.y) + 5}
-        y2={yScale(endPos.y) - 5}
+        x1={xScale(endPos.x)! - 5}
+        x2={xScale(endPos.x)! + 5}
+        y1={yScale(endPos.y)! + 5}
+        y2={yScale(endPos.y)! - 5}
       ></line>
       <line
         className="measureY"
