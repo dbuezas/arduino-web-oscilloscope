@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "baeefa5172da032f9387fd176062eb0e",
+    "revision": "6eb3d1168eb1cd15df84cc996a0248cf",
     "url": "/arduino-web-oscilloscope/index.html"
   },
   {
