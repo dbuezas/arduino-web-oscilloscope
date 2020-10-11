@@ -92,14 +92,24 @@ export class Serial {
       xoff: false,
       ...options
     }
+
+    const chackOptionsForAndroidCompat = options as any
+    chackOptionsForAndroidCompat.baudrate = options.baudRate
+    chackOptionsForAndroidCompat.databits = options.dataBits
+    chackOptionsForAndroidCompat.stopbits = options.stopBits
+    chackOptionsForAndroidCompat.buffersize = options.bufferSize
     if (this.port) await this.close()
     this.port = port
     await this.port.open(options)
     this.readbuffer = []
-    this.reader = this.port.readable.getReader()
+    // @ts-ignore
+    const readable = this.port.readable || this.port.in
+    this.reader = readable.getReader()
     // this.writer = this.port.writable.getWriter() // binary
     const encoder = new TextEncoderStream()
-    this.outputDone = encoder.readable.pipeTo(this.port.writable)
+    // @ts-ignore
+    const writable = this.port.writable || this.port.out
+    this.outputDone = encoder.readable.pipeTo(writable)
     const textOutputStream = encoder.writable
     this.writer = textOutputStream.getWriter()
   }
@@ -140,7 +150,13 @@ export class Serial {
         if (!this.reader) continue
         const { value } = await this.reader.read()
         if (value !== undefined) {
-          this.readbuffer.push(...value)
+          try {
+            this.readbuffer.push(...value)
+          } catch (e) {
+            const typedArray = new Uint8Array(value.buffer)
+            const array = Array.from(typedArray)
+            this.readbuffer.push(...array)
+          }
           consume()
         }
       }

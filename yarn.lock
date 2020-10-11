@@ -11848,6 +11848,11 @@ wbuf@^1.1.0, wbuf@^1.7.3:
   dependencies:
     minimalistic-assert "^1.0.0"
 
+web-serial-polyfill@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/web-serial-polyfill/-/web-serial-polyfill-1.0.6.tgz#42d7726226f728379792197a8eab55b86555b0cd"
+  integrity sha512-0pdZYgRG2pmpwS2wuAG+9cJP7pngtMNCWWNL2OybG037F+4J3vnJ+s8BkT1NagSGDLx+rkyBSRg/hKRjAPeB6Q==
+
 webidl-conversions@^4.0.2:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/webidl-conversions/-/webidl-conversions-4.0.2.tgz#a855980b1f0b6b359ba1d5d9fb39ae941faa63ad"

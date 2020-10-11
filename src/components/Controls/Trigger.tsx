@@ -8,7 +8,8 @@ import {
   useTriggerChannel,
   TriggerDirection,
   requestData,
-  useSecPerSample
+  useSecPerSample,
+  use50percentTriggerVoltage
 } from '../../communication/bindings'
 import {
   Icon,
@@ -32,6 +33,9 @@ const ButtonToolbarStyle = {
 export default function Trigger() {
   const isRunning = useRecoilValue(isRunningState)
   win.requestData = useSetRecoilState(requestData.send)
+  const set50PercentTriggerVoltage = useSetRecoilState(
+    use50percentTriggerVoltage
+  )
   const [triggerMode, setTriggerMode] = useRecoilState(useTriggerMode.send)
   const [triggerChannel, setTriggerChannel] = useRecoilState(
     useTriggerChannel.send
@@ -117,6 +121,9 @@ export default function Trigger() {
           <Tag color="yellow">Searching</Tag>
         )}
       </ButtonToolbar>
+      <Button size="sm" onClick={() => set50PercentTriggerVoltage(true)}>
+        50%
+      </Button>
     </Panel>
   )
 }

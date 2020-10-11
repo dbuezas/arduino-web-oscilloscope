@@ -22,7 +22,8 @@
     "recoil": "^0.0.13",
     "rsuite": "^4.8.0",
     "stk500": "2.0.2",
-    "typescript": "3.9.4"
+    "typescript": "3.9.4",
+    "web-serial-polyfill": "^1.0.6"
   },
   "scripts": {
     "start": "react-scripts start",

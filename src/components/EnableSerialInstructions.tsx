@@ -19,7 +19,7 @@ function EnableSerialInstructions() {
         shaded
         bordered
         style={{
-          margin: '20px auto',
+          margin: 'auto auto',
           overflow: 'scroll',
           height: '100%',
           zoom: 0.8
