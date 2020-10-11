@@ -45,7 +45,7 @@ State state = {
     2,                    // uint8_t amplifier;
     TriggerMode::autom,   // uint8_t triggerMode
     0,                    // uint8_t triggerChannel
-    0b00100111,           // bool isChannelOn;
+    0b00000000,           // bool isChannelOn;
     // input & output
     // output
     1,           // bool needData;
