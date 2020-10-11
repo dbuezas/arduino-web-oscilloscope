@@ -25,8 +25,12 @@ const ButtonToolbarStyle = {
 type ConnectedState = 'Connected' | 'Disconnected' | 'Connecting...' | 'Error'
 
 function SerialControls() {
+  const [error, setError] = useState('')
   const [serialState, setSerialState] = useState<ConnectedState>('Disconnected')
   const setAllData = useSetRecoilState(allDataState)
+  useEffect(() => {
+    if (serialState !== 'Error') setError('')
+  }, [serialState])
   useEffect(() => {
     return serial.onData((data) => {
       setAllData(data)
@@ -50,7 +54,10 @@ function SerialControls() {
             serial
               .connect(serialOptions)
               .then(() => setSerialState('Connected'))
-              .catch(() => setSerialState('Error'))
+              .catch((e) => {
+                setSerialState('Error')
+                setError(e.toString())
+              })
           }}
           icon={<Icon icon="arrow-right" style={{ width: ' 100%' }} />}
           placement="right"
@@ -96,7 +103,11 @@ function SerialControls() {
             Disconnected: undefined
           }[serialState]
 
-          return <Tag color={color}>{serialState}</Tag>
+          return (
+            <Tag color={color}>
+              {serialState} {error}
+            </Tag>
+          )
         })()}
       </ButtonToolbar>
       {serialState === 'Disconnected' && <Uploader />}
