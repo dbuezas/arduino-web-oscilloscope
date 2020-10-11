@@ -41,7 +41,7 @@ export default function Trigger() {
     useTriggerDirection.send
   )
   const secPerSample = useRecoilValue(useSecPerSample.send)
-  const tooFastForSlowMode = secPerSample < 0.0046875
+  const tooFastForSlowMode = secPerSample < 0.003
   return (
     <Panel header="Trigger" shaded collapsible defaultExpanded>
       <ButtonToolbar style={ButtonToolbarStyle}>

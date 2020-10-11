@@ -25,8 +25,8 @@ export default function TimeScales() {
   const [isRightActive, tapRight] = useActiveBtns()
 
   const perSample = [
-    us(100),
-    us(140.8),
+    us(100.8), // as fast as it goes
+    us(140.8), // in synch with adc clock
     us(200),
     us(500),
     us(1000),
