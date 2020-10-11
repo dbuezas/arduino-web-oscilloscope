@@ -4,6 +4,10 @@ Try it now without having to install anything at [https://dbuezas.github.io/ardu
 
 Currently only supports lgt328p boards
 
+<img src="./public/screenshot.png" alt="" width="800"/>
+
+# the react stuff
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
