@@ -27,9 +27,9 @@ done
 * Upload directly from webpage
 * fix xy mode scale
 * cleanup warnings
+* get rid of "trashed samples"
 
 todo
-* get rid of "trashed samples"
 * separate analog and digital inputs in different pannels
 * store configs and send on start
 * final clean up

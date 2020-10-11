@@ -32,7 +32,7 @@ typedef struct {
   bool forceUIUpdate;
   bool didTrigger;
   uint16_t freeMemory;
-  uint16_t trashedSamples;
+  uint16_t sentSamples;
   uint16_t samplesPerBuffer;
 } State;
 
@@ -48,12 +48,12 @@ State state = {
     0b00100111,           // bool isChannelOn;
     // input & output
     // output
-    1,            // bool needData;
-    0,            // bool forceUIUpdate;
-    false,        // bool didTrigger;
-    100,          // uint16_t freeMemory;
-    MAX_SAMPLES,  // uint16_t trashedSamples;
-    MAX_SAMPLES   // uint16_t samplesPerBuffer;
+    1,           // bool needData;
+    0,           // bool forceUIUpdate;
+    false,       // bool didTrigger;
+    100,         // uint16_t freeMemory;
+    0,           // uint16_t sentSamples;
+    MAX_SAMPLES  // uint16_t samplesPerBuffer;
 };
 
 uint8_t buffer0[MAX_SAMPLES];

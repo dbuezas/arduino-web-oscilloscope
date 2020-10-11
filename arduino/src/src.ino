@@ -28,6 +28,8 @@ void setup() {
 
 jmp_buf env;
 volatile bool canStop;
+volatile bool isInputAvailable;
+
 void loop() {
   state.freeMemory = freeMemory();
   sendData(false);
@@ -35,23 +37,21 @@ void loop() {
   for (;;) {
     bool isJump = setjmp(env);
     if (isJump) offAutoInterrupt();
-    internalState.inputChanged = false;
-    bool wait = handleInput();
-    canStop = true;
-    if (wait) {
-      // one could wait for the missing bytes
-      // while (1) {
-      // }
+    if (isInputAvailable) {
+      isInputAvailable = false;
+      handleInput();
     }
+    canStop = true;
+
     fillBuffer();
     canStop = false;
     sendData();
   }
 }
 
-volatile byte receives;
 ISR(USART_RX_vect) {
   Serial._rx_complete_irq();
+  isInputAvailable = true;
   if (canStop) {
     canStop = false;
     longjmp(env, 1);

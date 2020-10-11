@@ -49,8 +49,7 @@ void saveInput(char option, float val) {
 #define INPUT_BUFFER_SIZE 35
 char inputBuffer[INPUT_BUFFER_SIZE];
 byte ptr = 0;
-bool handleInput() {
-  bool wait = false;
+void handleInput() {
   while (Serial.available()) {
     int s = Serial.read();
     if (s == '>') {
@@ -61,7 +60,6 @@ bool handleInput() {
       inputBuffer[ptr] = 0;
 
       saveInput(option, val);
-      wait = false;
       internalState.inputChanged = true;
     } else {
       if (ptr >= INPUT_BUFFER_SIZE - 1) {
@@ -76,8 +74,6 @@ bool handleInput() {
       // give time to receive the rest of the message before filling the buffer
       // with trash. Not using normal delay because it uses micros() and that
       // timer is off
-      wait = true;
     }
   }
-  return wait;
 }

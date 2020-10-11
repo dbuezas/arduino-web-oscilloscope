@@ -71,16 +71,13 @@ export default function parseSerial(data: number[]) {
   const forceUIUpdate = get_bool(myData)
   const didTrigger = get_bool(myData)
   const freeMemory = get_uint16_t(myData)
-  const trashedSamples = get_uint16_t(myData)
+  const sentSamples = get_uint16_t(myData)
   const samplesPerBuffer = get_uint16_t(myData)
   const analogs = [
-    isChannelOn & 0b1 ? pull(myData, samplesPerBuffer - trashedSamples) : [],
-    isChannelOn & 0b10 ? pull(myData, samplesPerBuffer - trashedSamples) : []
+    isChannelOn & 0b1 ? pull(myData, sentSamples) : [],
+    isChannelOn & 0b10 ? pull(myData, sentSamples) : []
   ]
-  const digitalBytes =
-    isChannelOn & 0b11111100
-      ? pull(myData, samplesPerBuffer - trashedSamples)
-      : []
+  const digitalBytes = isChannelOn & 0b11111100 ? pull(myData, sentSamples) : []
   const digitals = [0b000100, 0b001000, 0b010000, 0b100000].map((mask) => {
     if (isChannelOn & mask) {
       return digitalBytes.map((byte) => byte & mask && 1)

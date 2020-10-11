@@ -165,23 +165,20 @@ void setupAutoInterrupt() {
 jmp_buf envAutoTimeout;
 void fillBuffer() {
   if (state.triggerMode == TriggerMode::slow) {
-    static uint16_t samplesToSend;
-
     if (internalState.inputChanged) {
+      internalState.inputChanged = false;
       startADC(2, state.amplifier);
       startCPUCounter();
-      const int FPS = 60;  // try to achive 25 frames per second
+      const int FPS = 30;  // try to achive 25 frames per second
       float samplesPerSecond = 1 / state.secPerSample;
-      samplesToSend = samplesPerSecond / FPS;
-      if (samplesToSend < 1) samplesToSend = 1;
-      if (samplesToSend > state.samplesPerBuffer - 1)
-        samplesToSend = state.samplesPerBuffer - 1;
+      state.sentSamples = samplesPerSecond / FPS;
+      if (state.sentSamples < 1) state.sentSamples = 1;
+      if (state.sentSamples > state.samplesPerBuffer - 1)
+        state.sentSamples = state.samplesPerBuffer - 1;
     }
     uint16_t bufferStart = internalState.bufferStartPtr;
-
-    for (uint16_t i = 0; i < samplesToSend; i++) storeOne(0);
+    for (uint16_t i = state.sentSamples; i > 0; i--) storeOne(0);
     internalState.bufferStartPtr = bufferStart;
-    state.trashedSamples = state.samplesPerBuffer - samplesToSend;
     return;
   }
   if (state.triggerMode == TriggerMode::autom) {
@@ -195,7 +192,7 @@ void fillBuffer() {
     }
   }
 
-  state.trashedSamples = 0;
+  state.sentSamples = state.samplesPerBuffer;
 
   if (state.triggerChannel < 2)
     fillBufferAnalogTrigger(state.triggerChannel, (TriggerDir)state.triggerDir);
