@@ -16,6 +16,16 @@ export const useTriggerVoltage = makeIntercom<number>({
   },
   default: 1
 })
+
+export const use50percentTriggerVoltage = selector({
+  key: '50% trigger voltage',
+  get: () => false,
+  set: ({ set, get }) => {
+    const { vavr } = get(voltagesState)
+    set(useTriggerVoltage.send, vavr)
+  }
+})
+
 export const useTriggerPos = makeIntercom<number>({
   key: 'P',
   ui2mcu: (v, get) => {

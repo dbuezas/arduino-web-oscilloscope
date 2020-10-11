@@ -49,20 +49,24 @@ export class Serial {
   async close() {
     console.log('closing')
     if (this.reader) {
-      await this.reader.cancel()
+      const reader = this.reader
       this.reader = undefined
+      await reader.cancel()
     }
     if (this.writer) {
-      await this.writer.close()
+      const writer = this.writer
       this.writer = undefined
+      await writer.close()
     }
     if (this.outputDone) {
-      await this.outputDone
+      const outputDone = this.outputDone
       this.outputDone = undefined
+      await outputDone
     }
     if (this.port) {
-      await this.port.close()
+      const port = this.port
       this.port = undefined
+      await port.close()
     }
     console.log('closed')
   }
