@@ -1,24 +1,22 @@
 {
   "files": {
     "main.css": "/arduino-web-oscilloscope/static/css/main.66076187.chunk.css",
-    "main.js": "/arduino-web-oscilloscope/static/js/main.e4ca79c3.chunk.js",
-    "main.js.map": "/arduino-web-oscilloscope/static/js/main.e4ca79c3.chunk.js.map",
-    "runtime-main.js": "/arduino-web-oscilloscope/static/js/runtime-main.383c76f5.js",
-    "runtime-main.js.map": "/arduino-web-oscilloscope/static/js/runtime-main.383c76f5.js.map",
-    "static/js/2.4b6ef436.chunk.js": "/arduino-web-oscilloscope/static/js/2.4b6ef436.chunk.js",
-    "static/js/2.4b6ef436.chunk.js.map": "/arduino-web-oscilloscope/static/js/2.4b6ef436.chunk.js.map",
-    "static/js/3.46b468dc.chunk.js": "/arduino-web-oscilloscope/static/js/3.46b468dc.chunk.js",
-    "static/js/3.46b468dc.chunk.js.map": "/arduino-web-oscilloscope/static/js/3.46b468dc.chunk.js.map",
+    "main.js": "/arduino-web-oscilloscope/static/js/main.29769d53.chunk.js",
+    "main.js.map": "/arduino-web-oscilloscope/static/js/main.29769d53.chunk.js.map",
+    "runtime-main.js": "/arduino-web-oscilloscope/static/js/runtime-main.3ac2590a.js",
+    "runtime-main.js.map": "/arduino-web-oscilloscope/static/js/runtime-main.3ac2590a.js.map",
+    "static/js/2.1ff69603.chunk.js": "/arduino-web-oscilloscope/static/js/2.1ff69603.chunk.js",
+    "static/js/2.1ff69603.chunk.js.map": "/arduino-web-oscilloscope/static/js/2.1ff69603.chunk.js.map",
     "index.html": "/arduino-web-oscilloscope/index.html",
-    "precache-manifest.4f0319ddd7e51f680cd21a0f394a9742.js": "/arduino-web-oscilloscope/precache-manifest.4f0319ddd7e51f680cd21a0f394a9742.js",
+    "precache-manifest.685fe069c24008938b17e3d117310fda.js": "/arduino-web-oscilloscope/precache-manifest.685fe069c24008938b17e3d117310fda.js",
     "service-worker.js": "/arduino-web-oscilloscope/service-worker.js",
     "static/css/main.66076187.chunk.css.map": "/arduino-web-oscilloscope/static/css/main.66076187.chunk.css.map",
-    "static/js/2.4b6ef436.chunk.js.LICENSE.txt": "/arduino-web-oscilloscope/static/js/2.4b6ef436.chunk.js.LICENSE.txt"
+    "static/js/2.1ff69603.chunk.js.LICENSE.txt": "/arduino-web-oscilloscope/static/js/2.1ff69603.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
-    "static/js/runtime-main.383c76f5.js",
-    "static/js/2.4b6ef436.chunk.js",
+    "static/js/runtime-main.3ac2590a.js",
+    "static/js/2.1ff69603.chunk.js",
     "static/css/main.66076187.chunk.css",
-    "static/js/main.e4ca79c3.chunk.js"
+    "static/js/main.29769d53.chunk.js"
   ]
 }
