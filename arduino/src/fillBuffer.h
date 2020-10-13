@@ -1,73 +1,35 @@
 #define TCNT3 _SFR_MEM16(0x94)
+#define ICR3 _SFR_MEM16(0x96)
 #include "data-struct.h"
-uint16_t prescaledTicksPerADCRead;
-uint16_t prescaledTicksPerADCReadTuned;
 
-#define prescaledTicksCount TCNT3
 void startCPUCounter() {
-  // counter for adcREad
   TCCR3A = 0;
-  TCCR3B = 0;
-  uint32_t ticksPerSample = state.secPerSample * F_CPU;
+  TCCR3B = (1 << WGM33) | (1 << WGM32);  // CTC mode, counts to ICR3
+  uint32_t ticksPerSample = state.secPerSample * F_CPU - 1;
   if (ticksPerSample < UINT16_MAX) {
-    // fits in 16 bits
-    TCCR3B = 1 << CS30;
-    prescaledTicksPerADCRead = ticksPerSample;
-    prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead - 10;
+    ICR3 = ticksPerSample;
+    TCCR3B |= (1 << CS30);
   } else if (ticksPerSample / 8 < UINT16_MAX) {
-    // fits prescaled by 8
-    TCCR3B = 2 << CS30;
-    prescaledTicksPerADCRead = ticksPerSample / 8;
-    prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead - 10 / 8;
+    ICR3 = ticksPerSample / 8;
+    TCCR3B |= (2 << CS30);
   } else if (ticksPerSample / 64 < UINT16_MAX) {
-    // fits prescaled by 64
-    TCCR3B = 3 << CS30;
-    prescaledTicksPerADCRead = ticksPerSample / 64;
-    prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead - 10 / 64;
+    ICR3 = ticksPerSample / 64;
+    TCCR3B |= (3 << CS30);
   } else if (ticksPerSample / 256 < UINT16_MAX) {
-    // fits prescaled by 256
-    TCCR3B = 4 << CS30;
-    prescaledTicksPerADCRead = ticksPerSample / 256;
-    prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead - 10 / 256;
+    ICR3 = ticksPerSample / 256;
+    TCCR3B |= (4 << CS30);
   } else if (ticksPerSample / 1024 < UINT16_MAX) {
-    // fits prescaled by 1024
-    TCCR3B = 5 << CS30;
-    prescaledTicksPerADCRead = ticksPerSample / 1024;
-    prescaledTicksPerADCReadTuned = prescaledTicksPerADCRead - 10 / 1024;
+    ICR3 = ticksPerSample / 1024;
+    TCCR3B |= (5 << CS30);
   }
-  /* There are 10 cycles between putting the (16 bit) current counter in 2
-   * registers, subtracting a (16 bit) number and storing them back. These 10
-   * "lost" cycles are added back by the "tuned" prescaler.
-   *
-   * There are another 9 cycles to get out of the while loop, so a total of 19
-   * cycles of overhead by the busy loop.
-   *
-   * An interrupt would consume ~52 cycles (in avr) according to
-   * https://billgrundmann.wordpress.com/2009/03/02/the-overhead-of-arduino-interrupts/
-   *
-   * A naked ISR would take 11 cycles (in an avr) according to this
-   * https://forum.arduino.cc/index.php?topic=157279.msg1182820#msg1182820
-   * potentially even 8 ticks by reactivating
-   * interrupts and then just busy looping instead of calling reti.
-   * So there is a faster way. Full 0,00000025 seconds faster.
-   *
-   * This would take it from ~63 cycles to ~54 cycles digital sample. Who cares!
-   */
-
-  // counter is TCNT1 and it counts cpu clocks
-  prescaledTicksCount = 0;
-  // con 16 bits: 51 for triggering and 47 after -> cae en 74% y deberia ser 79%
-  // (79 ticks per sample)
-  // con 8 bits: 48 for triggering and 44 after -> cae en 76%
-  // con prescaledTicksCount = 0, llega hasta 40, pero pierde resolucion
-  // con 16 bits and correction, 61 minimum for triggering
+  TCNT3 = 0;
+  TIFR3 = 255;  // setBit(TIFR3, OCF3A);  // clear overflow bit
 }
 #define FORCE_INLINE __attribute__((always_inline)) inline
 
 FORCE_INLINE byte storeOne(byte returnChannel) {
-  while (prescaledTicksCount < prescaledTicksPerADCRead) {
-  }
-  prescaledTicksCount -= prescaledTicksPerADCReadTuned;
+  loop_until_bit_is_set(TIFR3, OCF3A);
+  TIFR3 = 255;  // setBit(TIFR3, OCF3A);  // clear overflow bit
   uint8_t val0 = ADCH;
   uint8_t val1 = (PINB & 0b00011111) | (PIND & 0b11100000);
   uint8_t val2 = PINC & 0b00111100;
@@ -78,18 +40,16 @@ FORCE_INLINE byte storeOne(byte returnChannel) {
       (internalState.bufferStartPtr + 1) & 0b111111111;
   if (returnChannel == 0) return val0;
   if (returnChannel == 1) return val1;
-  // if (returnChannel > 1)
   return bitRead(val2, returnChannel);
 }
-FORCE_INLINE void fillBufferAnalogTrigger(uint8_t channel, TriggerDir dir) {
+void fillBufferAnalogTrigger(uint8_t channel, TriggerDir dir) {
   uint8_t triggerPoint = state.triggerVoltage;
   byte triggerVoltageMinus = max(0, (int)triggerPoint - 2);
   byte triggerVoltagePlus = min(255, (int)triggerPoint + 2);
   uint16_t headSamples = state.triggerPos;
   uint16_t tailSamples = state.samplesPerBuffer - state.triggerPos - 1;
-  startADC(2, state.amplifier);
+  startADC();
   startCPUCounter();
-  prescaledTicksCount = 0;
   while (headSamples--) {
     storeOne(channel);
   }
@@ -110,12 +70,11 @@ FORCE_INLINE void fillBufferAnalogTrigger(uint8_t channel, TriggerDir dir) {
   stopADC();
 }
 
-FORCE_INLINE void fillBufferDigitalTrigger(uint8_t channel, TriggerDir dir) {
+void fillBufferDigitalTrigger(uint8_t channel, TriggerDir dir) {
   uint16_t headSamples = state.triggerPos;
   uint16_t tailSamples = state.samplesPerBuffer - state.triggerPos;
-  startADC(2, state.amplifier);
+  startADC();
   startCPUCounter();
-  prescaledTicksCount = 0;
   while (headSamples--) {
     storeOne(channel);
   }
@@ -170,7 +129,7 @@ void fillBuffer() {
   if (state.triggerMode == TriggerMode::slow) {
     if (internalState.inputChanged) {
       internalState.inputChanged = false;
-      startADC(2, state.amplifier);
+      startADC();
       startCPUCounter();
       const int FPS = 30;  // try to achive 25 frames per second
       float samplesPerSecond = 1 / state.secPerSample;
