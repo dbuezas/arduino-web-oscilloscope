@@ -1,3 +1,4 @@
+#include "data-struct.h"
 
 #define DAPEN 7
 #define GA0 5
@@ -15,14 +16,6 @@
     6 -> 64  -> 22.727 kSamples
     7 -> 128 -> 11,363 kSamples
 */
-#define ADC_PRESCALER_conf 2  // 1 to 7
-// #define ADC_PRESCALER (1 << ADC_PRESCALER_conf)
-// uint16_t ticksPerAdcRead =
-//     ADC_PRESCALER * (15 + 1.5 + 5.5) -
-//     9;  // A normal conversion takes 15 ADC clock cycles
-//         // + 1.5 sample and hold + (5.5 unaccounted for) -9 for timing
-//         overhead
-
 #define DIV_1 0b0000
 #define DIV_1_5 0b1000
 #define DIV_4_5 0b1110
@@ -54,17 +47,40 @@ enum ReferenceVoltage {
 };
 
 const uint8_t refVoltage = ReferenceVoltage::AVCC;
-inline void startADC(uint8_t prescaler, uint8_t amplifier) {
-  // ADC0 --->
+inline void startADC() {
+  // input A0 --->
   // -[ADCSRD]-> voltage division ->
   // -[ADMUX]-> muxer ->
   // -[DAPCR]-> diff amplifier ->
-  // -[ADCSRD]-> ADC ->
+  // -[ADCSRD]-> ADC -> buffer
 
-  // 2, 0.5, 0.25, 0.125, 0.0625, 0.03125, 0.015625
+  // uint16_t ticksPerAdcRead =
+  //     ADC_PRESCALER * (15 + 1.5 + 5.5)
+  //      // A normal conversion takes 15 ADC clock cycles
+  //         // + 1.5 sample and hold + (5.5 unaccounted for)
 
-  uint8_t gain = gainArray[amplifier][0];
-  uint8_t divisor = gainArray[amplifier][1];
+  float adcTicksPerSample = state.secPerSample * F_CPU / 22;
+  uint8_t prescaler;
+
+  if (adcTicksPerSample >= 128)
+    prescaler = 7;
+  else if (adcTicksPerSample >= 64)
+    prescaler = 6;
+  else if (adcTicksPerSample >= 32)
+    prescaler = 5;
+  else if (adcTicksPerSample >= 16)
+    prescaler = 4;
+  else if (adcTicksPerSample >= 8)
+    prescaler = 3;
+  else if (adcTicksPerSample >= 4)
+    prescaler = 2;
+  else if (adcTicksPerSample >= 2)
+    prescaler = 1;
+  else
+    prescaler = 0;
+
+  uint8_t gain = gainArray[state.amplifier][0];
+  uint8_t divisor = gainArray[state.amplifier][1];
 
   ADMUX = bitRead(refVoltage, 0)
               << REFS0 |  // ADC refference is AVCC [seel also: ADCSRD:REFS2]
