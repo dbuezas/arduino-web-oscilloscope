@@ -130,46 +130,52 @@ void offAutoInterrupt() {
   TCCR1B = 0;
 }
 
+void fillBufferSlow() {
+  if (internalState.inputChanged) {
+    internalState.inputChanged = false;
+    startADC();
+    startCPUCounter();
+    const int FPS = 30;  // try to achive 25 frames per second
+    float samplesPerSecond = 1 / state.secPerSample;
+    state.sentSamples = samplesPerSecond / FPS;
+    if (state.sentSamples < 1) state.sentSamples = 1;
+    if (state.sentSamples > state.samplesPerBuffer - 1)
+      state.sentSamples = state.samplesPerBuffer - 1;
+  }
+  uint16_t bufferStart = internalState.bufferStartPtr;
+  for (uint16_t i = state.sentSamples; i > 0; i--) storeOne(0);
+  internalState.bufferStartPtr = bufferStart;
+}
+
 jmp_buf envAutoTimeout;
 void fillBuffer() {
-  if (state.triggerMode == TriggerMode::slow) {
-    if (internalState.inputChanged) {
-      internalState.inputChanged = false;
-      startADC();
-      startCPUCounter();
-      const int FPS = 30;  // try to achive 25 frames per second
-      float samplesPerSecond = 1 / state.secPerSample;
-      state.sentSamples = samplesPerSecond / FPS;
-      if (state.sentSamples < 1) state.sentSamples = 1;
-      if (state.sentSamples > state.samplesPerBuffer - 1)
-        state.sentSamples = state.samplesPerBuffer - 1;
-    }
-    uint16_t bufferStart = internalState.bufferStartPtr;
-    for (uint16_t i = state.sentSamples; i > 0; i--) storeOne(0);
-    internalState.bufferStartPtr = bufferStart;
-    return;
-  }
-  if (state.triggerMode == TriggerMode::autom) {
-    bool didTimeout = setjmp(envAutoTimeout);
-    if (didTimeout) {
-      offAutoInterrupt();
-      state.didTrigger = false;
-      return;
-    } else {
+  switch (state.triggerMode) {
+    case TriggerMode::slow:
+      fillBufferSlow();
+      break;
+    case TriggerMode::autom: {
+      bool didTimeout = setjmp(envAutoTimeout);
       setupAutoInterrupt();
+      if (didTimeout) {
+        offAutoInterrupt();
+        state.didTrigger = false;
+        return;
+      }
+      [[fallthrough]];
     }
+    case TriggerMode::single:
+    case TriggerMode::normal:
+      state.sentSamples = state.samplesPerBuffer;
+
+      if (state.triggerChannel < 2)
+        fillBufferAnalogTrigger(state.triggerChannel,
+                                (TriggerDir)state.triggerDir);
+      else
+        fillBufferDigitalTrigger(state.triggerChannel,
+                                 (TriggerDir)state.triggerDir);
+      offAutoInterrupt();
+      state.didTrigger = true;
   }
-
-  state.sentSamples = state.samplesPerBuffer;
-
-  if (state.triggerChannel < 2)
-    fillBufferAnalogTrigger(state.triggerChannel, (TriggerDir)state.triggerDir);
-  else
-    fillBufferDigitalTrigger(state.triggerChannel,
-                             (TriggerDir)state.triggerDir);
-  state.didTrigger = true;
-
-  offAutoInterrupt();
 }
 
 ISR(TIMER1_COMPA_vect) {

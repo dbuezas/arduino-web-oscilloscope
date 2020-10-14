@@ -33,9 +33,9 @@ void loop() {
   state.freeMemory = freeMemory();
   sendData(false);
   sendData(false);
+  bool isJump = setjmp(env);
+  if (isJump) offAutoInterrupt();
   for (;;) {
-    bool isJump = setjmp(env);
-    if (isJump) offAutoInterrupt();
     if (isInputAvailable) {
       isInputAvailable = false;
       handleInput();
