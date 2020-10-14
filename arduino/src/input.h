@@ -48,7 +48,7 @@ void saveInput(char option, float val) {
 */
 #define INPUT_BUFFER_SIZE 35
 char inputBuffer[INPUT_BUFFER_SIZE];
-byte ptr = 0;
+uint8_t ptr = 0;
 void handleInput() {
   while (Serial.available()) {
     int s = Serial.read();

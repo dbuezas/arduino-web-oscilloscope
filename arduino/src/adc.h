@@ -88,9 +88,6 @@ inline void startADC() {
                                              // also: ADCSRD:REFS2]
           1 << ADLAR |  // ADC data register is left adjustment
           divisor << MUX0;
-  // 0b0000 << MUX0;  // ADC0
-  // 0b1000 << MUX0;  // 1/5 ADC0
-  // 0b1110 << MUX0;  // 4/5 ADC0
 
   ADCSRA = 1 << ADEN |   // enable ADC
            1 << ADSC |   // start conversion
@@ -107,7 +104,6 @@ inline void startADC() {
            0b00 << IVSEL0 |  // 2v DAC output
            0b001 << VDS0;    // ADC0 voltage division
   DAPCR = 0b1 << DAPEN |     // Enable
-                             // 0b00 << GA0 |      // gain
           gain << GA0 |      // gain
           0b110 << DNS0 |    // (-) GND
           0b00 << DPS0;      // (+) MUX
@@ -116,28 +112,34 @@ inline void startADC() {
 inline void stopADC() { ADCSRA = 0; }
 
 void setupADC() {
-  bitSet(DIDR0, PC0D);  // disable digital input (reduce noise)
-  bitSet(DIDR0, PC1D);  // disable digital input (reduce noise)
-  bitSet(DIDR0, PC2D);  // disable digital input (reduce noise)
-  bitSet(DIDR0, PC3D);  // disable digital input (reduce noise)
-  bitSet(DIDR1, PE6D);  // disable digital input (reduce noise)
+  bitSet(DIDR0, PC0D);  // disable digital input (reduce noise) A0
+  // bitSet(DIDR0, PC1D);  // disable digital input (reduce noise) A1
+  // bitSet(DIDR0, PC2D);  // disable digital input (reduce noise) A2
+  // bitSet(DIDR0, PC3D);  // disable digital input (reduce noise) A3
 
-  pinMode(A10, INPUT);
-  pinMode(A0, INPUT);
+  // PC2::5 // 4 digital channels
+  // pinMode(A0, INPUT);
+  // pinMode(A1, INPUT);
+  // pinMode(A2, INPUT);
+  // pinMode(A3, INPUT);
+  // pinMode(A4, INPUT);
+  // pinMode(A5, INPUT);
+  DDRC = 0b00000000;
+
+  // PD5::7 // part 1 of external ADC
+  DDRD = 0b00011111;
+  PORTD = 0b00000000;
+  // pinMode(D5, INPUT);
+  // pinMode(D6, INPUT);
+  // pinMode(D7, INPUT);
 
   // PB0::4 // part 2 of external ADC
-  pinMode(D8, INPUT);
-  pinMode(D9, INPUT);
-  pinMode(D10, INPUT);
-  pinMode(D11, INPUT);
-  pinMode(D12, INPUT);
-  // PD5::7 // part 1 of external ADC
-  pinMode(D5, INPUT);
-  pinMode(D6, INPUT);
-  pinMode(D7, INPUT);
-  // PC2::5 // 4 digital channels
-  pinMode(A2, INPUT);
-  pinMode(A3, INPUT);
-  pinMode(A4, INPUT);
-  pinMode(A5, INPUT);
+  DDRB = 0b11100000;
+  PORTB = 0b00000000;
+  // pinMode(D8, INPUT);
+  // pinMode(D9, INPUT);
+  // pinMode(D10, INPUT);
+  // pinMode(D11, INPUT);
+  // pinMode(D12, INPUT);
+  // pinMode(D13, OUTPUT);
 }

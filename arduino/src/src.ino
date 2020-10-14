@@ -14,7 +14,6 @@
 #include "input.h"
 #include "output.h"
 void setup() {
-  pinMode(D13, OUTPUT);
   Serial.begin(115200 * 1);
   // disable all timer interrupts (millis() gone)
   bitWrite(TIMSK0, TOIE0, 0);

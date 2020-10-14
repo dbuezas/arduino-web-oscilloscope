@@ -27,12 +27,18 @@ void startCPUCounter() {
 }
 #define FORCE_INLINE __attribute__((always_inline)) inline
 
-FORCE_INLINE byte storeOne(byte returnChannel) {
+FORCE_INLINE uint8_t storeOne(uint8_t returnChannel) {
   loop_until_bit_is_set(TIFR3, OCF3A);
   TIFR3 = 255;  // setBit(TIFR3, OCF3A);  // clear overflow bit
   uint8_t val0 = ADCH;
+
+  // equivalent to (PINB & 0b00011111) | (PIND & 0b11100000) because the ignored
+  // pins are  configured as output low.
+  // uint8_t val1 = PINB | PIND;
   uint8_t val1 = (PINB & 0b00011111) | (PIND & 0b11100000);
-  uint8_t val2 = PINC & 0b00111100;
+
+  // uint8_t val2 = PINC & 0b00111100;
+  uint8_t val2 = PINC;
   buffer0[internalState.bufferStartPtr] = val0;
   buffer1[internalState.bufferStartPtr] = val1;
   buffer2[internalState.bufferStartPtr] = val2;
@@ -44,8 +50,8 @@ FORCE_INLINE byte storeOne(byte returnChannel) {
 }
 void fillBufferAnalogTrigger(uint8_t channel, TriggerDir dir) {
   uint8_t triggerPoint = state.triggerVoltage;
-  byte triggerVoltageMinus = max(0, (int)triggerPoint - 2);
-  byte triggerVoltagePlus = min(255, (int)triggerPoint + 2);
+  uint8_t triggerVoltageMinus = max(0, (int)triggerPoint - 2);
+  uint8_t triggerVoltagePlus = min(255, (int)triggerPoint + 2);
   uint16_t headSamples = state.triggerPos;
   uint16_t tailSamples = state.samplesPerBuffer - state.triggerPos - 1;
   startADC();
