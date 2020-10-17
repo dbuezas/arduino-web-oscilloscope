@@ -15,13 +15,53 @@ size_t write(const uint8_t* c, size_t length) {
   }
   return length;
 }
+
+float log2(float n) { return log(n) / log(2); }
 void sendBuffer(uint8_t buffer[]) {
   uint16_t ptr = internalState.bufferStartPtr;
+
+  int8_t minDelta = 127;
+  int8_t maxDelta = -127;
+
+  uint8_t last = buffer[ptr];
   for (uint16_t i = 0; i < state.sentSamples; i++) {
-    write(buffer[ptr]);
+    int16_t delta = buffer[ptr] - last;
+    last = buffer[ptr];
+    if (delta < -128) delta += 256;
+    if (delta > 127) delta -= 256;
+    minDelta = min(minDelta, delta);
+    maxDelta = max(maxDelta, delta);
     ptr++;
     if (ptr == state.samplesPerBuffer) ptr = 0;
   }
+  uint8_t bitsPerDelta = ceil(log2(1 + maxDelta - minDelta));
+  if (bitsPerDelta == 0) bitsPerDelta = 1;
+
+  ptr = internalState.bufferStartPtr;
+  last = buffer[ptr];
+  write(last);
+  write(minDelta);
+  write(bitsPerDelta);
+  uint16_t twoBytes = 0;
+  uint8_t position = 0;
+  for (uint16_t i = 0; i < state.sentSamples; i++) {
+    int16_t delta = buffer[ptr] - last;
+    last = buffer[ptr];
+    if (delta < -128) delta += 256;
+    if (delta > 127) delta -= 256;
+    uint8_t offsettedDelta = delta - minDelta;
+    twoBytes |= offsettedDelta << position;
+    position += bitsPerDelta;
+    if (position >= 8) {
+      uint8_t lowerByte = twoBytes;
+      write(lowerByte);
+      twoBytes = twoBytes >> 8;
+      position -= 8;
+    };
+    ptr++;
+    if (ptr == state.samplesPerBuffer) ptr = 0;
+  }
+  if (position > 0) write((uint8_t)twoBytes);
 }
 
 void sendData(bool withBuffers = true) {

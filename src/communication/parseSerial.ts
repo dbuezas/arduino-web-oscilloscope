@@ -6,11 +6,34 @@ type Data = {
 }
 
 function pull(data: Data, count: number) {
-  const result = data.data.slice(data.i, data.i + count)
-  data.i += count
-  return Array.from(result)
+  let last = get_uint8_t(data)
+  const minDelta = get_int8_t(data)
+  const bitsPerDelta = get_uint8_t(data)
+  const result = []
+  const totalBytes = Math.ceil((count * bitsPerDelta) / 8)
+  const mask = Math.pow(2, bitsPerDelta) - 1
+  let twoBytes = 0
+  let position = 0
+  for (let i = 0; i < totalBytes; i++) {
+    twoBytes |= get_uint8_t(data) << position
+    position += 8
+    while (position >= bitsPerDelta) {
+      last = last + minDelta + (twoBytes & mask)
+      last = (last + 256) % 256
+      result.push(last)
+      twoBytes = twoBytes >> bitsPerDelta
+      position -= bitsPerDelta
+    }
+  }
+  console.log('bitsPerDelta', bitsPerDelta)
+  return result
 }
 
+function get_int8_t(data: Data) {
+  const unsigned = get_uint8_t(data)
+  if (unsigned > 127) return unsigned - 256
+  return unsigned
+}
 function get_uint8_t(data: Data) {
   const res = data.data[data.i]
   data.i++
@@ -51,6 +74,7 @@ function get_float32_t(data: Data) {
 //   }
 //   return raw
 // }
+
 export default function parseSerial(data: number[]) {
   const myData: Data = {
     data,
