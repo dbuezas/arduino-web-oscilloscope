@@ -21,12 +21,12 @@ function FPS() {
     setLastT((lastT) => {
       setFps((fps) => {
         const newFps = 1000 / (performance.now() - lastT)
-        return Math.round(fps * 0.97 + newFps * 0.03)
+        return fps * 0.9 + newFps * 0.1
       })
       return performance.now()
     })
   }, [data])
-  return <Tag>FPS: {fps.toFixed(0)}</Tag>
+  return <Tag>FPS: {Math.round(fps)}</Tag>
 }
 
 function Frequency() {
