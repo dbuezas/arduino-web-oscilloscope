@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
+  dataState,
   freeMemoryState,
   frequencyState,
   voltagesState
@@ -11,6 +12,21 @@ import { useRecoilValue } from 'recoil'
 function FreeMemory() {
   const freeMemory = useRecoilValue(freeMemoryState)
   return <Tag>Mem: {freeMemory}bytes</Tag>
+}
+function FPS() {
+  const [, setLastT] = useState(0)
+  const [fps, setFps] = useState(0)
+  const data = useRecoilValue(dataState)
+  useEffect(() => {
+    setLastT((lastT) => {
+      setFps((fps) => {
+        const newFps = 1000 / (performance.now() - lastT)
+        return Math.round(fps * 0.97 + newFps * 0.03)
+      })
+      return performance.now()
+    })
+  }, [data])
+  return <Tag>FPS: {fps.toFixed(0)}</Tag>
 }
 
 function Frequency() {
@@ -49,9 +65,10 @@ export default function Stats() {
         <Voltages />
         <div style={style}>
           <FreeMemory />
-          <Frequency />
-          <Wavelength />
+          {/* <Frequency />
+          <Wavelength /> */}
         </div>
+        <FPS />
       </Panel>
     </div>
   )

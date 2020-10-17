@@ -118,28 +118,14 @@ void setupADC() {
   // bitSet(DIDR0, PC3D);  // disable digital input (reduce noise) A3
 
   // PC2::5 // 4 digital channels
-  // pinMode(A0, INPUT);
-  // pinMode(A1, INPUT);
-  // pinMode(A2, INPUT);
-  // pinMode(A3, INPUT);
-  // pinMode(A4, INPUT);
-  // pinMode(A5, INPUT);
   DDRC = 0b00000000;
+  PORTC = 0b00000000;
 
   // PD5::7 // part 1 of external ADC
-  DDRD = 0b00011111;
+  DDRD = 0b00000000;
   PORTD = 0b00000000;
-  // pinMode(D5, INPUT);
-  // pinMode(D6, INPUT);
-  // pinMode(D7, INPUT);
 
   // PB0::4 // part 2 of external ADC
-  DDRB = 0b11100000;
-  PORTB = 0b00000000;
-  // pinMode(D8, INPUT);
-  // pinMode(D9, INPUT);
-  // pinMode(D10, INPUT);
-  // pinMode(D11, INPUT);
-  // pinMode(D12, INPUT);
-  // pinMode(D13, OUTPUT);
+  DDRB = 0b00100000;   // d13 as output
+  PORTB = 0b00000000;  // disable all pullups
 }

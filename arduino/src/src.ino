@@ -36,6 +36,7 @@ void loop() {
   bool isJump = setjmp(env);
   if (isJump) offAutoInterrupt();
   for (;;) {
+    setDAC();
     if (isInputAvailable) {
       isInputAvailable = false;
       handleInput();
