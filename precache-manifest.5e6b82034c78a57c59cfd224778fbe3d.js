@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "ce917e7a706ae6159caf6dc5d1627e31",
+    "revision": "78ba0f939b723aa9fa02e4df950a13f0",
     "url": "/arduino-web-oscilloscope/index.html"
   },
   {
-    "revision": "d5bb45abcd615ebadf4e",
+    "revision": "4fde5a34a050ea9d320b",
     "url": "/arduino-web-oscilloscope/static/css/main.66076187.chunk.css"
   },
   {
@@ -16,8 +16,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/arduino-web-oscilloscope/static/js/2.1ff69603.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "d5bb45abcd615ebadf4e",
-    "url": "/arduino-web-oscilloscope/static/js/main.54d96431.chunk.js"
+    "revision": "4fde5a34a050ea9d320b",
+    "url": "/arduino-web-oscilloscope/static/js/main.2a171da0.chunk.js"
   },
   {
     "revision": "6eb4fcf0ca8607e5c853",
