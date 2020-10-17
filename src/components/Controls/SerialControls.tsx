@@ -25,6 +25,7 @@ const ButtonToolbarStyle = {
 type ConnectedState = 'Connected' | 'Disconnected' | 'Connecting...' | 'Error'
 
 function SerialControls() {
+  const [connectedWith, setConnectedWith] = useState({})
   const [error, setError] = useState('')
   const [serialState, setSerialState] = useState<ConnectedState>('Disconnected')
   const setAllData = useSetRecoilState(allDataState)
@@ -40,6 +41,7 @@ function SerialControls() {
     setSerialState('Connecting...')
     serial
       .connectWithPaired(serialOptions)
+      .then(setConnectedWith)
       .then(() => setSerialState('Connected'))
       .catch(() => setSerialState('Disconnected'))
   }, [])
@@ -53,6 +55,7 @@ function SerialControls() {
           onClick={async () => {
             serial
               .connect(serialOptions)
+              .then(setConnectedWith)
               .then(() => setSerialState('Connected'))
               .catch((e) => {
                 setSerialState('Error')
@@ -84,7 +87,8 @@ function SerialControls() {
 
             await serial
               .connectWithPaired(serialOptions)
-              .catch(() => serial.connect(serialOptions))
+              .then(setConnectedWith)
+              .catch(() => serial.connect(serialOptions).then(setConnectedWith))
               .then(() => setSerialState('Connected'))
               .catch(() => setSerialState('Error'))
           }}
@@ -110,6 +114,9 @@ function SerialControls() {
           )
         })()}
       </ButtonToolbar>
+      {serialState === 'Connected' && (
+        <div style={{ fontSize: 10 }}>{JSON.stringify(connectedWith)}</div>
+      )}
       {serialState === 'Disconnected' && <Uploader />}
     </Panel>
   )

@@ -5,6 +5,7 @@ export type Port = {
   writable: WritableStream
   open: (options: SerialOptions) => Promise<void>
   close: () => Promise<void>
+  getInfo: () => { usbProductId: number; usbVendorId: number }
 }
 export type NavigatorSerial = {
   requestPort: (optn: unknown) => Port
@@ -71,14 +72,18 @@ export class Serial {
     console.log('closed')
   }
   async connectWithPaired(options: SerialOptions) {
+    const filter = JSON.parse(localStorage.serialFilter)
     const ports = await navigator.serial.getPorts()
-    console.log(ports)
-    if (!ports.length) throw new Error('no paired')
-    this._connect(options, ports[0])
+    const [port] = ports.filter(
+      (port) => JSON.stringify(filter) === JSON.stringify(port.getInfo())
+    )
+    console.log(ports, port)
+    if (!port) throw new Error('no paired')
+    return this._connect(options, port)
   }
   async connect(options: SerialOptions) {
     const port = await navigator.serial.requestPort({})
-    this._connect(options, port)
+    return this._connect(options, port)
   }
   async _connect(options: SerialOptions, port: Port) {
     options = {
@@ -94,7 +99,10 @@ export class Serial {
     }
     if (this.port) await this.close()
     this.port = port
+
     await this.port.open(options)
+    const serialFilter = port.getInfo()
+    localStorage.serialFilter = JSON.stringify(serialFilter)
     this.readbuffer = []
     this.reader = this.port.readable.getReader()
     // this.writer = this.port.writable.getWriter() // binary
@@ -102,6 +110,7 @@ export class Serial {
     this.outputDone = encoder.readable.pipeTo(this.port.writable)
     const textOutputStream = encoder.writable
     this.writer = textOutputStream.getWriter()
+    return serialFilter
   }
 
   write = async (text: string) => {
