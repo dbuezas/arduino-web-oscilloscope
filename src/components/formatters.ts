@@ -8,7 +8,7 @@ type ohNoItIsAny = any
 
 export function formatTime(s: ohNoItIsAny) {
   s = Number(s)
-  if (Number.isNaN(s)) return '--'
+  if (!Number.isFinite(s)) return '--'
 
   const m = s / 60
   const h = s / 60 / 60
@@ -24,15 +24,16 @@ export function formatTime(s: ohNoItIsAny) {
 }
 
 export function formatFreq(hz: number) {
-  if (hz > 0) {
-    const khz = hz / 1000
-    if (hz < 1000) return toFixed(hz) + 'Hz'
-    if (khz < 10) return toFixed(khz, 2) + 'KHz'
-    return toFixed(khz) + 'KHz'
-  }
-  return '--'
+  if (!Number.isFinite(hz)) return '--'
+
+  const khz = hz / 1000
+  if (hz < 1000) return toFixed(hz) + 'Hz'
+  if (khz < 10) return toFixed(khz, 2) + 'KHz'
+  return toFixed(khz) + 'KHz'
 }
 export function formatVoltage(v: number): string {
+  if (!Number.isFinite(v)) return '--'
+
   if (v < 0) return '-' + formatVoltage(-v)
   const mv = v * 1000
   const uv = mv * 1000

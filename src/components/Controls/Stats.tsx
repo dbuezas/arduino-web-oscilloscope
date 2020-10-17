@@ -35,7 +35,7 @@ function Frequency() {
 }
 function Wavelength() {
   const frequency = useRecoilValue(frequencyState)
-  return <Tag>Wavelength: {formatTime(1 / frequency)}</Tag>
+  return <Tag>WLength: {formatTime(1 / frequency)}</Tag>
 }
 
 const style = {
@@ -64,11 +64,13 @@ export default function Stats() {
       <Panel header="Voltages" shaded collapsible defaultExpanded>
         <Voltages />
         <div style={style}>
-          <FreeMemory />
-          {/* <Frequency />
-          <Wavelength /> */}
+          <Wavelength />
+          <Frequency />
         </div>
-        <FPS />
+        <div style={style}>
+          <FreeMemory />
+          <FPS />
+        </div>
       </Panel>
     </div>
   )

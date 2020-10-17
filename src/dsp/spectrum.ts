@@ -32,32 +32,31 @@ export function getFFT(data: PlotDatum[]) {
   return normalized.map((v, i) => ({ v, t: dt * i }))
 }
 
-export function rollingAverage(signal: number[]) {
-  // exponential averaging is used to remove wrong frequency readings due to noise
-  let last = signal[0]
-  return signal.map((n) => {
-    last = last * 0.5 + n * 0.5
-    return last
-  })
-}
 export function getFrequencyCount(data: PlotDatum[]) {
   if (data.length < 2) return 0
-  const signal = rollingAverage(data.map(({ v }) => v))
+  const signal = data.map(({ v }) => v)
   const max = Math.max(...signal)
   const min = Math.min(...signal)
+
+  const lowThird = (max + min * 2) / 3
   const mid = (max + min) / 2
   let firstCross = -1
   let lastCross = 0
   let count = 0
+  let locked = true
   for (let i = 1; i < data.length; i++) {
-    const risingCross = data[i - 1].v < mid && data[i].v >= mid
+    if (data[i].v < lowThird) locked = false
+    const risingCross = !locked && data[i - 1].v < mid && data[i].v >= mid
     if (risingCross) {
+      locked = true
       count++
       if (firstCross < 0) firstCross = data[i].t
       lastCross = data[i].t
     }
   }
-  return (count - 1) / (lastCross - firstCross)
+  const result = (count - 1) / (lastCross - firstCross)
+  if (count > 1 && Number.isFinite(result)) return result
+  return Number.NaN
 }
 
 export function oversample(
