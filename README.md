@@ -2,9 +2,17 @@
 
 Try it now without having to install anything at [https://dbuezas.github.io/arduino-web-oscilloscope/](https://dbuezas.github.io/arduino-web-oscilloscope/)
 
-Currently only supports lgt328p boards
+Currently only supports lgt328p boards. If there's demand, I'll make an Arduino Uno and STM32 version.
+To start using it, just plug the board, click upload firmware and plug your signal to A1. You can also connect digital signals to A4 and A5.
+
+If you want to add browser firmware upload to your page (also supports atmel MCUs), visit https://github.com/dbuezas/arduino-web-uploader 
 
 <img src="./public/screenshot.png" alt="" width="800"/>
+
+
+# Featured in Hackaday!
+This makes me so happy! thanks Hackaday!
+https://hackaday.com/2021/02/22/slick-web-oscilloscope-is-ready-in-a-flash-literally/
 
 # the react stuff
 
