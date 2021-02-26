@@ -6,7 +6,7 @@ Try it now without having to install anything at [https://dbuezas.github.io/ardu
 Currently only supports *lgt328p* boards. If there's demand, I'll make an *Arduino Uno* and *STM32* versions.
 
 # How to use
-To start using it, just plug the board, click upload firmware and plug your signal to A1. You can also connect digital signals to A4 and A5.
+To start using it, just plug the board, click upload firmware and plug your signal to A0. You can also connect digital signals to A4 and A5.
 
 <img src="./public/screenshot.png" alt="" width="800"/>
 
